@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyLittleRPG.Data.Context;
 
@@ -10,9 +11,11 @@ using MyLittleRPG.Data.Context;
 namespace MyLittleRPG.Migrations
 {
     [DbContext(typeof(MonsterContext))]
-    partial class MonsterContextModelSnapshot : ModelSnapshot
+    [Migration("20250908133339_dbinit")]
+    partial class dbinit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,29 +64,6 @@ namespace MyLittleRPG.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Monsters");
-                });
-
-            modelBuilder.Entity("MyLittleRPG.Models.Tile", b =>
-                {
-                    b.Property<int>("PositionX")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PositionY")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("estTraversable")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("imageURL")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("PositionX", "PositionY");
-
-                    b.ToTable("Tiles");
                 });
 #pragma warning restore 612, 618
         }
