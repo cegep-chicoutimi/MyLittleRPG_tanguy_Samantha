@@ -28,4 +28,14 @@ async function getTilesAsync(x, y, radius = 10) {
       errorDiv.style.display = 'none';
     }, 5000);
   }
-    
+  function displayTiles(tiles) {
+    const grille = document.querySelector('.grille');
+    grille.innerHTML = ''; // Effacer le contenu précédent
+
+    tiles.forEach(tile => {
+      const tileDiv = document.createElement('div');
+      tileDiv.className = 'tile';
+      tileDiv.textContent = `(${tile.x}, ${tile.y}): ${tile.type}`;
+      grille.appendChild(tileDiv);
+    });
+  }
