@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using MyLittleRPG.Data.Context;
 using MyLittleRPG.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MyLittleRPG.Controllers
 {
@@ -94,8 +95,53 @@ namespace MyLittleRPG.Controllers
 
         private void reglerproba(int positionX, int positionY)
         {
-            throw new NotImplementedException();
+            var tileW = _context.Tiles.FindAsync(positionX-1, positionY);
+            checkTile(tileW.Result);
+            var tileE = _context.Tiles.FindAsync(positionX+1, positionY);
+            checkTile(tileE.Result);
+            var tileN = _context.Tiles.FindAsync(positionX, positionY+1);
+            checkTile(tileN.Result);
+            var tileS = _context.Tiles.FindAsync(positionX, positionY-1);
+            checkTile(tileN.Result);
+
         }
+
+
+        private void checkTile(Tile? tile)
+        {
+            if (tile != null)
+            {
+                if (tile.Type == TileType.FORET)
+                {
+                    probaForet += 10;
+                    probaHerbe -= 2;
+                    probaEau -= 2;
+                    probaMontagne -= 2;
+                    probaVille -= 2;
+                    probaRoute -= 2;
+                }
+                else if (tile.Type == TileType.EAU)
+                {
+                    probaEau += 10;
+                    probaHerbe -= 2;
+                    probaForet -= 2;
+                    probaMontagne -= 2;
+                    probaVille -= 2;
+                    probaRoute -= 2;
+                }
+                else if (tile.Type == TileType.MONTAGNE)
+                {
+                    probaMontagne += 10;
+                    probaHerbe -= 2;
+                    probaForet -= 2;
+                    probaEau -= 2;
+                    probaVille -= 2;
+                    probaRoute -= 2;
+                }
+
+            }
+        }
+
 
         // PUT: api/Tiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
