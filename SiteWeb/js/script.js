@@ -35,7 +35,7 @@ async function getTilesAsync(x, y, radius = 10) {
     tiles.forEach(tile => {
       const tileDiv = document.createElement('div');
       tileDiv.className = 'tile';
-      tileDiv.textContent = `(${tile.x}, ${tile.y}): ${tile.type}`;
+      tileDiv.textContent = tile.url;
       grille.appendChild(tileDiv);
     });
   }
