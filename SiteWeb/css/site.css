@@ -1,13 +1,16 @@
 div{
     margin: 5px;
     padding: 2px;
-    background-color: #4d93fc;
+    background-color: #0e174e;
     border-radius: 15px;
 }
 .btn{
     background-color: #c898ff;
     border-radius: 15px;
     color: white;
+}
+header .container{
+    background-color: #0e174e !important;
 }
 
 .container{
