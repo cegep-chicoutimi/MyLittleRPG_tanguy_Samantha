@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Monde RPG</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="icon" href="img/favicon.ico">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+    <header>
+        <div class="container text-center bg-primary">
+            <h2>Visualiseur de Monde RPG</h2>
+            <p>Explorer le monde généré par votre API - Position:(2,2)</p>
+        </div>
+    </header>
+    <main>
+        <div class="container text-center bg-secondary">
+            <div class="row h-120">
+                <!-- Section gauche -->
+                <div class="col-4">
+                    <div class="card mb-3">
+                        <div class="card-header text-white">
+                            Informations
+                        </div>
+                        <div class="card-body">
+                            <div class="divCard"><p>Taille du monde: 50x50</p></div>
+                            <div class="divCard"><p>Zone affichée: 20x20 tuiles</p></div>
+                            <div class="divCard"><p>Statut API : Connecté</p></div>
+                            <div class="divCard"><p>Tuile chargée: 9</p></div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-header text-white">
+                            Navigation
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-primary mb-1" onclick=""><i class="fas fa-arrow-up"></i>Nord</button>
+                            <div class="divCard row d-flex justify-content-center mb-2">
+                                <div class="divCard">
+                                    <button class="btn btn-primary mr-1" onclick=""><i class="fas fa-arrow-left"></i>Ouest</button>
+                                    <button id="btn-refresh" class="btn btn-primary btn-sm  ml-1" onclick=""><i class="fa-solid fa-arrow-rotate-right"></i>Actualiser</button>
+                                    <button class="btn btn-primary ml-1" onclick=""><i class="fas fa-arrow-right"></i>Est</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary mt-1" onclick=""><i class="fas fa-arrow-down"></i>Sud</button>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-header text-white">
+                            Légende
+                        </div>
+                        <div class="card-body text-left">
+                            <div class="divCard form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    <i class="fa-solid fa-seedling"></i> Herbe
+                                </label>
+                            </div>
+                            <div class="divCard form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+                                <label class="form-check-label" for="flexCheckChecked">
+                                    <i class="fa-solid fa-droplet"></i> Eau
+                                </label>
+                            </div>
+                            <div class="divCard form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+                                <label class="form-check-label" for="flexCheckChecked">
+                                    <i class="fa-solid fa-mountain"></i> Montagne
+                                </label>
+                            </div>
+                            <div class="divCard form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+                                <label class="form-check-label" for="flexCheckChecked">
+                                    <i class="fa-solid fa-tree"></i> Foret
+                                </label>
+                            </div>
+                            <div class="divCard form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+                                <label class="form-check-label" for="flexCheckChecked">
+                                    <i class="fa-solid fa-city"></i> Ville
+                                </label>
+                            </div>
+                            <div class="divCard form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" >
+                                <label class="form-check-label" for="flexCheckChecked">
+                                    <i class="fa-solid fa-road"></i> Route
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divCard card mb-3">
+                        <div class="card-header text-white">
+                            Tuile Sélectionnée
+                        </div>
+                        <div class="card-body">
+                            <div class="divCard"><p>Position : (1,1)</p></div>
+                            <div class="divCard"><p>Type : Herbe</p></div>
+                            <div class="divCard"><p>Traversable : Oui</p></div>
+                            <div class="divCard"><p>Description : </p></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Grille -->
+                <div class="col">
+                    <div class="grille" onload="getTilesAsync(10, 10, 2)"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <script src="js/site.js"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    </footer>
+</body>
+
+</html>
