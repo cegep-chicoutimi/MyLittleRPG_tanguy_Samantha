@@ -49,27 +49,27 @@ namespace MyLittleRPG.Controllers
                 int rand = random.Next(101);
                 if (rand < probaHerbe)
                 {
-                    tile = new Tile(PositionX, PositionY, TileType.HERBE, true, "urlherbe");
+                    tile = new Tile(PositionX, PositionY, TileType.HERBE, true, "Plains.png");
                 }
                 else if (rand < probaHerbe+probaEau)
                 {
-                    tile = new Tile(PositionX, PositionY, TileType.EAU, false, "urleau");
+                    tile = new Tile(PositionX, PositionY, TileType.EAU, false, "River.png");
                 }
                 else if (rand < probaHerbe + probaEau + probaMontagne)
                 {
-                    tile = new Tile(PositionX, PositionY, TileType.MONTAGNE, false, "urlMontagne");
+                    tile = new Tile(PositionX, PositionY, TileType.MONTAGNE, false, "Mountain.png");
                 }
                 else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
                 {
-                    tile = new Tile(PositionX, PositionY, TileType.FORET, true, "urlForet");
+                    tile = new Tile(PositionX, PositionY, TileType.FORET, true, "Forest.png");
                 }
                 else if (rand < probaHerbe + probaEau + probaMontagne + probaForet+ probaVille)
                 {
-                    tile = new Tile(PositionX, PositionY, TileType.VILLE, true, "urlVille");
+                    tile = new Tile(PositionX, PositionY, TileType.VILLE, true, "Town.png");
                 }
                 else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
                 {
-                    tile = new Tile(PositionX, PositionY, TileType.ROUTE, true, "urlRoute");
+                    tile = new Tile(PositionX, PositionY, TileType.ROUTE, true, "Road.png");
              
                 }else { return NotFound(); }
 
