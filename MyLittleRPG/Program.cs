@@ -3,7 +3,16 @@ using MyLittleRPG.Data.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policyBuilder =>
+    {
+        policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
+    });
+});
+
 // Add services to the container.
+
 
 builder.Services.AddDbContext<MonsterContext>(options =>
 {
@@ -25,6 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
