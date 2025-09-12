@@ -1,19 +1,40 @@
-async function getTilesAsync(x, y, radius = 10) {
+async function getTileAsync(x, y) {
     try {
-      const url = `http://localhost:3000/api/world/tiles/area?x=${x}&y=${y}&radius=${radius}`;
+      const url = `https://localhost:7061/api/Tiles/?PositionX=10&PositionY=10`;
       const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       
-      const tiles = await response.json();
-      displayTiles(tiles);
+      return tile = await response.json();
+
       
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       showErrorMessage('Impossible de charger les tuiles');
     }
+  }
+  function AfficherGrilleInitial()
+  {
+    var positionInitialX = 10;
+    var positionInitialY = 10; 
+    
+    let tiles = [];
+
+    tiles.push(getTileAsync(positionInitialX, positionInitialY));
+    tiles.push(getTileAsync(positionInitialX + 1, positionInitialY));
+    tiles.push(getTileAsync(positionInitialX - 1, positionInitialY));
+    tiles.push(getTileAsync(positionInitialX, positionInitialY + 1));
+    tiles.push(getTileAsync(positionInitialX, positionInitialY - 1));
+    tiles.push(getTileAsync(positionInitialX + 1, positionInitialY + 1));
+    tiles.push(getTileAsync(positionInitialX + 1, positionInitialY - 1));
+    tiles.push(getTileAsync(positionInitialX - 1, positionInitialY + 1));
+    tiles.push(getTileAsync(positionInitialX - 1, positionInitialY - 1));
+
+
+    displayTiles(tiles);
+    //Afficher tuile
   }
   function handleAPIError(error, userMessage = 'Une erreur est survenue') {
     console.error('Erreur API:', error);
@@ -35,7 +56,7 @@ async function getTilesAsync(x, y, radius = 10) {
     tiles.forEach(tile => {
       const tileDiv = document.createElement('div');
       tileDiv.className = 'tile';
-      tileDiv.textContent = tile.url;
+      tileDiv.textContent = tile.imageURL;
       grille.appendChild(tileDiv);
     });
   }
