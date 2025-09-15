@@ -9,6 +9,10 @@ namespace MyLittleRPG.Data.Context
         public DbSet<Monster> Monsters { get; set; }
         public DbSet<Tile> Tiles { get; set; }
 
+        public DbSet<Utilisateur> Utilisateurs { get; set; }
+
+        public DbSet<Personnage> Personnages { get; set; }
+
         public MonsterContext(DbContextOptions<MonsterContext> options) : base(options) { }
     }
 }
