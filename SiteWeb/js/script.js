@@ -74,20 +74,75 @@ async function getTileAsync(x, y) {
       errorDiv.style.display = 'none';
     }, 5000);
   }
+  function updateSelectedTile(tile) {
+    const selectedTileDiv = document.querySelector('.card-body.selected-tile');
+
+    console.log(tile)
+    
+
+    var typeStr = "default";
+
+    switch(tile.type){
+      case 0 : typeStr="plaine";break;
+      case 1 :typeStr="eau";break;
+      case 2 :typeStr="montagne";break;
+      case 3 :typeStr="forest";break;
+      case 4 :typeStr="ville";break;
+      case 5 :typeStr="route";break;
+      case "PLACEHOLDER": typeStr = "Inconnue"; break;
+    }
+
+    console.log(tile.type + " ; "+ typeStr)
+    
+  
+    selectedTileDiv.innerHTML = `
+    <div class="divCard"><p>Position : (${tile.positionX},${tile.positionY})</p></div>
+    <div class="divCard"><p>Type : ${typeStr}</p></div>
+    <div class="divCard"><p>Traversable : ${tile.estTraversable ? 'oui' : 'non'}</p></div>
+    <div class="divCard"><p>Description : ${tile.description || 'Aucune'}</p></div>
+  `;
+  }
+  
   function displayTiles(tiles) {
     const grille = document.querySelector('.grille');
     grille.innerHTML = ''; // Effacer le contenu précédent
-
+  
     tiles.forEach(tile => {
       const tileDiv = document.createElement('div');
       tileDiv.className = 'tile';
-
-
+  
       const img = document.createElement('img');
-      img.src =  'img/' + tile.imageURL;
+      img.src = 'img/' + tile.imageURL;
       img.alt = 'Tile';
+
+      tileDiv.addEventListener('click', async() => {
+        if(tile.type == "PLACEHOLDER"){
+          const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
+          if (revealedTile) {
+            // Mettre à jour l'image
+            img.src = 'img/' + revealedTile.imageURL;
+  
+            // Mettre à jour l'objet tile
+            Object.assign(tile, revealedTile);
+  
+            // Mettre à jour la partie "Tuile Sélectionnée"
+            updateSelectedTile(tile);
+          }
+        } else {
+          // Si déjà révélée → juste mise à jour infos
+          updateSelectedTile(tile);
+        }
+
+        document.querySelectorAll('.tile').forEach(t => t.classList.remove('selected'));
+        tileDiv.classList.add('selected');
+
+        updateSelectedTile(tile);
+      })
+  
       tileDiv.appendChild(img);
       grille.appendChild(tileDiv);
     });
   }
+
+
 window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
