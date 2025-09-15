@@ -78,6 +78,7 @@ namespace MyLittleRPG.Controllers
 
                 _context.Tiles.Add(tile);
                 await _context.SaveChangesAsync();
+                CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
             }
 
             return tile;
@@ -95,14 +96,14 @@ namespace MyLittleRPG.Controllers
 
         private void reglerproba(int positionX, int positionY)
         {
-            var tileW = _context.Tiles.FindAsync(positionX-1, positionY);
-            checkTile(tileW.Result);
-            var tileE = _context.Tiles.FindAsync(positionX+1, positionY);
-            checkTile(tileE.Result);
-            var tileN = _context.Tiles.FindAsync(positionX, positionY+1);
-            checkTile(tileN.Result);
-            var tileS = _context.Tiles.FindAsync(positionX, positionY-1);
-            checkTile(tileN.Result);
+            var tileW = _context.Tiles.Find(positionX - 1, positionY);
+            checkTile(tileW);
+            var tileE = _context.Tiles.Find(positionX + 1, positionY);
+            checkTile(tileE);
+            var tileN = _context.Tiles.Find(positionX, positionY + 1);
+            checkTile(tileN);
+            var tileS = _context.Tiles.Find(positionX, positionY - 1);
+            checkTile(tileN);
 
         }
 
