@@ -144,5 +144,63 @@ async function getTileAsync(x, y) {
     });
   }
 
+  async function login(email, motDePasse) {
+    try {
+      const response = await fetch("https://localhost:7061/api/Utilisateurs/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          motDePasse: motDePasse
+        })
+      });
+  
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Erreur de connexion");
+      }
+  
+      const utilisateur = await response.json();
+      console.log("Connecté :", utilisateur);
+  
+      // Exemple : stocker l’utilisateur en session/localStorage
+      localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+  
+      return utilisateur;
+  
+    } catch (err) {
+      console.error("Erreur lors de la connexion:", err);
+      handleAPIError(err, "Email ou mot de passe incorrect");
+      return null;
+    }
+  }
+
+  async function register(utilisateur) {
+    try {
+      const response = await fetch("https://localhost:7061/api/Utilisateurs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(utilisateur) // { nom, email, motDePasse, ... }
+      });
+  
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Erreur lors de l'inscription");
+      }
+  
+      const nouvelUtilisateur = await response.json();
+      console.log("Inscription réussie :", nouvelUtilisateur);
+  
+      return nouvelUtilisateur;
+  
+    } catch (err) {
+      console.error("Erreur lors de l'inscription:", err);
+      handleAPIError(err, "Impossible de créer le compte");
+      return null;
+    }
+  }
+  
+  
+
 
 window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);

@@ -86,3 +86,25 @@ header{
     border-radius: 8px;
     transition: all 0.2s ease-in-out;
   }
+
+  /* Corrige les champs de formulaire dans les cartes */
+.card .form-control {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+}
+
+/* On limite le style RPG aux "divCard" et pas aux div du formulaire */
+.divCard {
+    margin: 5px;
+    padding: 2px;
+    background-color: #0e174e;
+    border-radius: 15px;
+}
+
+div {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+}
