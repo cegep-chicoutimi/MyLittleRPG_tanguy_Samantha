@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MyLittleRPG.Data.Context;
 using MyLittleRPG.Models;
@@ -30,8 +31,9 @@ namespace MyLittleRPG.Controllers
         }
 
         // GET: api/Utilisateurs/5
-        [HttpPost("login")]
-        public async Task<ActionResult<Utilisateur>> Login([FromBody] Login login)
+        [HttpPost]
+        [Route("auth/login")]
+        public async Task<ActionResult<Utilisateur>> Login([FromBody] LoginUser login)
         {
             var utilisateur = await _context.Utilisateurs
                 .FirstOrDefaultAsync(u => u.Email == login.Email);
@@ -46,18 +48,41 @@ namespace MyLittleRPG.Controllers
                 return BadRequest("Mot de passe incorrect");
             }
 
+            utilisateur.TempsConexion = DateTime.Now;
+            _context.Entry(utilisateur).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UtilisateurExists(utilisateur.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             return utilisateur;
         }
 
         // PUT: api/Utilisateurs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUtilisateur(int id, Utilisateur utilisateur)
+        [HttpPut]
+        [Route("auth/logout/{id}")]
+        public async Task<IActionResult> PutUtilisateur(int id)
         {
-            if (id != utilisateur.Id)
+            Utilisateur? utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Id == id);
+
+            if (utilisateur == null)
             {
-                return BadRequest();
+                return BadRequest("Cet utilisateur n'existe pas");
             }
+
+            utilisateur.TempsConexion = null;
 
             _context.Entry(utilisateur).State = EntityState.Modified;
 
@@ -83,7 +108,8 @@ namespace MyLittleRPG.Controllers
         // POST: api/Utilisateurs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Utilisateur>> PostUtilisateur(Utilisateur utilisateur)
+        [Route("auth/register")]
+        public async Task<ActionResult<Utilisateur>> PostUtilisateur([FromBody] Utilisateur utilisateur)
         {   
             if(utilisateur == null) return BadRequest();
             
