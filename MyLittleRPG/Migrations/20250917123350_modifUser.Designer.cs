@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyLittleRPG.Data.Context;
 
@@ -11,9 +12,11 @@ using MyLittleRPG.Data.Context;
 namespace MyLittleRPG.Migrations
 {
     [DbContext(typeof(MonsterContext))]
-    partial class MonsterContextModelSnapshot : ModelSnapshot
+    [Migration("20250917123350_modifUser")]
+    partial class modifUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,8 +160,8 @@ namespace MyLittleRPG.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime?>("TempsConexion")
-                        .HasColumnType("datetime(6)");
+                    b.Property<TimeOnly?>("TempsConexion")
+                        .HasColumnType("time(6)");
 
                     b.HasKey("Id");
 

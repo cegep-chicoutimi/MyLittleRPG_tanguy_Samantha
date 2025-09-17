@@ -8,6 +8,8 @@
         public string Pseudo {  get; set; }
         public DateTime DateInscription { get; set; }
 
+        public DateTime? TempsConexion { get; set; }
+
         public Utilisateur(int id, string email, string motDePasse, string pseudo) 
         {
             Id = id;
@@ -15,6 +17,7 @@
             MotDePasse = motDePasse;
             Pseudo = pseudo;
             DateInscription = DateTime.Now;
+            TempsConexion = null;
         }
 
     }

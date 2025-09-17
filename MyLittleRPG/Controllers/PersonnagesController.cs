@@ -36,7 +36,7 @@ namespace MyLittleRPG.Controllers
 
             if (personnage == null)
             {
-                return NotFound();
+                return NotFound("Aucun utilisateur correspond à cet id");
             }
 
             return personnage;
@@ -47,12 +47,29 @@ namespace MyLittleRPG.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPersonnage(int id, Personnage personnage)
         {
-            if (id != personnage.Id)
+            var oldPersonnage = await _context.Personnages.FindAsync(id);
+
+            if (oldPersonnage == null)
             {
-                return BadRequest();
+                return BadRequest("Mauvais id de personnage");
             }
 
-            _context.Entry(personnage).State = EntityState.Modified;
+            if (personnage.PV > oldPersonnage.PVMax || personnage.PV < oldPersonnage.PV || personnage.Force > 15 || personnage.Defense > 20 || 
+                personnage.Force < oldPersonnage.Force || personnage.Defense < oldPersonnage.Defense || personnage.Niveau < oldPersonnage.Niveau || personnage.XP < oldPersonnage.XP)
+            {
+                return BadRequest("Les données entrées ne sont pas valide pour un personnage");
+            }
+            
+            oldPersonnage.Nom = personnage.Nom;
+            oldPersonnage.Niveau = personnage.Niveau;
+            oldPersonnage.PV = personnage.PV;
+            oldPersonnage.XP = personnage.XP;
+            oldPersonnage.Force = personnage.Force;
+            oldPersonnage.Defense = personnage.Defense;
+            oldPersonnage.PositionX = personnage.PositionX;
+            oldPersonnage.PositionY = personnage.PositionY;
+
+            _context.Entry(oldPersonnage).State = EntityState.Modified;
 
             try
             {
@@ -89,20 +106,20 @@ namespace MyLittleRPG.Controllers
         }
 
         // DELETE: api/Personnages/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePersonnage(int id)
-        {
-            var personnage = await _context.Personnages.FindAsync(id);
-            if (personnage == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeletePersonnage(int id)
+        //{
+        //    var personnage = await _context.Personnages.FindAsync(id);
+        //    if (personnage == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Personnages.Remove(personnage);
-            await _context.SaveChangesAsync();
+        //    _context.Personnages.Remove(personnage);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         private bool PersonnageExists(int id)
         {
