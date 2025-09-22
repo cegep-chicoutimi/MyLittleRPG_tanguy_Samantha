@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscription - Monde RPG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" href="img/favicon.ico">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header>
+    <div class="container text-center bg-success">
+      <h2>Créer un compte Monde RPG</h2>
+    </div>
+  </header>
+
+  <main class="d-flex justify-content-center align-items-center" style="height:80vh;">
+    <div class="card p-4" style="max-width:400px; width:100%;">
+      <div class="card-header text-center">
+        <i class="fa-solid fa-user-plus fa-2x"></i>
+        <h4>Inscription</h4>
+      </div>
+      <div class="card-body">
+        <!-- Zone pour les messages d'erreur -->
+        <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+
+        <form id="registerForm">
+          <div class="form-group text-left">
+            <label for="pseudo">Pseudo</label>
+            <input type="text" class="form-control" id="pseudo" placeholder="Votre pseudo" required>
+          </div>
+          <div class="form-group text-left">
+            <label for="email">Adresse email</label>
+            <input type="email" class="form-control" id="email" placeholder="Votre email" required>
+          </div>
+          <div class="form-group text-left">
+            <label for="password">Mot de passe</label>
+            <input type="password" class="form-control" id="password" placeholder="Votre mot de passe" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100 mt-3">
+            <i class="fa-solid fa-user-plus"></i> S’inscrire
+          </button>
+        </form>
+      </div>
+      <div class="card-footer text-center">
+        <p>Déjà un compte ? <a href="login.html">Se connecter</a></p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="js/script.js"></script>
+  </footer>
+</body>
+</html>

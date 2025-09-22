@@ -59,6 +59,9 @@ namespace MyLittleRPG.Controllers
             if (posX < 0 || posX > 50 || posY < 0 || posY > 50) 
                 return BadRequest(new { messeage = "La position voulu est hors de la carte" });
 
+            if (!_tileGeneration.GenererTile(posX, posY).Result.estTraversable)
+                return BadRequest(new { messeage = "la case nest pas traversable" });
+
             if ((Math.Abs(posX - personnage.PositionX) <= 1) && (Math.Abs(posY - personnage.PositionY) <= 1))
             {
                 personnage.PositionX = posX;
