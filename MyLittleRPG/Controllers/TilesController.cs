@@ -43,7 +43,7 @@ namespace MyLittleRPG.Controllers
         {
 
             Tile? tile =  await TileGeneration.GenererTile(PositionX, PositionY);
-            if (tile == null) return BadRequest(new { message = "Les positions entré ne sont pas valide" });
+            if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });
 
             CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);          
 
