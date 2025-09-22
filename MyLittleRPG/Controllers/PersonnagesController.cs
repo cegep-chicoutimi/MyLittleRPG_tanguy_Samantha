@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using MyLittleRPG.Data.Context;
+using MyLittleRPG.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyLittleRPG.Data.Context;
-using MyLittleRPG.Models;
 
 namespace MyLittleRPG.Controllers
 {
@@ -56,7 +57,7 @@ namespace MyLittleRPG.Controllers
             }
 
             if (posX < 0 || posX > 50 || posY < 0 || posY > 50) 
-                return BadRequest(new { messeage = "la position voulu est hors de la carte" });
+                return BadRequest(new { messeage = "La position voulu est hors de la carte" });
 
             if ((Math.Abs(posX - personnage.PositionX) <= 1) && (Math.Abs(posY - personnage.PositionY) <= 1))
             {
@@ -139,6 +140,15 @@ namespace MyLittleRPG.Controllers
         [HttpPost("{idUser},{nom}")]
         public async Task<ActionResult<Personnage>> PostPersonnage(int idUser, string nom)
         {
+            var utilisateur = await _context.Utilisateurs
+                .FirstOrDefaultAsync(u => u.Id == idUser);
+
+            if (utilisateur == null)
+            {
+                return NotFound("L'id de l'utilisateur n'est pas valide");
+            }
+
+            if (string.IsNullOrEmpty(nom)) return BadRequest(new { message = "Le nom de l'utilisateur ne doit pas être vide" });
             Random random = new Random();
 
             Personnage personnage = new Personnage(0, nom,1,1,random.Next(10,15),50,random.Next(5,10),random.Next(5,10), 10, 10, idUser);

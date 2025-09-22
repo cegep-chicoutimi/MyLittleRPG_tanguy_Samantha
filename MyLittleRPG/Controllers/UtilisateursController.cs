@@ -37,7 +37,7 @@ namespace MyLittleRPG.Controllers
 
             if (utilisateur == null)
             {
-                return NotFound();
+                return NotFound(new {message = "L'email entrée ne correspond à aucun utilisateur"});
             }
 
             return utilisateur;
@@ -53,12 +53,12 @@ namespace MyLittleRPG.Controllers
 
             if (utilisateur == null)
             {
-                return NotFound("Utilisateur non trouvé");
+                return Unauthorized(new { message = "L'email entrée ne correspond à aucun utilisateur" });
             }
 
             if (utilisateur.MotDePasse != login.MotDePasse)
             {
-                return BadRequest("Mot de passe incorrect");
+                return Unauthorized(new { message = "Mot de passe incorrect" });
             }
 
             utilisateur.TempsConexion = DateTime.Now;
@@ -124,11 +124,11 @@ namespace MyLittleRPG.Controllers
         [Route("auth/register")]
         public async Task<ActionResult<Utilisateur>> PostUtilisateur([FromBody] Utilisateur utilisateur)
         {   
-            if(utilisateur == null) return BadRequest();
+            if(utilisateur == null) return Unauthorized(new {message = "L'utilisateur entré est null"});
             
             if(UtilisateurExists(utilisateur.Email))
             {
-                return BadRequest(new { message = "L'email est déjà utilisé" });
+                return Unauthorized(new { message = "L'email est déjà utilisé" });
             }
 
             utilisateur.DateInscription = DateTime.Now;
