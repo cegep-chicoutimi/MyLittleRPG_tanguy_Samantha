@@ -151,6 +151,12 @@ function displayTiles(tiles) {
 
     tileDiv.appendChild(img);
     grille.appendChild(tileDiv);
+
+    // après avoir généré toutes les tuiles
+    const player = document.createElement("div");
+    player.id = "player";
+    grille.appendChild(player);
+
   });
 }
 
@@ -273,6 +279,7 @@ try {
   // Mettre à jour la position locale correctement (même casse que le JSON)
   personnage.positionX = nouvelleX;
   personnage.positionY = nouvelleY;
+  updatePlayerPosition(nouvelleX,nouvelleY)
   localStorage.setItem("personnage", JSON.stringify(personnage));
 
   // Reconstruire la grille complète
@@ -309,6 +316,17 @@ for(let dx=-2; dx<=2; dx++){
     }
 }
 return fullGrid;
+}
+
+function updatePlayerPosition(x, y) {
+  const playerDiv = document.getElementById('player');
+  if (!playerDiv) return;
+
+  // Taille d'une tuile (ajuste si ce n’est pas 32px)
+  const tileSize = 32;
+
+  playerDiv.style.left = (x * tileSize) + "px";
+  playerDiv.style.top = (y * tileSize) + "px";
 }
 
 

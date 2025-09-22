@@ -60,7 +60,8 @@ header{
   display: grid;
   grid-template-columns: repeat(5, 100px); /* 5 columns of 100px each */
   grid-template-rows: repeat(5, 100px);    /* 5 rows of 100px */
-  gap: 5px;                               /* space between tiles */
+  gap: 5px; 
+  position: relative;                              /* space between tiles */
 }
 
 .tile {
@@ -107,4 +108,13 @@ div {
     padding: 0;
     background: none;
     border-radius: 0;
+}
+
+#player {
+    width: 64px;               /* largeur d’une tuile */
+    height: 64px;              /* hauteur d’une tuile */
+    position: absolute;        /* pour le placer librement */
+    z-index: 100;              /* toujours au-dessus des tuiles */
+    background-image: url("../img/sprite.png"); /* ton sprite ou une image */
+    background-size: cover;    /* pour remplir le carré */
 }
