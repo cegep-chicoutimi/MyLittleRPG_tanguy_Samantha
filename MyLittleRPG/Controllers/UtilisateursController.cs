@@ -24,11 +24,11 @@ namespace MyLittleRPG.Controllers
         }
 
         // GET: api/Utilisateurs
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Utilisateur>>> GetUtilisateurs()
-        {
-            return await _context.Utilisateurs.ToListAsync();
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Utilisateur>>> GetUtilisateurs()
+        //{
+        //    return await _context.Utilisateurs.ToListAsync();
+        //}
 
         [HttpGet("{email}")]
         public async Task<ActionResult<Utilisateur>> GetUtilisateur(string email)
@@ -84,39 +84,39 @@ namespace MyLittleRPG.Controllers
 
         // PUT: api/Utilisateurs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut]
-        [Route("auth/logout/{id}")]
-        public async Task<IActionResult> PutUtilisateur(int id)
-        {
-            Utilisateur? utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Id == id);
+        //[HttpPut]
+        //[Route("auth/logout/{id}")]
+        //public async Task<IActionResult> PutUtilisateur(int id)
+        //{
+        //    Utilisateur? utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Id == id);
 
-            if (utilisateur == null)
-            {
-                return BadRequest("Cet utilisateur n'existe pas");
-            }
+        //    if (utilisateur == null)
+        //    {
+        //        return BadRequest("Cet utilisateur n'existe pas");
+        //    }
 
-            utilisateur.TempsConexion = null;
+        //    utilisateur.TempsConexion = null;
 
-            _context.Entry(utilisateur).State = EntityState.Modified;
+        //    _context.Entry(utilisateur).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UtilisateurExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!UtilisateurExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // POST: api/Utilisateurs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
