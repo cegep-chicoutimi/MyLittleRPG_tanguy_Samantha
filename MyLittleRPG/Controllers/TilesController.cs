@@ -15,133 +15,104 @@ namespace MyLittleRPG.Controllers
     [ApiController]
     public class TilesController : ControllerBase
     {
-        private int probaHerbe = 20;
-        private int probaEau = 10;
-        private int probaMontagne = 15;
-        private int probaForet = 15;
-        private int probaVille = 05;
-        private int probaRoute = 35;
+        //private int probaHerbe = 20;
+        //private int probaEau = 10;
+        //private int probaMontagne = 15;
+        //private int probaForet = 15;
+        //private int probaVille = 05;
+        //private int probaRoute = 35;
+        private TileGeneration TileGeneration;
 
         private readonly MonsterContext _context;
 
         public TilesController(MonsterContext context)
         {
             _context = context;
+            TileGeneration = new TileGeneration(context);
         }
 
         // GET: api/Tiles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tile>>> GetTiles()
+        public async Task<ActionResult<IEnumerable<Tile>>> GetTilesAutour(int PositionX, int PositionY)
         {
-            return await _context.Tiles.ToListAsync();
+            List<Tile> tiles = (List<Tile>)await TileGeneration.GenererTilesAutour(PositionX, PositionY);
+
+            if(tiles == null) return NotFound(new {message = "Les tuiles n'ont pas pu se générer"});
+
+            return tiles;
         }
 
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
         public async Task<ActionResult<Tile>> GetTile(int PositionX, int PositionY)
         {
-            var tile = await _context.Tiles.FindAsync(PositionX, PositionY);
 
-            if (tile == null)
-            {
-                reglerproba(PositionX, PositionY);
-                Random random = new Random();
-                int rand = random.Next(101);
-                if (rand < probaHerbe)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.HERBE, true, "Plains.png");
-                }
-                else if (rand < probaHerbe+probaEau)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.EAU, false, "River.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.MONTAGNE, false, "Mountain.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.FORET, true, "Forest.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne + probaForet+ probaVille)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.VILLE, true, "Town.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.ROUTE, true, "Road.png");
-             
-                }else { return NotFound(); }
+            Tile? tile =  await TileGeneration.GenererTile(PositionX, PositionY);
+            if (tile == null) return BadRequest(new { message = "Les positions entré ne sont pas valide" });
 
-                resetproba();
-
-
-                _context.Tiles.Add(tile);
-                await _context.SaveChangesAsync();
-                CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
-            }
+            CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);          
 
             return tile;
         }
 
-        private void resetproba()
-        {
-            probaHerbe = 20;
-            probaEau = 10;
-            probaMontagne = 15;
-            probaForet = 15;
-            probaVille = 05;
-            probaRoute = 35;
-        }
+        //private void resetproba()
+        //{
+        //    probaHerbe = 20;
+        //    probaEau = 10;
+        //    probaMontagne = 15;
+        //    probaForet = 15;
+        //    probaVille = 05;
+        //    probaRoute = 35;
+        //}
 
-        private void reglerproba(int positionX, int positionY)
-        {
-            var tileW = _context.Tiles.Find(positionX - 1, positionY);
-            checkTile(tileW);
-            var tileE = _context.Tiles.Find(positionX + 1, positionY);
-            checkTile(tileE);
-            var tileN = _context.Tiles.Find(positionX, positionY + 1);
-            checkTile(tileN);
-            var tileS = _context.Tiles.Find(positionX, positionY - 1);
-            checkTile(tileS);
+        //private void reglerproba(int positionX, int positionY)
+        //{
+        //    var tileW = _context.Tiles.Find(positionX - 1, positionY);
+        //    checkTile(tileW);
+        //    var tileE = _context.Tiles.Find(positionX + 1, positionY);
+        //    checkTile(tileE);
+        //    var tileN = _context.Tiles.Find(positionX, positionY + 1);
+        //    checkTile(tileN);
+        //    var tileS = _context.Tiles.Find(positionX, positionY - 1);
+        //    checkTile(tileS);
 
-        }
+        //}
 
 
-        private void checkTile(Tile? tile)
-        {
-            if (tile != null)
-            {
-                if (tile.Type == TileType.FORET)
-                {
-                    probaForet += 10;
-                    probaHerbe -= 2;
-                    probaEau -= 2;
-                    probaMontagne -= 2;
-                    probaVille -= 2;
-                    probaRoute -= 2;
-                }
-                else if (tile.Type == TileType.EAU)
-                {
-                    probaEau += 10;
-                    probaHerbe -= 2;
-                    probaForet -= 2;
-                    probaMontagne -= 2;
-                    probaVille -= 2;
-                    probaRoute -= 2;
-                }
-                else if (tile.Type == TileType.MONTAGNE)
-                {
-                    probaMontagne += 10;
-                    probaHerbe -= 2;
-                    probaForet -= 2;
-                    probaEau -= 2;
-                    probaVille -= 2;
-                    probaRoute -= 2;
-                }
+        //private void checkTile(Tile? tile)
+        //{
+        //    if (tile != null)
+        //    {
+        //        if (tile.Type == TileType.FORET)
+        //        {
+        //            probaForet += 10;
+        //            probaHerbe -= 2;
+        //            probaEau -= 2;
+        //            probaMontagne -= 2;
+        //            probaVille -= 2;
+        //            probaRoute -= 2;
+        //        }
+        //        else if (tile.Type == TileType.EAU)
+        //        {
+        //            probaEau += 10;
+        //            probaHerbe -= 2;
+        //            probaForet -= 2;
+        //            probaMontagne -= 2;
+        //            probaVille -= 2;
+        //            probaRoute -= 2;
+        //        }
+        //        else if (tile.Type == TileType.MONTAGNE)
+        //        {
+        //            probaMontagne += 10;
+        //            probaHerbe -= 2;
+        //            probaForet -= 2;
+        //            probaEau -= 2;
+        //            probaVille -= 2;
+        //            probaRoute -= 2;
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
 
         //// PUT: api/Tiles/5
