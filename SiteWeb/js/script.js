@@ -144,61 +144,102 @@ async function getTileAsync(x, y) {
     });
   }
 
-  async function login(email, motDePasse) {
-    try {
-      const response = await fetch("https://localhost:7061/api/Utilisateurs/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          motDePasse: motDePasse
-        })
-      });
-  
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Erreur de connexion");
-      }
-  
-      const utilisateur = await response.json();
-      console.log("Connecté :", utilisateur);
-  
-      // Exemple : stocker l’utilisateur en session/localStorage
-      localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
-  
-      return utilisateur;
-  
-    } catch (err) {
-      console.error("Erreur lors de la connexion:", err);
-      handleAPIError(err, "Email ou mot de passe incorrect");
-      return null;
+
+async function login(email, motDePasse) {
+  try {
+    const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, motDePasse })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Erreur de connexion");
     }
+
+    const utilisateur = await response.json();
+    console.log("Connecté :", utilisateur);
+    localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+    window.location.href = "index.html";
+  } catch (err) {
+    console.error("Erreur lors de la connexion:", err);
+    const errorDiv = document.getElementById('error-message');
+    if(errorDiv){
+      errorDiv.textContent = err.message;
+      errorDiv.style.display = "block";
+    }
+  }
+}
+
+async function register(pseudo, email, motDePasse) {
+  try {
+    const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pseudo, email, motDePasse })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Erreur d'inscription");
+    }
+
+    const utilisateur = await response.json();
+    console.log("Utilisateur créé :", utilisateur);
+    localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+
+    // Création du personnage associé
+    const responsePerso = await fetch(`https://localhost:7061/api/Personnages/${utilisateur.id},${encodeURIComponent(pseudo)}`, {
+        method: "POST"
+    });
+
+    if(!responsePerso.ok){
+      const message = await responsePerso.text();
+      throw new Error(message || "Erreur lors de la création du personnage");
+    }
+
+    const personnage = await responsePerso.json();
+    console.log("Personnage créé :", personnage);
+    localStorage.setItem("personnage", JSON.stringify(personnage));
+
+    // Redirection vers la carte
+    window.location.href = "index.html";
+
+  } catch (err) {
+    console.error("Erreur lors de l'inscription:", err);
+    const errorDiv = document.getElementById('error-message');
+    if(errorDiv){
+      errorDiv.textContent = err.message;
+      errorDiv.style.display = "block";
+    }
+  }
+}
+
+
+// Pour tes formulaires
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      login(email, password);
+    });
   }
 
-  async function register(utilisateur) {
-    try {
-      const response = await fetch("https://localhost:7061/api/Utilisateurs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(utilisateur) // { nom, email, motDePasse, ... }
-      });
-  
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Erreur lors de l'inscription");
-      }
-  
-      const nouvelUtilisateur = await response.json();
-      console.log("Inscription réussie :", nouvelUtilisateur);
-  
-      return nouvelUtilisateur;
-  
-    } catch (err) {
-      console.error("Erreur lors de l'inscription:", err);
-      handleAPIError(err, "Impossible de créer le compte");
-      return null;
-    }
+  const registerForm = document.getElementById("registerForm");
+  if (registerForm) {
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const pseudo = document.getElementById("pseudo").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      register(pseudo, email, password);
+    });
   }
+});
   
   
 

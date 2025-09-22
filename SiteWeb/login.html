@@ -50,45 +50,7 @@
   <footer>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-
-    <script>
-      async function login(email, motDePasse) {
-        try {
-          const response = await fetch("https://localhost:7061/api/Utilisateurs/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email, motDePasse: motDePasse })
-          });
-
-          if (!response.ok) {
-            const message = await response.text();
-            throw new Error(message || "Erreur de connexion");
-          }
-
-          const utilisateur = await response.json();
-          console.log("Connecté :", utilisateur);
-
-          // Stockage local
-          localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
-
-          // Rediriger vers la carte
-          window.location.href = "index.html";
-
-        } catch (err) {
-          console.error("Erreur lors de la connexion:", err);
-          const errorDiv = document.getElementById('error-message');
-          errorDiv.textContent = err.message;
-          errorDiv.style.display = "block";
-        }
-      }
-
-      document.getElementById("loginForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        login(email, password);
-      });
-    </script>
+    <script src="js/script.js"></script>
   </footer>
 </body>
 </html>

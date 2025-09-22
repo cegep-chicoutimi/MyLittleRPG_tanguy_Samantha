@@ -54,50 +54,7 @@
   <footer>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-
-    <script>
-      async function register(pseudo, email, motDePasse) {
-        try {
-          const response = await fetch("https://localhost:7061/api/Utilisateurs", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              pseudo: pseudo,
-              email: email,
-              motDePasse: motDePasse
-            })
-          });
-
-          if (!response.ok) {
-            const message = await response.text();
-            throw new Error(message || "Erreur d'inscription");
-          }
-
-          const utilisateur = await response.json();
-          console.log("Utilisateur créé :", utilisateur);
-
-          // Stocker en local
-          localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
-
-          // Redirection vers la carte
-          window.location.href = "index.html";
-
-        } catch (err) {
-          console.error("Erreur lors de l'inscription:", err);
-          const errorDiv = document.getElementById('error-message');
-          errorDiv.textContent = err.message;
-          errorDiv.style.display = "block";
-        }
-      }
-
-      document.getElementById("registerForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const pseudo = document.getElementById("pseudo").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        register(pseudo, email, password);
-      });
-    </script>
+    <script src="js/script.js"></script>
   </footer>
 </body>
 </html>
