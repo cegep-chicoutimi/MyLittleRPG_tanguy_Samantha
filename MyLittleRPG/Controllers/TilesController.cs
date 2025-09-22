@@ -15,12 +15,7 @@ namespace MyLittleRPG.Controllers
     [ApiController]
     public class TilesController : ControllerBase
     {
-        //private int probaHerbe = 20;
-        //private int probaEau = 10;
-        //private int probaMontagne = 15;
-        //private int probaForet = 15;
-        //private int probaVille = 05;
-        //private int probaRoute = 35;
+
         private TileGeneration TileGeneration;
 
         private readonly MonsterContext _context;
@@ -53,67 +48,7 @@ namespace MyLittleRPG.Controllers
             CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);          
 
             return tile;
-        }
-
-        //private void resetproba()
-        //{
-        //    probaHerbe = 20;
-        //    probaEau = 10;
-        //    probaMontagne = 15;
-        //    probaForet = 15;
-        //    probaVille = 05;
-        //    probaRoute = 35;
-        //}
-
-        //private void reglerproba(int positionX, int positionY)
-        //{
-        //    var tileW = _context.Tiles.Find(positionX - 1, positionY);
-        //    checkTile(tileW);
-        //    var tileE = _context.Tiles.Find(positionX + 1, positionY);
-        //    checkTile(tileE);
-        //    var tileN = _context.Tiles.Find(positionX, positionY + 1);
-        //    checkTile(tileN);
-        //    var tileS = _context.Tiles.Find(positionX, positionY - 1);
-        //    checkTile(tileS);
-
-        //}
-
-
-        //private void checkTile(Tile? tile)
-        //{
-        //    if (tile != null)
-        //    {
-        //        if (tile.Type == TileType.FORET)
-        //        {
-        //            probaForet += 10;
-        //            probaHerbe -= 2;
-        //            probaEau -= 2;
-        //            probaMontagne -= 2;
-        //            probaVille -= 2;
-        //            probaRoute -= 2;
-        //        }
-        //        else if (tile.Type == TileType.EAU)
-        //        {
-        //            probaEau += 10;
-        //            probaHerbe -= 2;
-        //            probaForet -= 2;
-        //            probaMontagne -= 2;
-        //            probaVille -= 2;
-        //            probaRoute -= 2;
-        //        }
-        //        else if (tile.Type == TileType.MONTAGNE)
-        //        {
-        //            probaMontagne += 10;
-        //            probaHerbe -= 2;
-        //            probaForet -= 2;
-        //            probaEau -= 2;
-        //            probaVille -= 2;
-        //            probaRoute -= 2;
-        //        }
-
-        //    }
-        //}
-
+        }      
 
         //// PUT: api/Tiles/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
