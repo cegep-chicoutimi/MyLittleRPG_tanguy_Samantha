@@ -103,7 +103,7 @@ namespace MyLittleRPG.Controllers
             var tileN = _context.Tiles.Find(positionX, positionY + 1);
             checkTile(tileN);
             var tileS = _context.Tiles.Find(positionX, positionY - 1);
-            checkTile(tileN);
+            checkTile(tileS);
 
         }
 
@@ -144,77 +144,77 @@ namespace MyLittleRPG.Controllers
         }
 
 
-        // PUT: api/Tiles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTile(int id, Tile tile)
-        {
-            if (id != tile.PositionX)
-            {
-                return BadRequest();
-            }
+        //// PUT: api/Tiles/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutTile(int id, Tile tile)
+        //{
+        //    if (id != tile.PositionX)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(tile).State = EntityState.Modified;
+        //    _context.Entry(tile).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TileExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!TileExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        // POST: api/Tiles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Tile>> PostTile(Tile tile)
-        {
-            _context.Tiles.Add(tile);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (TileExists(tile.PositionX))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //// POST: api/Tiles
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<Tile>> PostTile(Tile tile)
+        //{
+        //    _context.Tiles.Add(tile);
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        if (TileExists(tile.PositionX))
+        //        {
+        //            return Conflict();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
-        }
+        //    return CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
+        //}
 
-        // DELETE: api/Tiles/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTile(int id)
-        {
-            var tile = await _context.Tiles.FindAsync(id);
-            if (tile == null)
-            {
-                return NotFound();
-            }
+        //// DELETE: api/Tiles/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteTile(int id)
+        //{
+        //    var tile = await _context.Tiles.FindAsync(id);
+        //    if (tile == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Tiles.Remove(tile);
-            await _context.SaveChangesAsync();
+        //    _context.Tiles.Remove(tile);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         private bool TileExists(int id)
         {

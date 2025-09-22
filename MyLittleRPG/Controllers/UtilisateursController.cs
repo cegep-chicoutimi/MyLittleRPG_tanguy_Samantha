@@ -30,6 +30,19 @@ namespace MyLittleRPG.Controllers
             return await _context.Utilisateurs.ToListAsync();
         }
 
+        [HttpGet("{email}")]
+        public async Task<ActionResult<Utilisateur>> GetUtilisateur(string email)
+        {
+            var utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (utilisateur == null)
+            {
+                return NotFound();
+            }
+
+            return utilisateur;
+        }
+
         // GET: api/Utilisateurs/5
         [HttpPost]
         [Route("auth/login")]
@@ -115,7 +128,7 @@ namespace MyLittleRPG.Controllers
             
             if(UtilisateurExists(utilisateur.Email))
             {
-                return BadRequest("L'email est déjà utilisé");
+                return BadRequest(new { message = "L'email est déjà utilisé" });
             }
 
             utilisateur.DateInscription = DateTime.Now;
@@ -123,7 +136,7 @@ namespace MyLittleRPG.Controllers
             _context.Utilisateurs.Add(utilisateur);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUtilisateur", new { email = utilisateur.Email, mdp = utilisateur.MotDePasse }, utilisateur);
+            return CreatedAtAction("GetUtilisateur", new { email = utilisateur.Email }, utilisateur);
         }
 
         //// DELETE: api/Utilisateurs/5
