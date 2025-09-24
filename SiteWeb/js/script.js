@@ -1,4 +1,5 @@
 let personnage = JSON.parse(localStorage.getItem("personnage"));
+let allTiles = [];
 
 
 async function AfficherGrilleInitial() {
@@ -7,48 +8,69 @@ async function AfficherGrilleInitial() {
   const centerX = personnage.positionX; // utiliser la position du joueur
   const centerY = personnage.positionY;
 
-const fetchedPositions = [
-  [0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]
-];
+  const fetchedPositions = [
+    [0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]
+  ];
 
-// Fetch 9 tiles around the center
-let fetchedTilesPromises = fetchedPositions.map(([dx, dy]) => getTileAsync(centerX + dx, centerY + dy));
-const fetchedTiles = await Promise.all(fetchedTilesPromises);
+  // Fetch 9 tiles around the center
+ /* let fetchedTilesPromises = fetchedPositions.map(([dx, dy]) => getTileAsync(centerX + dx, centerY + dy));
+  const fetchedTiles = await Promise.all(fetchedTilesPromises);*/
 
-// Create a map of fetched tiles for quick lookup
-const fetchedMap = new Map();
-fetchedTiles.forEach(tile => {
-  if (tile) {
-    const key = `${tile.positionX},${tile.positionY}`;
-    fetchedMap.set(key, tile);
-  }
-});
+  let fetchedTiles = await getTilesAroundAsync(centerX, centerY);
+  // Create a map of fetched tiles for quick lookup
+  const fetchedMap = new Map();
+  fetchedTiles.forEach(tile => {
+    if (tile) {
+      const key = `${tile.positionX},${tile.positionY}`;
+      fetchedMap.set(key, tile);
+    }
+  });
 
-// Build the full 5x5 tiles grid, including placeholders where tiles are missing
-let fullGridTiles = [];
+  // Build the full 5x5 tiles grid, including placeholders where tiles are missing
+  let fullGridTiles = [];
 
-for (let dx = -2; dx <= 2; dx++) {
-  for (let dy = -2; dy <= 2; dy++) {
-    const posX = centerX + dx;
-    const posY = centerY + dy;
-    const key = `${posX},${posY}`;
-    if (fetchedMap.has(key)) {
-      fullGridTiles.push(fetchedMap.get(key));
-    } else {
-      // Placeholder tile object with default image (change as needed)
-      fullGridTiles.push({
-        positionX: posX,
-        positionY: posY,
-        imageURL: "tuileCache.png",  // your default image filename
-        type: "PLACEHOLDER"
-      });
+  for (let dx = -2; dx <= 2; dx++) {
+    for (let dy = -2; dy <= 2; dy++) {
+      const posX = centerX + dx;
+      const posY = centerY + dy;
+      const key = `${posX},${posY}`;
+      if (fetchedMap.has(key)) {
+        fullGridTiles.push(fetchedMap.get(key));
+      } else {
+        // Placeholder tile object with default image (change as needed)
+        fullGridTiles.push({
+          positionX: posX,
+          positionY: posY,
+          imageURL: "tuileCache.png",  // your default image filename
+          type: "PLACEHOLDER"
+        });
+      }
     }
   }
-}
 
-displayTiles(fullGridTiles);
+  displayTiles(fullGridTiles);
 }
+async function getTilesAroundAsync(x, y) {
+  try {
+    
+    const url = `https://localhost:7061/api/Tiles`;
+    const mesHeaders = new Headers({
+      "PositionX": x,
+      "PositionY": y
+    });
+    const response = await fetch(url, {headers:mesHeaders});
+    
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
 
+    return await response.json();
+
+  } catch (error) {
+    console.error('Erreur lors du chargement:', error);
+    handleAPIError(error, 'Impossible de charger les tuiles');
+  }
+}
 
 async function getTileAsync(x, y) {
   try {
@@ -69,8 +91,6 @@ async function getTileAsync(x, y) {
   }
 }
 
-
-
 function handleAPIError(error, userMessage = 'Une erreur est survenue') {
   console.error('Erreur API:', error);
   
@@ -84,12 +104,12 @@ function handleAPIError(error, userMessage = 'Une erreur est survenue') {
     errorDiv.style.display = 'none';
   }, 5000);
 }
+
 function updateSelectedTile(tile) {
   const selectedTileDiv = document.querySelector('.card-body.selected-tile');
 
   console.log(tile)
   
-
   var typeStr = "default";
 
   switch(tile.type){
@@ -104,7 +124,6 @@ function updateSelectedTile(tile) {
 
   console.log(tile.type + " ; "+ typeStr)
   
-
   selectedTileDiv.innerHTML = `
   <div class="divCard"><p>Position : (${tile.positionX},${tile.positionY})</p></div>
   <div class="divCard"><p>Type : ${typeStr}</p></div>
@@ -189,47 +208,47 @@ try {
 }
 
 async function register(pseudo, email, motDePasse) {
-try {
-  const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pseudo, email, motDePasse })
-  });
+  try {
+    const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pseudo, email, motDePasse })
+    });
 
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || "Erreur d'inscription");
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Erreur d'inscription");
+    }
+
+    const utilisateur = await response.json();
+    console.log("Utilisateur créé :", utilisateur);
+    localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+
+    // Création du personnage associé
+    const responsePerso = await fetch(`https://localhost:7061/api/Personnages/${utilisateur.id},${encodeURIComponent(pseudo)}`, {
+        method: "POST"
+    });
+
+    if(!responsePerso.ok){
+      const message = await responsePerso.text();
+      throw new Error(message || "Erreur lors de la création du personnage");
+    }
+
+    const personnage = await responsePerso.json();
+    console.log("Personnage créé :", personnage);
+    localStorage.setItem("personnage", JSON.stringify(personnage));
+
+    // Redirection vers la carte
+    window.location.href = "index.html";
+
+  } catch (err) {
+    console.error("Erreur lors de l'inscription:", err);
+    const errorDiv = document.getElementById('error-message');
+    if(errorDiv){
+      errorDiv.textContent = err.message;
+      errorDiv.style.display = "block";
+    }
   }
-
-  const utilisateur = await response.json();
-  console.log("Utilisateur créé :", utilisateur);
-  localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
-
-  // Création du personnage associé
-  const responsePerso = await fetch(`https://localhost:7061/api/Personnages/${utilisateur.id},${encodeURIComponent(pseudo)}`, {
-      method: "POST"
-  });
-
-  if(!responsePerso.ok){
-    const message = await responsePerso.text();
-    throw new Error(message || "Erreur lors de la création du personnage");
-  }
-
-  const personnage = await responsePerso.json();
-  console.log("Personnage créé :", personnage);
-  localStorage.setItem("personnage", JSON.stringify(personnage));
-
-  // Redirection vers la carte
-  window.location.href = "index.html";
-
-} catch (err) {
-  console.error("Erreur lors de l'inscription:", err);
-  const errorDiv = document.getElementById('error-message');
-  if(errorDiv){
-    errorDiv.textContent = err.message;
-    errorDiv.style.display = "block";
-  }
-}
 }
 
 
@@ -258,37 +277,37 @@ if (registerForm) {
 });
 
 async function deplacer(dx, dy) {
-if (!personnage) return;
+  if (!personnage) return;
 
-const nouvelleX = personnage.positionX + dx;
-const nouvelleY = personnage.positionY + dy;
+  const nouvelleX = personnage.positionX + dx;
+  const nouvelleY = personnage.positionY + dy;
 
-console.log("Tentative de déplacement vers", nouvelleX, ";", nouvelleY);
+  console.log("Tentative de déplacement vers", nouvelleX, ";", nouvelleY);
 
-try {
-  const response = await fetch(`https://localhost:7061/api/Personnages/Deplacement?posX=${nouvelleX}&posY=${nouvelleY}&idPerso=${personnage.id}`);
-  
-  if (!response.ok) {
-    const msg = await response.json();
-    alert(msg.message || "Déplacement impossible");
-    return;
+  try {
+    const response = await fetch(`https://localhost:7061/api/Personnages/Deplacement?posX=${nouvelleX}&posY=${nouvelleY}&idPerso=${personnage.id}`);
+    
+    if (!response.ok) {
+      const msg = await response.json();
+      alert(msg.message || "Déplacement impossible");
+      return;
+    }
+
+    const nouvellesTiles = await response.json();
+    
+    // Mettre à jour la position locale correctement (même casse que le JSON)
+    personnage.positionX = nouvelleX;
+    personnage.positionY = nouvelleY;
+    updatePlayerPosition(nouvelleX,nouvelleY)
+    localStorage.setItem("personnage", JSON.stringify(personnage));
+
+    // Reconstruire la grille complète
+    const fullGrid = buildFullGrid(nouvelleX, nouvelleY, nouvellesTiles);
+    displayTiles(fullGrid);
+
+  } catch (err) {
+    console.error("Erreur déplacement:", err);
   }
-
-  const nouvellesTiles = await response.json();
-  
-  // Mettre à jour la position locale correctement (même casse que le JSON)
-  personnage.positionX = nouvelleX;
-  personnage.positionY = nouvelleY;
-  updatePlayerPosition(nouvelleX,nouvelleY)
-  localStorage.setItem("personnage", JSON.stringify(personnage));
-
-  // Reconstruire la grille complète
-  const fullGrid = buildFullGrid(nouvelleX, nouvelleY, nouvellesTiles);
-  displayTiles(fullGrid);
-
-} catch (err) {
-  console.error("Erreur déplacement:", err);
-}
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -299,23 +318,23 @@ document.getElementById("btn-est").addEventListener("click", () => deplacer(0, 1
 });
 
 function buildFullGrid(centerX, centerY, tilesFetched) {
-const mapTiles = new Map();
-tilesFetched.forEach(t => mapTiles.set(`${t.positionX},${t.positionY}`, t));
+  const mapTiles = new Map();
+  tilesFetched.forEach(t => mapTiles.set(`${t.positionX},${t.positionY}`, t));
 
-let fullGrid = [];
-for(let dx=-2; dx<=2; dx++){
-    for(let dy=-2; dy<=2; dy++){
-        const posX = centerX+dx;
-        const posY = centerY+dy;
-        const key = `${posX},${posY}`;
-        if(mapTiles.has(key)){
-            fullGrid.push(mapTiles.get(key));
-        } else {
-            fullGrid.push({ positionX: posX, positionY: posY, imageURL:"tuileCache.png", type:"PLACEHOLDER" });
-        }
-    }
-}
-return fullGrid;
+  let fullGrid = [];
+  for(let dx=-2; dx<=2; dx++){
+      for(let dy=-2; dy<=2; dy++){
+          const posX = centerX+dx;
+          const posY = centerY+dy;
+          const key = `${posX},${posY}`;
+          if(mapTiles.has(key)){
+              fullGrid.push(mapTiles.get(key));
+          } else {
+              fullGrid.push({ positionX: posX, positionY: posY, imageURL:"tuileCache.png", type:"PLACEHOLDER" });
+          }
+      }
+  }
+  return fullGrid;
 }
 
 function updatePlayerPosition(x, y) {
@@ -328,10 +347,5 @@ function updatePlayerPosition(x, y) {
   playerDiv.style.left = (x * tileSize) + "px";
   playerDiv.style.top = (y * tileSize) + "px";
 }
-
-
-
-
-
 
 window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
