@@ -28,26 +28,27 @@ namespace MyLittleRPG.Controllers
 
         // GET: api/Tiles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tile>>> GetTilesAutour(int PositionX, int PositionY)
+        public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int PositionX, int PositionY)
         {
             List<Tile> tiles = (List<Tile>)await TileGeneration.GenererTilesAutour(PositionX, PositionY);
 
             if(tiles == null) return NotFound(new {message = "Les tuiles n'ont pas pu se générer"});
 
-            return tiles;
+            return BadRequest("not imlemented");
+            //return tiles;
         }
 
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
-        public async Task<ActionResult<Tile>> GetTile(int PositionX, int PositionY)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int PositionX, int PositionY)
         {
 
             Tile? tile =  await TileGeneration.GenererTile(PositionX, PositionY);
             if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });
 
-            CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);          
-
-            return tile;
+            CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
+            return BadRequest("not imlemented");
+            //return tile;
         }      
 
         //// PUT: api/Tiles/5

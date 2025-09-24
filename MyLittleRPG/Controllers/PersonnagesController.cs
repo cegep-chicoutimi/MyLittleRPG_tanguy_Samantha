@@ -47,7 +47,7 @@ namespace MyLittleRPG.Controllers
 
         [HttpGet]
         [Route("Deplacement")]
-        public async Task<ActionResult<IEnumerable<Tile>>> Deplacement(int posX, int posY, int idPerso)
+        public async Task<ActionResult<GrilleJeuDto>> Deplacement(int posX, int posY, int idPerso)
         {
             var personnage = await _context.Personnages.FindAsync(idPerso);
 
@@ -85,7 +85,8 @@ namespace MyLittleRPG.Controllers
                     }
                 }
                 var tiles = await _tileGeneration.GenererTilesAutour(posX, posY);
-                return (List<Tile>)tiles;
+                return BadRequest("not imlemented");
+                //return (List<Tile>)tiles;
             }
             return BadRequest(new { message = "Déplacement non autorisé. Vous pouvez vous déplacer d'une case maximum." });        
         }
