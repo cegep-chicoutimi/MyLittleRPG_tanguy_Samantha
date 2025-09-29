@@ -16,93 +16,26 @@ namespace MyLittleRPG.Controllers
     {
         private readonly MonsterContext _context;
 
-        //public MonstersController(MonsterContext context)
-        //{
-        //    _context = context;
-        //}
+        [HttpPut]
+        [Route("monstre/generateall")]
+        public async Task<IActionResult> generateall()
+        {
+            return BadRequest("not imlemented");
+        }
 
-        //// GET: api/Monsters
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Monster>>> GetMonsters()
-        //{
-        //    return await _context.Monsters.ToListAsync();
-        //}
+        [HttpPut]
+        [Route("monstre/generate10")]
+        public async Task<IActionResult> generate10()
+        {
+            return BadRequest("not imlemented");
+        }
 
-        //// GET: api/Monsters/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Monster>> GetMonster(int id)
-        //{
-        //    var monster = await _context.Monsters.FindAsync(id);
+        [HttpPost]
+        [Route("monstre/fight/{x}/{y}")]
+        public async Task<ActionResult<ResultDto>> fight(int x, int y)
+        {
+            return BadRequest("not imlemented");
+        }
 
-        //    if (monster == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return monster;
-        //}
-
-        //// PUT: api/Monsters/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutMonster(int id, Monster monster)
-        //{
-        //    if (id != monster.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(monster).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!MonsterExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        //// POST: api/Monsters
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Monster>> PostMonster(Monster monster)
-        //{
-        //    _context.Monsters.Add(monster);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetMonster", new { id = monster.Id }, monster);
-        //}
-
-        //// DELETE: api/Monsters/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteMonster(int id)
-        //{
-        //    var monster = await _context.Monsters.FindAsync(id);
-        //    if (monster == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Monsters.Remove(monster);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool MonsterExists(int id)
-        //{
-        //    return _context.Monsters.Any(e => e.Id == id);
-        //}
     }
 }

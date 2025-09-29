@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using MyLittleRPG.Data.Context;
+using MyLittleRPG.Migrations;
 using MyLittleRPG.Models;
 using System;
 using System.Collections.Generic;
@@ -47,7 +49,7 @@ namespace MyLittleRPG.Controllers
 
         [HttpGet]
         [Route("Deplacement")]
-        public async Task<ActionResult<IEnumerable<Tile>>> Deplacement(int posX, int posY, int idPerso)
+        public async Task<ActionResult<GrilleJeuDto>> Deplacement(int posX, int posY, int idPerso)
         {
             var personnage = await _context.Personnages.FindAsync(idPerso);
 
@@ -85,7 +87,48 @@ namespace MyLittleRPG.Controllers
                     }
                 }
                 var tiles = await _tileGeneration.GenererTilesAutour(posX, posY);
-                return (List<Tile>)tiles;
+
+                List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
+
+                foreach (var tile in tiles)
+                {
+                    TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+                    tileDTO.X = tile.PositionX;
+                    tileDTO.Y = tile.PositionY;
+                    tileDTO.TypeTuile = tile.Type.ToString();
+                    tileDTO.EstAccessible = tile.estTraversable;
+                    var InstanceMonstre = await _context.InstanceMonstres.FindAsync(tile.PositionX, tile.PositionY);
+                    
+                    if (InstanceMonstre != null) 
+                    {
+                        InstanceMonstreDto monsterDTO = new InstanceMonstreDto();
+                        monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
+                        monsterDTO.Nom = InstanceMonstre.Monster.Nom;
+                        monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
+                        monsterDTO.Niveau = InstanceMonstre.niveaux;
+                        monsterDTO.X = InstanceMonstre.PositionX;
+                        monsterDTO.Y = InstanceMonstre.PositionY;
+                        monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
+                        monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
+                        monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
+                        monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
+                        monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
+
+                        tileDTO.Monstre=monsterDTO;
+                        
+                    }
+
+                    Tuiles.Add(tileDTO);
+                }
+
+                GrilleJeuDto grille = new GrilleJeuDto();
+
+                grille.Tuiles = Tuiles;
+                grille.CentreX = posX;
+                grille.CentreY = posY;
+
+                return grille;
+                //return (List<Tile>)tiles;
             }
             return BadRequest(new { message = "Déplacement non autorisé. Vous pouvez vous déplacer d'une case maximum." });        
         }

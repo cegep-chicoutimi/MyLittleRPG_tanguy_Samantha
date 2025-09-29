@@ -8,6 +8,7 @@ namespace MyLittleRPG.Data.Context
     {
         public DbSet<Monster> Monsters { get; set; }
         public DbSet<Tile> Tiles { get; set; }
+        public DbSet<InstanceMonster> InstanceMonstres { get; set; }
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
 
