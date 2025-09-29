@@ -34,8 +34,46 @@ namespace MyLittleRPG.Controllers
 
             if(tiles == null) return NotFound(new {message = "Les tuiles n'ont pas pu se générer"});
 
-            return BadRequest("not imlemented");
-            //return tiles;
+            List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
+
+            foreach (var tile in tiles)
+            {
+                TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+                tileDTO.X = tile.PositionX;
+                tileDTO.Y = tile.PositionY;
+                tileDTO.TypeTuile = tile.Type.ToString();
+                tileDTO.EstAccessible = tile.estTraversable;
+                var InstanceMonstre = await _context.InstanceMonstres.FindAsync(tile.PositionX, tile.PositionY);
+
+                if (InstanceMonstre != null)
+                {
+                    InstanceMonstreDto monsterDTO = new InstanceMonstreDto();
+                    monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
+                    monsterDTO.Nom = InstanceMonstre.Monster.Nom;
+                    monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
+                    monsterDTO.Niveau = InstanceMonstre.niveaux;
+                    monsterDTO.X = InstanceMonstre.PositionX;
+                    monsterDTO.Y = InstanceMonstre.PositionY;
+                    monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
+                    monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
+                    monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
+                    monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
+                    monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
+
+                    tileDTO.Monstre = monsterDTO;
+
+                }
+
+                Tuiles.Add(tileDTO);
+            }
+
+            GrilleJeuDto grille = new GrilleJeuDto();
+
+            grille.Tuiles = Tuiles;
+            grille.CentreX = PositionX;
+            grille.CentreY = PositionY;
+
+            return grille;
         }
 
         // GET: api/Tiles/5
@@ -47,8 +85,33 @@ namespace MyLittleRPG.Controllers
             if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });
 
             CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
-            return BadRequest("not imlemented");
-            //return tile;
+
+            TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+            tileDTO.X = tile.PositionX;
+            tileDTO.Y = tile.PositionY;
+            tileDTO.TypeTuile = tile.Type.ToString();
+            tileDTO.EstAccessible = tile.estTraversable;
+            var InstanceMonstre = await _context.InstanceMonstres.FindAsync(tile.PositionX, tile.PositionY);
+
+            if (InstanceMonstre != null)
+            {
+                InstanceMonstreDto monsterDTO = new InstanceMonstreDto();
+                monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
+                monsterDTO.Nom = InstanceMonstre.Monster.Nom;
+                monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
+                monsterDTO.Niveau = InstanceMonstre.niveaux;
+                monsterDTO.X = InstanceMonstre.PositionX;
+                monsterDTO.Y = InstanceMonstre.PositionY;
+                monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
+                monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
+                monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
+                monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
+                monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
+
+                tileDTO.Monstre = monsterDTO;
+            }
+
+            return tileDTO;
         }      
 
         //// PUT: api/Tiles/5
