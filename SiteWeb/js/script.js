@@ -9,7 +9,8 @@ async function AfficherGrilleInitial() {
   const centerX = personnage.positionX; // utiliser la position du joueur
   const centerY = personnage.positionY;
 
-  let fetchedTiles = await getTilesAroundAsync(centerX, centerY);
+  let fetchedTilesDto = await getTilesAroundAsync(centerX, centerY);
+  let fetchedTiles = fetchedTilesDto.tuiles;
 
   // Create a map of fetched tiles for quick lookup
   const fetchedMap = new Map();
