@@ -33,7 +33,6 @@
         public int PointsVieMax { get; set; }
         public int Attaque { get; set; }
         public int Defense { get; set; }
-        public int Vitesse { get; set; }
 
         // Informations supplémentaires
         public int ExperienceDonnee { get; set; }
