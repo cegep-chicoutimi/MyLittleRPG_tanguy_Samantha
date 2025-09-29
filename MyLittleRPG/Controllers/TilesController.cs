@@ -91,7 +91,9 @@ namespace MyLittleRPG.Controllers
             tileDTO.Y = tile.PositionY;
             tileDTO.TypeTuile = tile.Type.ToString();
             tileDTO.EstAccessible = tile.estTraversable;
-            var InstanceMonstre = await _context.InstanceMonstres.FindAsync(tile.PositionX, tile.PositionY);
+            var InstanceMonstre = await _context.InstanceMonstres
+                .Include(im => im.Monster)
+                .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
 
             if (InstanceMonstre != null)
             {
