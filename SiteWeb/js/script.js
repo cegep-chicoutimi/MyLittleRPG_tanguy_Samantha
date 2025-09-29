@@ -1,5 +1,6 @@
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let allTiles = [];
+let tilesVisible = [];
 
 
 async function AfficherGrilleInitial() {
@@ -8,21 +9,15 @@ async function AfficherGrilleInitial() {
   const centerX = personnage.positionX; // utiliser la position du joueur
   const centerY = personnage.positionY;
 
-  const fetchedPositions = [
-    [0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]
-  ];
-
-  // Fetch 9 tiles around the center
- /* let fetchedTilesPromises = fetchedPositions.map(([dx, dy]) => getTileAsync(centerX + dx, centerY + dy));
-  const fetchedTiles = await Promise.all(fetchedTilesPromises);*/
-
   let fetchedTiles = await getTilesAroundAsync(centerX, centerY);
+
   // Create a map of fetched tiles for quick lookup
   const fetchedMap = new Map();
   fetchedTiles.forEach(tile => {
     if (tile) {
       const key = `${tile.positionX},${tile.positionY}`;
       fetchedMap.set(key, tile);
+      tilesVisible.push(key, tile);
     }
   });
 
@@ -53,12 +48,9 @@ async function AfficherGrilleInitial() {
 async function getTilesAroundAsync(x, y) {
   try {
     
-    const url = `https://localhost:7061/api/Tiles`;
-    const mesHeaders = new Headers({
-      "PositionX": x,
-      "PositionY": y
-    });
-    const response = await fetch(url, {headers:mesHeaders});
+    const url = `https://localhost:7061/api/Tiles?PositionX=${x}&PositionY=${y}`;
+
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`Erreur HTTP: ${response.status}`);
@@ -74,7 +66,7 @@ async function getTilesAroundAsync(x, y) {
 
 async function getTileAsync(x, y) {
   try {
-    
+    console.log(x,y);
     const url = `https://localhost:7061/api/Tiles/${x}%2C${y}?PositionX=${x}&PositionY=${y}`;
     const response = await fetch(url);
     
@@ -109,6 +101,9 @@ function updateSelectedTile(tile) {
   const selectedTileDiv = document.querySelector('.card-body.selected-tile');
 
   console.log(tile)
+
+  const key = `${tile.positionX},${tile.positionY}`;
+  tilesVisible.push(key, tile);
   
   var typeStr = "default";
 
@@ -122,6 +117,7 @@ function updateSelectedTile(tile) {
     case "PLACEHOLDER": typeStr = "Inconnue"; break;
   }
 
+  
   console.log(tile.type + " ; "+ typeStr)
   
   selectedTileDiv.innerHTML = `
@@ -139,13 +135,13 @@ function displayTiles(tiles) {
   tiles.forEach(tile => {
     const tileDiv = document.createElement('div');
     tileDiv.className = 'tile';
-
     const img = document.createElement('img');
     img.src = 'img/' + tile.imageURL;
     img.alt = 'Tile';
 
     tileDiv.addEventListener('click', async() => {
       if(tile.type == "PLACEHOLDER"){
+        console.log(tile.positionX);
         const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
         if (revealedTile) {
           // Mettre à jour l'image
@@ -155,7 +151,7 @@ function displayTiles(tiles) {
           Object.assign(tile, revealedTile);
 
           // Mettre à jour la partie "Tuile Sélectionnée"
-          updateSelectedTile(tile);
+          updateSelectedTile(revealedTile);
         }
       } else {
         // Si déjà révélée → juste mise à jour infos
@@ -299,10 +295,16 @@ async function deplacer(dx, dy) {
     personnage.positionX = nouvelleX;
     personnage.positionY = nouvelleY;
     updatePlayerPosition(nouvelleX,nouvelleY)
+
     localStorage.setItem("personnage", JSON.stringify(personnage));
 
+    nouvellesTiles.forEach(tile => {
+      const key = `${tile.positionX},${tile.positionY}`;
+      tilesVisible.push(key, tile);
+    });
+
     // Reconstruire la grille complète
-    const fullGrid = buildFullGrid(nouvelleX, nouvelleY, nouvellesTiles);
+    const fullGrid = buildFullGrid(nouvelleX, nouvelleY, tilesVisible);
     displayTiles(fullGrid);
 
   } catch (err) {
@@ -319,7 +321,12 @@ document.getElementById("btn-est").addEventListener("click", () => deplacer(0, 1
 
 function buildFullGrid(centerX, centerY, tilesFetched) {
   const mapTiles = new Map();
-  tilesFetched.forEach(t => mapTiles.set(`${t.positionX},${t.positionY}`, t));
+
+  tilesFetched.forEach(t => {
+    const key = `${t.positionX},${t.positionY}`;
+    mapTiles.set(key, t);      
+    tilesVisible.push(key, t);           
+  });
 
   let fullGrid = [];
   for(let dx=-2; dx<=2; dx++){
@@ -328,8 +335,12 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
           const posY = centerY+dy;
           const key = `${posX},${posY}`;
           if(mapTiles.has(key)){
-              fullGrid.push(mapTiles.get(key));
-          } else {
+              fullGrid.push(mapTiles.get(key));             
+          } else if(tilesVisible.includes(key))
+          {
+            fullGrid.push(tilesVisible.get(key));
+          }
+        else {
               fullGrid.push({ positionX: posX, positionY: posY, imageURL:"tuileCache.png", type:"PLACEHOLDER" });
           }
       }
