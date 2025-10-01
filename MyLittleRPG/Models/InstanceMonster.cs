@@ -7,6 +7,8 @@ namespace MyLittleRPG.Models
     {
         public int PositionX { get; set; }
         public int PositionY { get; set; }
+
+        public int MonsterId { get; set; }
         public Monster Monster { get; set; }
         public int niveaux { get; set; }
         public int PVMax { get; set; }

@@ -15,5 +15,15 @@ namespace MyLittleRPG.Data.Context
         public DbSet<Personnage> Personnages { get; set; }
 
         public MonsterContext(DbContextOptions<MonsterContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<InstanceMonster>()
+                .HasOne(im => im.Monster)
+                .WithMany()
+                .HasForeignKey(im => im.MonsterId);
+        }
     }
 }

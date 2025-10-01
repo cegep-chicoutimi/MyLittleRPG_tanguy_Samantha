@@ -46,7 +46,7 @@ namespace MyLittleRPG.Migrations
 
                     b.HasIndex("MonsterId");
 
-                    b.ToTable("InstanceMonstres");
+                    b.ToTable("InstanceMonstres", (string)null);
                 });
 
             modelBuilder.Entity("MyLittleRPG.Models.Monster", b =>
@@ -88,7 +88,7 @@ namespace MyLittleRPG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Monsters");
+                    b.ToTable("Monsters", (string)null);
                 });
 
             modelBuilder.Entity("MyLittleRPG.Models.Personnage", b =>
@@ -135,7 +135,7 @@ namespace MyLittleRPG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personnages");
+                    b.ToTable("Personnages", (string)null);
                 });
 
             modelBuilder.Entity("MyLittleRPG.Models.Tile", b =>
@@ -158,7 +158,7 @@ namespace MyLittleRPG.Migrations
 
                     b.HasKey("PositionX", "PositionY");
 
-                    b.ToTable("Tiles");
+                    b.ToTable("Tiles", (string)null);
                 });
 
             modelBuilder.Entity("MyLittleRPG.Models.Utilisateur", b =>
@@ -189,7 +189,7 @@ namespace MyLittleRPG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Utilisateurs");
+                    b.ToTable("Utilisateurs", (string)null);
                 });
 
             modelBuilder.Entity("MyLittleRPG.Models.InstanceMonster", b =>
