@@ -175,3 +175,11 @@ div {
   grid-column: 2;
   grid-row: 3;
 }
+
+.imgSprite, .imgTuile {
+  width: 64px;               /* largeur d’une tuile */
+    height: 64px;              /* hauteur d’une tuile */
+    position: absolute;        /* pour le placer librement */
+    z-index: 100;              /* toujours au-dessus des tuiles */
+    background-size: cover; 
+}

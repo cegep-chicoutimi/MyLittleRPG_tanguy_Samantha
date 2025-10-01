@@ -1,6 +1,16 @@
 // Initialisation au chargement de la page
 window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
 
+//Vérifier if logged in
+/*document.addEventListener('DOMContentLoaded', function() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  const user = localStorage.getItem('utilisateur');
+
+  if (!isLoggedIn || !user) {
+      window.location.href = 'login.html'; 
+  }
+});*/
+
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let allTiles = [];
 let tilesVisible = [];
@@ -8,32 +18,55 @@ let monsters = [];
 let nbMonstresVaincus = 0;
 
 // Met à jour l'affichage du nombre de monstres vaincus
-function updateMonstresVaincus() {
-  const compteurDiv = document.querySelector('.compteur-monstres-vaincus');
+/*function updateMonstresVaincus() {
+  const compteurDiv = document.querySelector('#monstresVaincus');
   compteurDiv.textContent = `Monstres vaincus : ${nbMonstresVaincus}`;
 }
 
 // Fonction appelée lorsqu'un monstre est vaincu
-function onMonsterDefeated() {
+function onMonsterDefeated(monstre) {
   nbMonstresVaincus++;
 
+  
   if(nbMonstresVaincus % 10 === 0) {
-    fetchMonsters().then(newMonsters => {
+    fetchMonsters10().then(newMonsters => {
       monsters = monsters.concat(newMonsters);
-      //console.log("Nouveaux monstres chargés :", newMonsters);
     });
   }
+
   updateMonstresVaincus();
+
+  for(let x = 0; x < monsters.length; x++)
+  {
+    if(monsters[x].MonstreId == monstre.MonstreId)
+    monsters.splice(x,1);
+    return;
+  }
 }
 
 // Charger les monstres au démarrage
-fetchMonsters().then(loadedMonsters => {
+fetchAllMonsters().then(loadedMonsters => {
   monsters = loadedMonsters;
-  //console.log("Monstres chargés au démarrage :", monsters);
+  console.log("Monstres chargés au démarrage :", monsters);
 });
 
 // Fonction pour récupérer les 10 monstres
-async function fetchMonsters() {
+async function fetchMonsters10() {
+  try {
+    const response = await fetch('https://localhost:7061/api/Monstres/monstre/generateall');
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+    const monsters = await response.json();
+    return monsters;
+  } catch (error) {
+    console.error('Erreur lors du chargement des monstres:', error);
+    handleAPIError(error, 'Impossible de charger les monstres');
+    return [];
+  }
+}
+// Fonction pour récupérer tous les monstres
+async function fetchAllMonsters() {
   try {
     const response = await fetch('https://localhost:7061/api/Monstres/monstre/generate10');
     if (!response.ok) {
@@ -46,7 +79,7 @@ async function fetchMonsters() {
     handleAPIError(error, 'Impossible de charger les monstres');
     return [];
   }
-}
+}*/
 
 // Affiche la grille initiale centrée sur le personnage
 async function AfficherGrilleInitial() {
@@ -91,6 +124,59 @@ async function AfficherGrilleInitial() {
   }
 
   displayTiles(fullGridTiles);
+}
+
+// Affiche les tuiles dans la grille
+function displayTiles(tiles) {
+  const grille = document.querySelector('.grille');
+  grille.innerHTML = ''; // Effacer le contenu précédent
+  
+  tiles.forEach(tile => {
+    const tileDiv = document.createElement('div');
+    tileDiv.className = 'tile';
+    const img = document.createElement('img');
+    img.src = 'img/' + tile.imageURL;
+    img.classList.add("imgTuile");
+    img.alt = 'Tile';
+    const imgSprite = document.createElement('img');
+    imgSprite.src = tile.Monstre.SpriteUrl;
+    imgSprite.classList.add("imgSprite");
+    imgSprite.alt = 'TileMonstre';
+    
+    tileDiv.addEventListener('click', async() => {
+      if(tile.type == "PLACEHOLDER"){
+        console.log(tile.positionX);
+        const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
+        if (revealedTile) {
+          // Mettre à jour l'image
+          img.src = 'img/' + revealedTile.imageURL;
+          
+          // Mettre à jour l'objet tile
+          Object.assign(tile, revealedTile);
+
+          // Mettre à jour la partie "Tuile Sélectionnée"
+          updateSelectedTile(revealedTile);
+        }
+      } else {
+        // Si déjà révélée → juste mise à jour infos
+        updateSelectedTile(tile);
+      }
+      
+      document.querySelectorAll('.tile').forEach(t => t.classList.remove('selected'));
+      tileDiv.classList.add('selected');
+      
+      updateSelectedTile(tile);
+    })
+    
+    tileDiv.appendChild(img);
+    grille.appendChild(tileDiv);
+    
+    // après avoir généré toutes les tuiles
+    const player = document.createElement("div");
+    player.id = "player";
+    grille.appendChild(player);
+    
+  });
 }
 
 // Récupère les tuiles autour d'une position donnée
@@ -165,53 +251,6 @@ function updateSelectedTile(tile) {
   `;
 }
 
-// Affiche les tuiles dans la grille
-function displayTiles(tiles) {
-  const grille = document.querySelector('.grille');
-  grille.innerHTML = ''; // Effacer le contenu précédent
-  
-  tiles.forEach(tile => {
-    const tileDiv = document.createElement('div');
-    tileDiv.className = 'tile';
-    const img = document.createElement('img');
-    img.src = 'img/' + tile.imageURL;
-    img.alt = 'Tile';
-    
-    tileDiv.addEventListener('click', async() => {
-      if(tile.type == "PLACEHOLDER"){
-        console.log(tile.positionX);
-        const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
-        if (revealedTile) {
-          // Mettre à jour l'image
-          img.src = 'img/' + revealedTile.imageURL;
-          
-          // Mettre à jour l'objet tile
-          Object.assign(tile, revealedTile);
-
-          // Mettre à jour la partie "Tuile Sélectionnée"
-          updateSelectedTile(revealedTile);
-        }
-      } else {
-        // Si déjà révélée → juste mise à jour infos
-        updateSelectedTile(tile);
-      }
-      
-      document.querySelectorAll('.tile').forEach(t => t.classList.remove('selected'));
-      tileDiv.classList.add('selected');
-      
-      updateSelectedTile(tile);
-    })
-    
-    tileDiv.appendChild(img);
-    grille.appendChild(tileDiv);
-    
-    // après avoir généré toutes les tuiles
-    const player = document.createElement("div");
-    player.id = "player";
-    grille.appendChild(player);
-    
-  });
-}
 
 // Reconstruit la grille complète en utilisant les tuiles visibles et des placeholders
 function buildFullGrid(centerX, centerY, tilesFetched) {
@@ -368,6 +407,7 @@ async function login(email, motDePasse) {
         const utilisateur = await response.json();
         console.log("Connecté :", utilisateur);
         localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+        localStorage.setItem('isLoggedIn', 'true');
         window.location.href = "index.html";
       } catch (err) {
         console.error("Erreur lors de la connexion:", err);

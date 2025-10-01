@@ -47,7 +47,7 @@
         public string TypeTuile { get; set; }
 
         // Monstre présent sur la tuile (null si aucun)
-        public InstanceMonstreDto Monstre { get; set; }
+        public InstanceMonstreDto? Monstre { get; set; }
 
         // Indique si le joueur peut se déplacer sur cette tuile
         public bool EstAccessible { get; set; }
