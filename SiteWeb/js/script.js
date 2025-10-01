@@ -95,9 +95,10 @@ async function AfficherGrilleInitial() {
   const fetchedMap = new Map();
   fetchedTiles.forEach(tile => {
     if (tile) {
-      const key = `${tile.positionX},${tile.positionY}`;
+      const key = `${tile.x},${tile.y}`;
+    console.log("Adding tile to map:", key, tile);
       fetchedMap.set(key, tile);
-      tilesVisible.push(key, tile);
+      tilesVisible.push({key, tile});
     }
   });
 
@@ -117,7 +118,8 @@ async function AfficherGrilleInitial() {
           positionX: posX,
           positionY: posY,
           imageURL: "tuileCache.png",  // your default image filename
-          type: "PLACEHOLDER"
+          type: "PLACEHOLDER",
+          monstre: null,
         });
       }
     }
@@ -138,10 +140,13 @@ function displayTiles(tiles) {
     img.src = 'img/' + tile.imageURL;
     img.classList.add("imgTuile");
     img.alt = 'Tile';
-    const imgSprite = document.createElement('img');
-    imgSprite.src = tile.Monstre.SpriteUrl;
-    imgSprite.classList.add("imgSprite");
-    imgSprite.alt = 'TileMonstre';
+    if(tile.monstre != null)
+    {
+      const imgSprite = document.createElement('img');
+      imgSprite.src = tile.Monstre.SpriteUrl;
+      imgSprite.classList.add("imgSprite");
+      imgSprite.alt = 'TileMonstre';
+    }
     
     tileDiv.addEventListener('click', async() => {
       if(tile.type == "PLACEHOLDER"){
@@ -282,58 +287,12 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
       return fullGrid;
 }
 
-// Vérifie la présence d'un monstre sur une tuile donnée
-function VerifierIfMonstreOnTile(x,y){
-  return monsters.find(m => m.positionX === x && m.positionY === y);
-}
-
-// Démarre un combat contre un monstre
-async function startCombat(monstre){
-  const url = `https://localhost:7061/api/Mosntres/monstre/fight/${monstre.positionX}/${monstre.positionY}`;
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Erreur HTTP: ${response.status}`);
-    }
-
-    return await response.json();
-  }
-
-// Gestion des événements de victoire/défaite
-function onMonsterDefeated() {
-  nbMonstresVaincus++;
-  updateMonstresVaincus();
-}
-function onPlayerDefeated() {
- // Joueur retourne au dernier tuile ville
-
-}
-
 // Déplacement du personnage
 async function deplacer(dx, dy) {
   if (!personnage) return;
   
   const nouvelleX = personnage.positionX + dx;
   const nouvelleY = personnage.positionY + dy;
-  
-  // Vérifier la présence d'un monstre sur la nouvelle tuile
-  const monstre = VerifierIfMonstreOnTile(nouvelleX, nouvelleY);
-  if(monstre){
-    let resultat = await startCombat(monstre);
-    if(resultat.code === "Win"){
-      alert("Vous avez vaincu le monstre !");
-      onMonsterDefeated();
-      monsters = monsters.filter(m => m !== monstre);
-    }
-    else if(resultat.code === "Lose"){
-      alert("Vous avez été vaincu par le monstre...");
-      onPlayerDefeated();
-    }
-    else{
-      alert("Le combat n'a pas généré de vainqueur.");
-      return; // Ne pas se déplacer si le combat n'a pas de vainqueur
-    }
-  }
   
   // Appel API pour valider le déplacement
   try {

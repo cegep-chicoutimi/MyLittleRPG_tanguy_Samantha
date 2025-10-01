@@ -24,14 +24,8 @@
         <div class="container text-center bg-secondary">
             <div class="row h-120">
                 <!-- Section gauche -->
-                <div class="col-4">
-                    <div class="card mb-3">
-                        <div class="card-header text-white">
-                            Monstres Vaincus
-                        </div>
-                        <div class="card-body">
-                            <div class="divCard"><p id="monstresVaincus">0</p></div>
-                        </div>
+                <div class="col-3">
+                    
                     <div class="card mb-3">
                         <div class="card-header text-white">
                             Informations
@@ -97,6 +91,24 @@
                             </div>
                         </div>
                     </div>
+                    
+                </div>
+                <!-- Grille -->
+                <div class="col-6">
+                    <h2 class="text-white">Carte du Monde</h2>
+                    <div class="grille">
+                        <div id="player"></div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card mb-3">
+                        <div class="card-header text-white">
+                            Monstres Vaincus
+                        </div>
+                        <div class="card-body">
+                            <div class="divCard"><p id="monstresVaincus">0</p></div>
+                        </div>
+                    </div>
                     <div class="divCard card mb-3">
                         <div class="card-header text-white">
                             Tuile Sélectionnée
@@ -107,13 +119,6 @@
                             <div class="divCard"><p>Traversable : Oui</p></div>
                             <div class="divCard"><p>Description : </p></div>
                         </div>
-                    </div>
-                </div>
-                <!-- Grille -->
-                <div class="col">
-                    <h2 class="text-white">Carte du Monde</h2>
-                    <div class="grille">
-                        <div id="player"></div>
                     </div>
                 </div>
             </div>
