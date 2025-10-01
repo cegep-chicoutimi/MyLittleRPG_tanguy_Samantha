@@ -18,6 +18,22 @@
     // DTO pour représenter un monstre instancié sur la carte
     public class InstanceMonstreDto
     {
+        public InstanceMonstreDto(InstanceMonster enemy)
+        {
+            this.MonstreId = enemy.MonsterId;
+            this.Nom = enemy.Monster.Nom;
+            this.SpriteUrl = enemy.Monster.spriteUrl;
+            this.Niveau = enemy.niveaux;
+            this.X = enemy.PositionX;
+            this.Y = enemy.PositionY;
+            this.PointsVieActuels = enemy.PVactuels;
+            this.PointsVieMax = enemy.PVMax;
+            this.Attaque = enemy.Monster.forceBase;
+            this.Defense = enemy.Monster.defenseBase;
+            this.ExperienceDonnee = enemy.Monster.experienceBase+(enemy.niveaux*10);
+            this.EstVivant = enemy.PVactuels>0;
+        }
+
         public int Id { get; set; }
         public int MonstreId { get; set; }
         public string Nom { get; set; }
@@ -61,10 +77,22 @@
         // Position centrale de la grille (position du joueur)
         public int CentreX { get; set; }
         public int CentreY { get; set; }
+        public ResultDto resultFight { get; set; }
     }
 
     public class PersonnageDto
     {
+        public PersonnageDto(Personnage personnage)
+        {
+            this.Niveau = personnage.Niveau;
+            this.XP = personnage.XP;
+            this.PV = personnage.PV;
+            this.PVMax = personnage.PVMax;
+            this.Force = personnage.Force;
+            this.Defense = personnage.Defense;
+            this.PositionX = personnage.PositionX;
+            this.PositionY = personnage.PositionY;
+        }
 
         public int Niveau { get; set; }
         public int XP { get; set; }

@@ -41,13 +41,15 @@ namespace MyLittleRPG.Controllers
                 TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
                 tileDTO.X = tile.PositionX;
                 tileDTO.Y = tile.PositionY;
-                tileDTO.TypeTuile = tile.Type.ToString();
+                tileDTO.TypeTuile = tile.imageURL;
                 tileDTO.EstAccessible = tile.estTraversable;
-                var InstanceMonstre = await _context.InstanceMonstres.FindAsync(tile.PositionX, tile.PositionY);
+                var InstanceMonstre = await _context.InstanceMonstres
+                        .Include(im => im.Monster)
+                        .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
 
                 if (InstanceMonstre != null)
                 {
-                    InstanceMonstreDto monsterDTO = new InstanceMonstreDto();
+                    InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
                     monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
                     monsterDTO.Nom = InstanceMonstre.Monster.Nom;
                     monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
@@ -89,7 +91,7 @@ namespace MyLittleRPG.Controllers
             TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
             tileDTO.X = tile.PositionX;
             tileDTO.Y = tile.PositionY;
-            tileDTO.TypeTuile = tile.Type.ToString();
+            tileDTO.TypeTuile = tile.imageURL;
             tileDTO.EstAccessible = tile.estTraversable;
             var InstanceMonstre = await _context.InstanceMonstres
                 .Include(im => im.Monster)
@@ -97,18 +99,7 @@ namespace MyLittleRPG.Controllers
 
             if (InstanceMonstre != null)
             {
-                InstanceMonstreDto monsterDTO = new InstanceMonstreDto();
-                monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
-                monsterDTO.Nom = InstanceMonstre.Monster.Nom;
-                monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
-                monsterDTO.Niveau = InstanceMonstre.niveaux;
-                monsterDTO.X = InstanceMonstre.PositionX;
-                monsterDTO.Y = InstanceMonstre.PositionY;
-                monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
-                monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
-                monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
-                monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
-                monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
+                InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
 
                 tileDTO.Monstre = monsterDTO;
             }
