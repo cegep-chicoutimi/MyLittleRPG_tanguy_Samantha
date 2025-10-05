@@ -21,6 +21,14 @@
         </div>
     </header>
     <main>
+        <div id="modal-backdrop" class="modal-backdrop"></div>
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <h2>Simulation de Combat</h2>
+                <p></p>
+                <button id="closeModalBtn">Close</button>
+            </div>
+        </div>
         <div class="container text-center bg-secondary">
             <div class="row h-120">
                 <!-- Section gauche -->
@@ -107,6 +115,16 @@
                         </div>
                         <div class="card-body">
                             <div class="divCard"><p id="monstresVaincus">0</p></div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-header text-white">
+                            Simulation Monstres
+                        </div>
+                        <div class="card-body">
+                            <div class="divCard">
+                                <button id="btn-simuler" class="btn btn-danger">Simuler Combat</button>
+                            </div>
                         </div>
                     </div>
                     <div class="divCard card mb-3">

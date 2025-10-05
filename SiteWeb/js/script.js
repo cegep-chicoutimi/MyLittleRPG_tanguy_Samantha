@@ -10,12 +10,32 @@ window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
       window.location.href = 'login.html'; 
   }
 });*/
+const openModalBtn = document.getElementById('btn-simuler');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const myModal = document.getElementById('myModal');
+const modalBackdrop = document.getElementById('modal-backdrop');
 
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let allTiles = [];
 let tilesVisible = [];
 let monsters = [];
 let nbMonstresVaincus = 0;
+
+/*openModalBtn.addEventListener('click', () => {
+  myModal.style.display = 'block';
+  modalBackdrop.style.display = 'block';
+});
+
+closeModalBtn.addEventListener('click', () => {
+  myModal.style.display = 'none';
+  modalBackdrop.style.display = 'none';
+});
+
+// Optional: Close modal when clicking outside of it
+modalBackdrop.addEventListener('click', () => {
+  myModal.style.display = 'none';
+  modalBackdrop.style.display = 'none';
+});*/
 
 // Met à jour l'affichage du nombre de monstres vaincus
 /*function updateMonstresVaincus() {
@@ -80,6 +100,26 @@ async function fetchAllMonsters() {
     return [];
   }
 }*/
+
+function SimulationCombat() {
+  if (monsters.length === 0) {
+    alert("Aucun monstre disponible pour le combat.");
+    return;
+  }
+  const monstre = selectedTileDiv.monstre;
+
+  if(monstre == null){
+    alert("Aucun monstre sur cette tuile.");
+    return;
+  }
+
+
+  // Logique de simulation de combat ici
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const simulerButton = document.getElementById('btn-simuler');
+  simulerButton.addEventListener('click', SimulationCombat);
+});
 
 // Affiche la grille initiale centrée sur le personnage
 async function AfficherGrilleInitial() {
@@ -150,7 +190,6 @@ function displayTiles(tiles) {
     
     tileDiv.addEventListener('click', async() => {
       if(tile.type == "PLACEHOLDER"){
-        console.log(tile.positionX);
         const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
         if (revealedTile) {
           // Mettre à jour l'image
@@ -364,6 +403,7 @@ async function login(email, motDePasse) {
         }
         
         const utilisateur = await response.json();
+        getPersonnageById(utilisateur.id, utilisateur.pseudo);
         console.log("Connecté :", utilisateur);
         localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
         localStorage.setItem('isLoggedIn', 'true');
@@ -409,6 +449,23 @@ async function login(email, motDePasse) {
           errorDiv.textContent = err.message;
           errorDiv.style.display = "block";
         }
+      }
+    }
+
+    async function getPersonnageById(id, pseudo) {
+      try {
+        const response = await fetch(`https://localhost:7061/api/Personnages/${id}`);
+        if (!response.ok) {
+          // Si le personnage n'existe pas, le créer
+          return await CreatePersonnage(id, pseudo);
+        }
+        const personnage = await response.json();
+        console.log("Personnage récupéré :", personnage);
+        localStorage.setItem("personnage", JSON.stringify(personnage));
+        return personnage;
+      } catch (err) {
+        console.error("Erreur lors de la récupération du personnage:", err);
+        return await CreatePersonnage(id, pseudo);
       }
     }
   // Récupère le personnage par ID ou le crée s'il n'existe pas
