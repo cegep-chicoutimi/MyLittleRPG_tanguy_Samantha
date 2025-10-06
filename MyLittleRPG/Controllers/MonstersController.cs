@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MyLittleRPG.Data.Context;
+using MyLittleRPG.Migrations;
 using MyLittleRPG.Models;
 using System;
 using System.Collections.Generic;
@@ -26,14 +28,87 @@ namespace MyLittleRPG.Controllers
         [Route("monstre/generateall")]
         public async Task<IActionResult> generateall()
         {
-            return BadRequest("not imlemented");
+            List<string> UsedXY = new List<string>();
+
+
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM InstanceMonstres");
+            for (int i = 0; i < 300; i++)
+            {
+                addmonstre(UsedXY);
+            }
+            await _context.SaveChangesAsync();
+            return Ok("300 monstre regenere");
         }
 
         [HttpPut]
         [Route("monstre/generate10")]
         public async Task<IActionResult> generate10()
         {
-            return BadRequest("not imlemented");
+            List<string> UsedXY = new List<string>();
+            for (int i = 0; i < 10; i++)
+            {
+                addmonstre(UsedXY);
+            }
+            await _context.SaveChangesAsync();
+            return Ok("10 monstres générés avec succès !");
+        }
+
+        private void addmonstre(List<string> UsedXY)
+        {
+            Random random = new Random();
+            int x;
+            int y;
+            string verif;
+
+            do {
+
+                x = random.Next(1, 50);
+                y = random.Next(1, 50);
+                verif = x + "," + y;
+            } while (UsedXY.Contains(verif));
+
+            UsedXY.Add(x + "," + y);
+
+            Monster monster = getRandomMonstre();
+            int level = getDistanceVille(x,y) / 3;
+
+            InstanceMonster monsterInstance = new InstanceMonster();
+
+            monsterInstance.PositionX = x;
+            monsterInstance.PositionY = y;
+            monsterInstance.MonsterId = monster.Id;
+            monsterInstance.Monster = monster;
+            monsterInstance.niveaux = level;
+            monsterInstance.PVMax = monster.pointsVieBase;
+            monsterInstance.PVactuels = monster.pointsVieBase;
+
+            Console.WriteLine("ajout de " + monster.Nom +"de niveaux "+level+ "a la bd a la case "+x+" ; "+y);
+                
+            _context.InstanceMonstres.Add(monsterInstance);
+        }
+
+        private int getDistanceVille(int x, int y)
+        {
+            int distance = 1000;
+            foreach (var tile in _context.Tiles)
+            {
+                if (tile.Type == TileType.VILLE)
+                {
+                    int newDistance = Math.Abs(x - tile.PositionX) + Math.Abs(y - tile.PositionY);
+                    if (newDistance < distance){  distance = newDistance; }
+                }
+            }
+
+            return distance;
+            throw new NotImplementedException();
+        }
+
+        private Monster getRandomMonstre()
+        {
+            Random random = new Random();
+
+            int id = random.Next(1, 809);
+            return _context.Monsters.Find(id);
         }
     }
 }

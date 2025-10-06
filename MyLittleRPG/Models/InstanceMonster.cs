@@ -14,5 +14,7 @@ namespace MyLittleRPG.Models
         public int PVMax { get; set; }
         public int PVactuels { get; set; }
 
+
+
     }
 }
