@@ -1,62 +1,74 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using MyLittleRPG.Data.Context;
-using MyLittleRPG.Services;
+using MyLittleRPG.Controllers;
 
 namespace MyLittleRPG.Services
 {
     public class MonstreMaintenanceService : BackgroundService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _sp;
         private readonly ILogger<MonstreMaintenanceService> _logger;
+        private readonly TimeSpan _interval = TimeSpan.FromMinutes(30);
+        private readonly SemaphoreSlim _mutex = new(1, 1); // évite le chevauchement
 
-        public MonstreMaintenanceService(IServiceProvider serviceProvider, ILogger<MonstreMaintenanceService> logger)
+        public MonstreMaintenanceService(IServiceProvider sp, ILogger<MonstreMaintenanceService> logger)
         {
-            _serviceProvider = serviceProvider;
+            _sp = sp;
             _logger = logger;
         }
 
-        private async Task ValidateMonsterCount(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var scope = _serviceProvider.CreateScope();
+            // 1er run au démarrage
+            await RunGenerateAllSafe(stoppingToken);
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var context = scope.ServiceProvider.GetRequiredService<MonsterContext>();
-
-                //On peut utiliser le context de la mÃªme faÃ§on que dans nos controllers Ã  partir d'ici
-                var monsterCount = await context.InstanceMonstres.CountAsync(cancellationToken);
-
-                if (monsterCount <= 300)
+                try
                 {
-                    //On a accÃ¨s Ã  un logger pour sortir de l'information dans la console.
-                    _logger.LogError($"blablabla j'aime les patates");
+                    await Task.Delay(_interval, stoppingToken);
+                    await RunGenerateAllSafe(stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break; // arrêt propre
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Erreur dans MonstreMaintenanceService");
                 }
             }
         }
 
-        //ConÃ§u pour s'exÃ©cuter une seule fois et contenir une boucle.
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        private async Task RunGenerateAllSafe(CancellationToken ct)
         {
-            TimeSpan _checkInterval = TimeSpan.FromMinutes(30); // Check every 30 minutes
-                                                                // Perform initial check on startup
-            await ValidateMonsterCount(cancellationToken);
-
-            // Continue checking periodically
-            while (!cancellationToken.IsCancellationRequested)
+            if (!await _mutex.WaitAsync(0, ct))
             {
-                try
-                {
-                    await Task.Delay(_checkInterval, cancellationToken);
-                    await ValidateMonsterCount(cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    // Expected when cancellation is requested
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error during periodic monster count validation");
-                    // Continue the loop - don't let one failure kill the service
-                }
+                _logger.LogWarning("Un cycle de régénération est déjà en cours. Skip.");
+                return;
+            }
+
+            try
+            {
+                using var scope = _sp.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<MonsterContext>();
+
+                // Instancie le controller et appelle directement generateall()
+                var controller = new MonstersController(context);
+
+                _logger.LogInformation("Régénération des monstres (300) démarrée...");
+                var result = await controller.generateall(); // appelle ta méthode existante
+                _logger.LogInformation("Régénération terminée: {ResultType}", result?.GetType().Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Échec de la régénération des monstres");
+            }
+            finally
+            {
+                _mutex.Release();
             }
         }
     }

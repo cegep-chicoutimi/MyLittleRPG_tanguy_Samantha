@@ -105,7 +105,51 @@ namespace MyLittleRPG.Controllers
             }
 
             return tileDTO;
-        }      
+        }
+
+        // GET: api/Tiles/generate/all?minX=1&maxX=50&minY=1&maxY=50
+        [HttpGet("generate/all")]
+        public async Task<IActionResult> AddAllTiles(
+            int minX = 1, int maxX = 50,
+            int minY = 1, int maxY = 50)
+        {
+            if (minX > maxX || minY > maxY)
+                return BadRequest(new { message = "Bornes invalides." });
+
+            int created = 0;
+
+            // Accélère les insertions massives EF
+            var oldDetect = _context.ChangeTracker.AutoDetectChangesEnabled;
+            _context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            try
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    for (int y = minY; y <= maxY; y++)
+                    {
+                        // GenererTile évite les doublons (FindAsync d'abord)
+                        var tile = await TileGeneration.GenererTile(x, y);
+                        if (tile != null) created++;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                var total = await _context.Tiles.CountAsync();
+                return Ok(new
+                {
+                    message = "Génération terminée",
+                    created,
+                    totalTiles = total,
+                    bounds = new { minX, maxX, minY, maxY }
+                });
+            }
+            finally
+            {
+                _context.ChangeTracker.AutoDetectChangesEnabled = oldDetect;
+            }
+        }
 
         //// PUT: api/Tiles/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -184,4 +228,6 @@ namespace MyLittleRPG.Controllers
             return _context.Tiles.Any(e => e.PositionX == id);
         }
     }
+
+
 }

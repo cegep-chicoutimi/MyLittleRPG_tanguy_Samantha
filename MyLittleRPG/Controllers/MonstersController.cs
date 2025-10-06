@@ -65,7 +65,7 @@ namespace MyLittleRPG.Controllers
                 x = random.Next(1, 50);
                 y = random.Next(1, 50);
                 verif = x + "," + y;
-            } while (UsedXY.Contains(verif));
+            } while (UsedXY.Contains(verif) || !isSpawnable(x, y));
 
             UsedXY.Add(x + "," + y);
 
@@ -85,6 +85,22 @@ namespace MyLittleRPG.Controllers
             Console.WriteLine("ajout de " + monster.Nom +"de niveaux "+level+ "a la bd a la case "+x+" ; "+y);
                 
             _context.InstanceMonstres.Add(monsterInstance);
+        }
+
+        private bool isSpawnable(int x, int y)
+        {
+
+            var tile = _context.Tiles.Find(x, y);
+            if (tile == null)
+                return false;
+
+            if (!tile.estTraversable)
+                return false;
+
+            if (tile.Type == TileType.VILLE || tile.Type == TileType.ROUTE)
+                return false;
+
+            return true;
         }
 
         private int getDistanceVille(int x, int y)

@@ -26,7 +26,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//builder.Services.AddHostedService<MonstreMaintenanceService>();
+builder.Services.AddHostedService<MonstreMaintenanceService>();
 
 var app = builder.Build();
 
