@@ -62,6 +62,8 @@
         public int Y { get; set; }
         public string TypeTuile { get; set; }
 
+        public string imageUrl { get; set; }
+
         // Monstre présent sur la tuile (null si aucun)
         public InstanceMonstreDto? Monstre { get; set; }
 

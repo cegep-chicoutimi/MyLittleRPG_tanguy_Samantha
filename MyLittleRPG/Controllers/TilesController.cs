@@ -41,7 +41,8 @@ namespace MyLittleRPG.Controllers
                 TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
                 tileDTO.X = tile.PositionX;
                 tileDTO.Y = tile.PositionY;
-                tileDTO.TypeTuile = tile.imageURL;
+                tileDTO.TypeTuile = tile.Type.ToString();
+                tileDTO.imageUrl = tile.imageURL;
                 tileDTO.EstAccessible = tile.estTraversable;
                 var InstanceMonstre = await _context.InstanceMonstres
                         .Include(im => im.Monster)
@@ -91,7 +92,8 @@ namespace MyLittleRPG.Controllers
             TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
             tileDTO.X = tile.PositionX;
             tileDTO.Y = tile.PositionY;
-            tileDTO.TypeTuile = tile.imageURL;
+            tileDTO.imageUrl = tile.imageURL;
+            tileDTO.TypeTuile = tile.Type.ToString();
             tileDTO.EstAccessible = tile.estTraversable;
             var InstanceMonstre = await _context.InstanceMonstres
                 .Include(im => im.Monster)

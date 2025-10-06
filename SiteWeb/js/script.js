@@ -8,14 +8,39 @@ const openModalBtn = document.getElementById('btn-simuler');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const myModal = document.getElementById('myModal');
 const modalBackdrop = document.getElementById('modal-backdrop');
+const toggleButton = document.getElementById('themeToggle');
 
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let allTiles = [];
-let tilesVisible = [];
+const tilesVisible = new Map();
 let monsters = [];
 let nbMonstresVaincus = 0;
 
-/*openModalBtn.addEventListener('click', () => {
+toggleButton.addEventListener('click', ThemeChange)
+
+function ThemeChange()
+{
+  const body = document.body;
+
+  // Load saved theme from localStorage
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    body.classList.add(savedTheme);
+  } else {
+    body.classList.add('dark-theme'); // Default theme
+  }
+    if (body.classList.contains('light-theme')) {
+      body.classList.remove('light-theme');
+      body.classList.add('dark-theme');
+      localStorage.setItem('theme', 'dark-theme');
+    } else {
+      body.classList.remove('dark-theme');
+      body.classList.add('light-theme');
+      localStorage.setItem('theme', 'light-theme');
+    }
+}
+
+openModalBtn.addEventListener('click', () => {
   myModal.style.display = 'block';
   modalBackdrop.style.display = 'block';
 });
@@ -29,7 +54,7 @@ closeModalBtn.addEventListener('click', () => {
 modalBackdrop.addEventListener('click', () => {
   myModal.style.display = 'none';
   modalBackdrop.style.display = 'none';
-});*/
+});
 
 // Met à jour l'affichage du nombre de monstres vaincus
 /*function updateMonstresVaincus() {
@@ -110,10 +135,10 @@ function SimulationCombat() {
 
   // Logique de simulation de combat ici
 }
-document.addEventListener('DOMContentLoaded', () => {
+/*document.addEventListener('DOMContentLoaded', () => {
   const simulerButton = document.getElementById('btn-simuler');
   simulerButton.addEventListener('click', SimulationCombat);
-});
+});*/
 
 // Affiche la grille initiale centrée sur le personnage
 async function AfficherGrilleInitial() {
@@ -132,7 +157,7 @@ async function AfficherGrilleInitial() {
       const key = `${tile.x},${tile.y}`;
     console.log("Adding tile to map:", key, tile);
       fetchedMap.set(key, tile);
-      tilesVisible.push({key, tile});
+      tilesVisible.set(key, tile);
     }
   });
 
@@ -151,7 +176,7 @@ async function AfficherGrilleInitial() {
         fullGridTiles.push({
           positionX: posX,
           positionY: posY,
-          imageURL: "tuileCache.png",  // your default image filename
+          imageUrl: "tuileCache.png",  // your default image filename
           type: "PLACEHOLDER",
           monstre: null,
         });
@@ -171,13 +196,13 @@ function displayTiles(tiles) {
     const tileDiv = document.createElement('div');
     tileDiv.className = 'tile';
     const img = document.createElement('img');
-    img.src = 'img/' + tile.imageURL;
+    img.src = 'img/' + tile.imageUrl;
     img.classList.add("imgTuile");
     img.alt = 'Tile';
     if(tile.monstre != null)
     {
       const imgSprite = document.createElement('img');
-      imgSprite.src = tile.Monstre.SpriteUrl;
+      imgSprite.src = tile.monstre.spriteUrl;
       imgSprite.classList.add("imgSprite");
       imgSprite.alt = 'TileMonstre';
     }
@@ -187,7 +212,7 @@ function displayTiles(tiles) {
         const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
         if (revealedTile) {
           // Mettre à jour l'image
-          img.src = 'img/' + revealedTile.imageURL;
+          img.src = 'img/' + revealedTile.imageUrl;
           
           // Mettre à jour l'objet tile
           Object.assign(tile, revealedTile);
@@ -209,12 +234,12 @@ function displayTiles(tiles) {
     tileDiv.appendChild(img);
     grille.appendChild(tileDiv);
     
-    // après avoir généré toutes les tuiles
-    const player = document.createElement("div");
-    player.id = "player";
-    grille.appendChild(player);
-    
   });
+
+  // après avoir généré toutes les tuiles
+  const player = document.createElement("div");
+  player.id = "player";
+  grille.appendChild(player);
 }
 
 // Récupère les tuiles autour d'une position donnée
@@ -263,8 +288,8 @@ function updateSelectedTile(tile) {
   
   console.log(tile)
   
-  const key = `${tile.positionX},${tile.positionY}`;
-  tilesVisible.push(key, tile);
+  const key = `${tile.x},${tile.y}`;
+  tilesVisible.set(key, tile);
   
   var typeStr = "default";
   
@@ -297,10 +322,11 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
   tilesFetched.forEach(t => {
     const key = `${t.positionX},${t.positionY}`;
     mapTiles.set(key, t);      
-    tilesVisible.push(key, t);           
+    tilesVisible.set(key, t);           
   });
   
-  let fullGrid = [];
+  const fullGrid = [];
+
   for(let dx=-2; dx<=2; dx++){
     for(let dy=-2; dy<=2; dy++){
       const posX = centerX+dx;
@@ -308,12 +334,11 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
       const key = `${posX},${posY}`;
       if(mapTiles.has(key)){
         fullGrid.push(mapTiles.get(key));             
-      } else if(tilesVisible.includes(key))
-        {
+      } else if(tilesVisible.has(key)) {
           fullGrid.push(tilesVisible.get(key));
         }
         else {
-          fullGrid.push({ positionX: posX, positionY: posY, imageURL:"tuileCache.png", type:"PLACEHOLDER" });
+          fullGrid.push({ positionX: posX, positionY: posY, imageUrl:"tuileCache.png", type:"PLACEHOLDER" });
         }
     }
   }
@@ -337,7 +362,8 @@ async function deplacer(dx, dy) {
       return;
     }
     
-    const nouvellesTiles = await response.json();
+    const grilleRetour = await response.json();
+    const nouvellesTiles = grilleRetour.tuiles;
     
     // Mettre à jour la position locale correctement (même casse que le JSON)
     personnage.positionX = nouvelleX;
@@ -347,8 +373,8 @@ async function deplacer(dx, dy) {
     localStorage.setItem("personnage", JSON.stringify(personnage));
     
     nouvellesTiles.forEach(tile => {
-      const key = `${tile.positionX},${tile.positionY}`;
-      tilesVisible.push(key, tile);
+      const key = `${tile.x},${tile.y}`;
+      tilesVisible.set(key, tile);
     });
     
     // Reconstruire la grille complète

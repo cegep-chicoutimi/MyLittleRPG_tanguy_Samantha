@@ -20,7 +20,7 @@
             <p>Explorer le monde généré par votre API - Position:(2,2)</p>
         </div>
         <div class="container text-center bg-primary">
-            <button class="btn btn-primary">Clair/Obscur</button>
+            <button class="btn btn-primary" id="themeChange">Clair/Obscur</button>
             <button id="btnDeconnecter" class="btn btn-primary">Déconnexion</button>
         </div>
     </header>
@@ -28,9 +28,9 @@
         <div id="modal-backdrop" class="modal-backdrop"></div>
         <div id="myModal" class="modal">
             <div class="modal-content">
-                <h2>Simulation de Combat</h2>
-                <p></p>
-                <button id="closeModalBtn">Close</button>
+                <h2 class="modalTitle">Simulation de Combat</h2>
+                <div class="container" id="modalInfo"></div>
+                <button class="btn btn-primary" id="closeModalBtn">Close</button>
             </div>
         </div>
         <div class="container text-center bg-secondary">
