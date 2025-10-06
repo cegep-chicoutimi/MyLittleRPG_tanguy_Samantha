@@ -2,14 +2,8 @@
 window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
 
 //Vérifier if logged in
-/*document.addEventListener('DOMContentLoaded', function() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-  const user = localStorage.getItem('utilisateur');
+document.addEventListener('DOMContentLoaded', VerifIfLoggedIn);
 
-  if (!isLoggedIn || !user) {
-      window.location.href = 'login.html'; 
-  }
-});*/
 const openModalBtn = document.getElementById('btn-simuler');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const myModal = document.getElementById('myModal');
@@ -451,6 +445,32 @@ async function login(email, motDePasse) {
         }
       }
     }
+    function deconnection() {
+        localStorage.setItem("utilisateur", null);
+        localStorage.setItem("isLoggedIn", false);
+        VerifIfLoggedIn();
+    }
+    function VerifIfLoggedIn()
+    {
+      const currentPage = window.location.pathname;
+
+      // Don't redirect if already on login.html
+      if (currentPage.endsWith('login.html') || currentPage.endsWith('register.html')) {
+          return;
+      }
+      var LoggedIn = localStorage.getItem("isLoggedIn");
+      var user = localStorage.getItem("utilisateur");
+
+      // Since localStorage stores everything as strings:
+      if (LoggedIn === "false" && (user === "null" || user === null || user === "")) {
+          window.location.href = 'login.html'; 
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const deconnectBtn = document.getElementById('btnDeconnecter');
+      deconnectBtn.addEventListener('click', deconnection);
+    });
 
     async function getPersonnageById(id, pseudo) {
       try {
