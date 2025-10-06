@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pag
 using MyLittleRPG.Data.Context;
 using MyLittleRPG.Migrations;
 using MyLittleRPG.Models;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,9 +36,9 @@ namespace MyLittleRPG.Controllers
 
         // GET: api/Personnages/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Personnage>> GetPersonnage(int id)
+        public async Task<ActionResult<Personnage>> GetPersonnage(int UserId)
         {
-            var personnage = await _context.Personnages.FindAsync(id);
+            var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.UtilisateurId == UserId);
 
             if (personnage == null)
             {
@@ -51,6 +52,7 @@ namespace MyLittleRPG.Controllers
         [Route("Deplacement")]
         public async Task<ActionResult<GrilleJeuDto>> Deplacement(int posX, int posY, int idPerso)
         {
+            GrilleJeuDto grille = new GrilleJeuDto();
             var personnage = await _context.Personnages.FindAsync(idPerso);
 
             if (personnage == null)
@@ -64,13 +66,82 @@ namespace MyLittleRPG.Controllers
             if (!_tileGeneration.GenererTile(posX, posY).Result.estTraversable)
                 return BadRequest(new { messeage = "la case nest pas traversable" });
 
-            if ((Math.Abs(posX - personnage.PositionX) <= 1) && (Math.Abs(posY - personnage.PositionY) <= 1))
+            var monstre = await _context.InstanceMonstres
+                        .Include(im => im.Monster)
+                        .FirstOrDefaultAsync(im => im.PositionX == posX && im.PositionY == posY);
+
+            if (monstre != null)
             {
-                personnage.PositionX = posX;
-                personnage.PositionY = posY;
+                grille.resultFight = fight(posX, posY, idPerso);
+                personnage.savechanges(grille.resultFight.Personnage);
+                monstre.PVactuels = grille.resultFight.Monstre.PointsVieActuels;
+            }
+            else
+            {
+                grille.resultFight = null;
+            }
 
-                _context.Entry(personnage).State = EntityState.Modified;
+            if (grille.resultFight == null|| grille.resultFight.code=="Win")
+            {
+                if ((Math.Abs(posX - personnage.PositionX) <= 1) && (Math.Abs(posY - personnage.PositionY) <= 1))
+                {
+                    personnage.PositionX = posX;
+                    personnage.PositionY = posY;
 
+
+                    _context.Entry(personnage).State = EntityState.Modified;
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!PersonnageExists(idPerso))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    var tiles = await _tileGeneration.GenererTilesAutour(posX, posY);
+
+                    List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
+
+                    foreach (var tile in tiles)
+                    {
+                        TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+                        tileDTO.X = tile.PositionX;
+                        tileDTO.Y = tile.PositionY;
+                        tileDTO.TypeTuile = tile.imageURL;
+                        tileDTO.EstAccessible = tile.estTraversable;
+                        var InstanceMonstre = await _context.InstanceMonstres
+                            .Include(im => im.Monster)
+                            .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
+
+
+                        if (InstanceMonstre != null)
+                        {
+                            InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+                            tileDTO.Monstre = monsterDTO;
+                        }
+
+                        Tuiles.Add(tileDTO);
+                    }
+
+
+
+                    grille.Tuiles = Tuiles;
+                    grille.CentreX = posX;
+                    grille.CentreY = posY;
+
+                    return grille;
+                }
+            }
+            else if(grille.resultFight.code == "Lose")
+            {
                 try
                 {
                     await _context.SaveChangesAsync();
@@ -86,7 +157,7 @@ namespace MyLittleRPG.Controllers
                         throw;
                     }
                 }
-                var tiles = await _tileGeneration.GenererTilesAutour(posX, posY);
+                var tiles = await _tileGeneration.GenererTilesAutour(personnage.PositionX, personnage.PositionY);
 
                 List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
 
@@ -95,45 +166,130 @@ namespace MyLittleRPG.Controllers
                     TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
                     tileDTO.X = tile.PositionX;
                     tileDTO.Y = tile.PositionY;
-                    tileDTO.TypeTuile = tile.Type.ToString();
+                    tileDTO.TypeTuile = tile.imageURL;
                     tileDTO.EstAccessible = tile.estTraversable;
                     var InstanceMonstre = await _context.InstanceMonstres
                         .Include(im => im.Monster)
                         .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
 
 
-                    if (InstanceMonstre != null) 
+                    if (InstanceMonstre != null)
                     {
-                        InstanceMonstreDto monsterDTO = new InstanceMonstreDto();
-                        monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
-                        monsterDTO.Nom = InstanceMonstre.Monster.Nom;
-                        monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
-                        monsterDTO.Niveau = InstanceMonstre.niveaux;
-                        monsterDTO.X = InstanceMonstre.PositionX;
-                        monsterDTO.Y = InstanceMonstre.PositionY;
-                        monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
-                        monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
-                        monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
-                        monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
-                        monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
-
-                        tileDTO.Monstre=monsterDTO;
-                        
+                        InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+                        tileDTO.Monstre = monsterDTO;
                     }
 
                     Tuiles.Add(tileDTO);
                 }
 
-                GrilleJeuDto grille = new GrilleJeuDto();
+
 
                 grille.Tuiles = Tuiles;
-                grille.CentreX = posX;
-                grille.CentreY = posY;
+                grille.CentreX = personnage.PositionX;
+                grille.CentreY = personnage.PositionY;
 
                 return grille;
-                //return (List<Tile>)tiles;
             }
-            return BadRequest(new { message = "Déplacement non autorisé. Vous pouvez vous déplacer d'une case maximum." });        
+            else if(grille.resultFight.code == "Draw")
+            {
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PersonnageExists(idPerso))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                var tiles = await _tileGeneration.GenererTilesAutour(personnage.PositionX, personnage.PositionY);
+
+                List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
+
+                foreach (var tile in tiles)
+                {
+                    TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+                    tileDTO.X = tile.PositionX;
+                    tileDTO.Y = tile.PositionY;
+                    tileDTO.TypeTuile = tile.imageURL;
+                    tileDTO.EstAccessible = tile.estTraversable;
+                    var InstanceMonstre = await _context.InstanceMonstres
+                        .Include(im => im.Monster)
+                        .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
+
+
+                    if (InstanceMonstre != null)
+                    {
+                        InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+                        tileDTO.Monstre = monsterDTO;
+                    }
+
+                    Tuiles.Add(tileDTO);
+                }
+
+
+
+                grille.Tuiles = Tuiles;
+                grille.CentreX = personnage.PositionX;
+                grille.CentreY = personnage.PositionY;
+
+                return grille;
+            }
+                return BadRequest(new { message = "Déplacement non autorisé. Vous pouvez vous déplacer d'une case maximum." });        
+        }
+
+        private ResultDto fight(int x, int y, int id)
+        {
+            ResultDto resultat = new ResultDto();
+            var personnage = _context.Personnages.Find(id);
+            var enemy = _context.InstanceMonstres
+               .Include(im => im.Monster)
+               .FirstOrDefault(im => im.PositionX == x && im.PositionY == y);
+
+            Random random = new Random();
+            double factmonster = (random.Next(80, 125) / 100.0);
+            double factperso = (random.Next(80, 125) / 100.0);
+
+            int damageMonster = (int)((personnage.Force - (enemy.Monster.defenseBase + enemy.niveaux)) * factmonster);
+            int damagePlayer = (int)(((enemy.Monster.forceBase + enemy.niveaux) - personnage.Defense) * factperso);
+
+            if (damageMonster > 0)
+            {
+                enemy.PVactuels -= damageMonster;
+            }
+
+            if (damagePlayer > 0)
+            {
+                personnage.PV -= damagePlayer;
+            }
+
+            if (enemy.PVactuels <= 0)
+            {
+                _context.InstanceMonstres.Remove(enemy);
+                personnage.getexp(enemy.Monster.experienceBase+(enemy.niveaux*10));
+                resultat.code = "Win";
+            }else if(personnage.PV <= 0)
+            {
+                personnage.backToTown();
+                resultat.code = "Lose";
+            }else
+            {
+                resultat.code = "Draw";
+            }
+
+            PersonnageDto personnageDto = new PersonnageDto(personnage);
+            resultat.Personnage = personnageDto;
+            InstanceMonstreDto instanceMonstre = new InstanceMonstreDto(enemy);
+            resultat.Monstre = instanceMonstre;
+
+
+            Console.WriteLine(enemy);
+            return resultat;
         }
 
         // PUT: api/Personnages/5
@@ -228,5 +384,7 @@ namespace MyLittleRPG.Controllers
         {
             return _context.Personnages.Any(e => e.Id == id);
         }
+
+        
     }
 }

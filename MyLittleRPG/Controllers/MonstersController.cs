@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using MyLittleRPG.Data.Context;
+using MyLittleRPG.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyLittleRPG.Data.Context;
-using MyLittleRPG.Models;
 
 namespace MyLittleRPG.Controllers
 {
@@ -15,6 +16,11 @@ namespace MyLittleRPG.Controllers
     public class MonstersController : ControllerBase
     {
         private readonly MonsterContext _context;
+
+        public MonstersController(MonsterContext context)
+        {
+            _context = context;
+        }
 
         [HttpPut]
         [Route("monstre/generateall")]
@@ -29,13 +35,5 @@ namespace MyLittleRPG.Controllers
         {
             return BadRequest("not imlemented");
         }
-
-        [HttpPost]
-        [Route("monstre/fight/{x}/{y}")]
-        public async Task<ActionResult<ResultDto>> fight(int x, int y)
-        {
-            return BadRequest("not imlemented");
-        }
-
     }
 }
