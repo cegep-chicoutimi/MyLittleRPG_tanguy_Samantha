@@ -36,9 +36,9 @@ namespace MyLittleRPG.Controllers
 
         // GET: api/Personnages/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Personnage>> GetPersonnage(int id)
+        public async Task<ActionResult<Personnage>> GetPersonnage(int UserId)
         {
-            var personnage = await _context.Personnages.FindAsync(id);
+            var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.UtilisateurId == UserId);
 
             if (personnage == null)
             {
