@@ -8,7 +8,6 @@ const openModalBtn = document.getElementById('btn-simuler');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const myModal = document.getElementById('myModal');
 const modalBackdrop = document.getElementById('modal-backdrop');
-const toggleButton = document.getElementById('themeToggle');
 
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let allTiles = [];
@@ -16,28 +15,28 @@ const tilesVisible = new Map();
 let monsters = [];
 let nbMonstresVaincus = 0;
 
-toggleButton.addEventListener('click', ThemeChange)
+//Changement thème
+const body = document.body;
+const toggleBtn = document.getElementById('themeChange');
 
-function ThemeChange()
-{
-  const body = document.body;
+toggleBtn.addEventListener('click', () => {
+  body.classList.toggle('light-theme');
+  body.classList.toggle('dark-theme');
 
-  // Load saved theme from localStorage
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    body.classList.add(savedTheme);
+  // Optional: save preference in localStorage
+  if (body.classList.contains('light-theme')) {
+    localStorage.setItem('theme', 'light');
   } else {
-    body.classList.add('dark-theme'); // Default theme
+    localStorage.setItem('theme', 'dark');
   }
-    if (body.classList.contains('light-theme')) {
-      body.classList.remove('light-theme');
-      body.classList.add('dark-theme');
-      localStorage.setItem('theme', 'dark-theme');
-    } else {
-      body.classList.remove('dark-theme');
-      body.classList.add('light-theme');
-      localStorage.setItem('theme', 'light-theme');
-    }
+});
+
+// On load, restore saved theme
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+  body.classList.add(savedTheme + "-theme");
+} else {
+  body.classList.add("dark-theme"); // default
 }
 
 openModalBtn.addEventListener('click', () => {
@@ -208,7 +207,7 @@ function displayTiles(tiles) {
     }
     
     tileDiv.addEventListener('click', async() => {
-      if(tile.type == "PLACEHOLDER"){
+      if(tile.typeTuile == "PLACEHOLDER"){
         const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
         if (revealedTile) {
           // Mettre à jour l'image
@@ -293,13 +292,13 @@ function updateSelectedTile(tile) {
   
   var typeStr = "default";
   
-  switch(tile.type){
-    case 0 : typeStr="plaine";break;
-    case 1 :typeStr="eau";break;
-    case 2 :typeStr="montagne";break;
-    case 3 :typeStr="forest";break;
-    case 4 :typeStr="ville";break;
-    case 5 :typeStr="route";break;
+  switch(tile.typeTuile){
+    case "PLAINE" : typeStr="plaine";break;
+    case "EAU" :typeStr="eau";break;
+    case "MONTAGNE" :typeStr="montagne";break;
+    case "FORET" :typeStr="forest";break;
+    case "VILLE+" :typeStr="ville";break;
+    case "ROUTE" :typeStr="route";break;
     case "PLACEHOLDER": typeStr = "Inconnue"; break;
   }
   
@@ -307,10 +306,9 @@ function updateSelectedTile(tile) {
   console.log(tile.type + " ; "+ typeStr)
   
   selectedTileDiv.innerHTML = `
-  <div class="divCard"><p>Position : (${tile.positionX},${tile.positionY})</p></div>
+  <div class="divCard"><p>Position : ${tile.x},${tile.y}</p></div>
   <div class="divCard"><p>Type : ${typeStr}</p></div>
-  <div class="divCard"><p>Traversable : ${tile.estTraversable ? 'oui' : 'non'}</p></div>
-  <div class="divCard"><p>Description : ${tile.description || 'Aucune'}</p></div>
+  <div class="divCard"><p>Traversable : ${tile.estAccessible ? 'oui' : 'non'}</p></div>
   `;
 }
 
@@ -531,7 +529,7 @@ async function login(email, motDePasse) {
           return personnage;
   }
     
-// Pour tes formulaires
+// Pour les formulaires
 document.addEventListener('DOMContentLoaded', () => {
       const loginForm = document.getElementById("loginForm");
       if (loginForm) {
