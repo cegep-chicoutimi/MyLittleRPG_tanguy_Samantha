@@ -35,10 +35,23 @@ namespace MyLittleRPG.Controllers
         //}
 
         // GET: api/Personnages/5
-        [HttpGet("{UserId}")]
-        public async Task<ActionResult<Personnage>> GetPersonnage(int UserId)
+        [HttpGet("User/{UserId}")]
+        public async Task<ActionResult<Personnage>> GetPersonnageUserId(int UserId)
         {
             var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.UtilisateurId == UserId);
+
+            if (personnage == null)
+            {
+                return NotFound("Aucun utilisateur correspond à cet id");
+            }
+
+            return personnage;
+        }
+        // GET: api/Personnages/5
+        [HttpGet("{Id}")]
+        public async Task<ActionResult<Personnage>> GetPersonnage(int Id)
+        {
+            var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == Id);
 
             if (personnage == null)
             {
@@ -343,21 +356,21 @@ namespace MyLittleRPG.Controllers
 
         // POST: api/Personnages
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("{idUser},{nom}")]
-        public async Task<ActionResult<Personnage>> PostPersonnage(int idUser, string nom)
+        [HttpPost]
+        public async Task<ActionResult<Personnage>> PostPersonnage([FromBody] CreatePersonnageDto persoDto)
         {
             var utilisateur = await _context.Utilisateurs
-                .FirstOrDefaultAsync(u => u.Id == idUser);
+                .FirstOrDefaultAsync(u => u.Id == persoDto.IdUser);
 
             if (utilisateur == null)
             {
                 return NotFound("L'id de l'utilisateur n'est pas valide");
             }
 
-            if (string.IsNullOrEmpty(nom)) return BadRequest(new { message = "Le nom de l'utilisateur ne doit pas être vide" });
+            if (string.IsNullOrEmpty(persoDto.Nom)) return BadRequest(new { message = "Le nom de l'utilisateur ne doit pas être vide" });
             Random random = new Random();
 
-            Personnage personnage = new Personnage(0, nom,1,1,random.Next(10,15),50,random.Next(5,10),random.Next(5,10), 10, 10, idUser);
+            Personnage personnage = new Personnage(0, persoDto.Nom, 1,1,random.Next(10,15),50,random.Next(5,10),random.Next(5,10), 10, 10, persoDto.IdUser);
 
             _context.Personnages.Add(personnage);
             await _context.SaveChangesAsync();

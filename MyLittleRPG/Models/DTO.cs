@@ -81,6 +81,11 @@
         public int CentreY { get; set; }
         public ResultDto resultFight { get; set; }
     }
+    public class CreatePersonnageDto
+    {
+        public int IdUser { get; set; }
+        public string Nom { get; set; } = string.Empty;
+    }
 
     public class PersonnageDto
     {

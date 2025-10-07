@@ -10,50 +10,50 @@ const myModal = document.getElementById('myModal');
 const modalBackdrop = document.getElementById('modal-backdrop');
 
 let personnage = JSON.parse(localStorage.getItem("personnage"));
+let user = JSON.parse(localStorage.getItem("utilisateur"));
 let allTiles = [];
 const tilesVisible = new Map();
 let monsters = [];
 let nbMonstresVaincus = 0;
 
-//Changement thème
-const body = document.body;
-const toggleBtn = document.getElementById('themeChange');
+function ChangementTheme() {
+  const body = document.body;
+  const toggleBtn = document.getElementById('themeChange');
 
-toggleBtn.addEventListener('click', () => {
-  body.classList.toggle('light-theme');
-  body.classList.toggle('dark-theme');
-
-  // Optional: save preference in localStorage
-  if (body.classList.contains('light-theme')) {
-    localStorage.setItem('theme', 'light');
-  } else {
-    localStorage.setItem('theme', 'dark');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      body.classList.toggle('light-theme');
+      body.classList.toggle('dark-theme');
+      localStorage.setItem('theme', body.classList.contains('light-theme') ? 'light' : 'dark');
+    });
   }
-});
 
-// On load, restore saved theme
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
+  // Apply saved theme
+  const savedTheme = localStorage.getItem('theme') || 'dark';
   body.classList.add(savedTheme + "-theme");
-} else {
-  body.classList.add("dark-theme"); // default
 }
 
-openModalBtn.addEventListener('click', () => {
-  myModal.style.display = 'block';
-  modalBackdrop.style.display = 'block';
-});
+document.addEventListener("DOMContentLoaded", ChangementTheme);
 
-closeModalBtn.addEventListener('click', () => {
-  myModal.style.display = 'none';
-  modalBackdrop.style.display = 'none';
-});
+// Only add event listeners if modal exists
+if (openModalBtn && closeModalBtn && modalBackdrop && myModal) {
+  
+  openModalBtn.addEventListener('click', () => {
+    myModal.style.display = 'block';
+    modalBackdrop.style.display = 'block';
+  });
 
-// Optional: Close modal when clicking outside of it
-modalBackdrop.addEventListener('click', () => {
-  myModal.style.display = 'none';
-  modalBackdrop.style.display = 'none';
-});
+  closeModalBtn.addEventListener('click', () => {
+    myModal.style.display = 'none';
+    modalBackdrop.style.display = 'none';
+  });
+
+  // Optional: close when clicking backdrop
+  modalBackdrop.addEventListener('click', () => {
+    myModal.style.display = 'none';
+    modalBackdrop.style.display = 'none';
+  });
+}
 
 // Met à jour l'affichage du nombre de monstres vaincus
 /*function updateMonstresVaincus() {
@@ -141,7 +141,11 @@ function SimulationCombat() {
 
 // Affiche la grille initiale centrée sur le personnage
 async function AfficherGrilleInitial() {
-  if (!personnage) return;
+  if (!personnage && !user) return;
+  if (!personnage && user) 
+    personnage = await CreatePersonnage(user.id, user.pseudo);
+  
+  // Centrer la grille sur le personnage
 
   const centerX = personnage.positionX; // utiliser la position du joueur
   const centerY = personnage.positionY;
@@ -204,10 +208,11 @@ function displayTiles(tiles) {
       imgSprite.src = tile.monstre.spriteUrl;
       imgSprite.classList.add("imgSprite");
       imgSprite.alt = 'TileMonstre';
+      tileDiv.appendChild(imgSprite);
     }
     
     tileDiv.addEventListener('click', async() => {
-      if(tile.typeTuile == "PLACEHOLDER"){
+      if(tile.type == "PLACEHOLDER"){
         const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
         if (revealedTile) {
           // Mettre à jour l'image
@@ -345,7 +350,7 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
 
 // Déplacement du personnage
 async function deplacer(dx, dy) {
-  if (!personnage) return;
+  if (!personnage && !user) return;
   
   const nouvelleX = personnage.positionX + dx;
   const nouvelleY = personnage.positionY + dy;
@@ -400,11 +405,16 @@ function updatePlayerPosition(x, y) {
 
 // Gestion des boutons de déplacement
 document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById("btn-nord").addEventListener("click", () => deplacer(-1, 0));
-      document.getElementById("btn-sud").addEventListener("click", () => deplacer(1, 0));
-      document.getElementById("btn-ouest").addEventListener("click", () => deplacer(0, -1));
-      document.getElementById("btn-est").addEventListener("click", () => deplacer(0, 1));
-    });
+  const btnNord  = document.getElementById("btn-nord");
+  const btnSud   = document.getElementById("btn-sud");
+  const btnOuest = document.getElementById("btn-ouest");
+  const btnEst   = document.getElementById("btn-est");
+
+  if (btnNord)  btnNord.addEventListener("click", () => deplacer(-1, 0));
+  if (btnSud)   btnSud.addEventListener("click", () => deplacer(1, 0));
+  if (btnOuest) btnOuest.addEventListener("click", () => deplacer(0, -1));
+  if (btnEst)   btnEst.addEventListener("click", () => deplacer(0, 1));
+});
     
 // Fonctions de connexion et d'inscription
 async function login(email, motDePasse) {
@@ -421,8 +431,7 @@ async function login(email, motDePasse) {
         }
         
         const utilisateur = await response.json();
-        getPersonnageById(utilisateur.id, utilisateur.pseudo);
-        console.log("Connecté :", utilisateur);
+        getPersonnageByUserId(utilisateur.id, utilisateur.pseudo);
         localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
         localStorage.setItem('isLoggedIn', 'true');
         window.location.href = "index.html";
@@ -472,6 +481,7 @@ async function login(email, motDePasse) {
     function deconnection() {
         localStorage.setItem("utilisateur", null);
         localStorage.setItem("isLoggedIn", false);
+        localStorage.setItem("personnage", null);
         VerifIfLoggedIn();
     }
     function VerifIfLoggedIn()
@@ -493,38 +503,40 @@ async function login(email, motDePasse) {
 
     document.addEventListener('DOMContentLoaded', () => {
       const deconnectBtn = document.getElementById('btnDeconnecter');
-      deconnectBtn.addEventListener('click', deconnection);
+      if(deconnectBtn) deconnectBtn.addEventListener('click', deconnection);
     });
 
-    async function getPersonnageById(id, pseudo) {
+    async function getPersonnageByUserId(userId, pseudo) {
       try {
-        const response = await fetch(`https://localhost:7061/api/Personnages/${id}`);
+        const response = await fetch(`https://localhost:7061/api/Personnages/User/${userId}`);
         if (!response.ok) {
           // Si le personnage n'existe pas, le créer
-          return await CreatePersonnage(id, pseudo);
+          return await CreatePersonnage(userId, pseudo);
         }
         const personnage = await response.json();
+
         console.log("Personnage récupéré :", personnage);
         localStorage.setItem("personnage", JSON.stringify(personnage));
         return personnage;
       } catch (err) {
         console.error("Erreur lors de la récupération du personnage:", err);
-        return await CreatePersonnage(id, pseudo);
+        return await CreatePersonnage(userId, pseudo);
       }
     }
   // Récupère le personnage par ID ou le crée s'il n'existe pas
   async function CreatePersonnage(id, pseudo) {
-    const responsePerso = await fetch(`https://localhost:7061/api/Personnages/${utilisateur.id},${encodeURIComponent(pseudo)}`, {
-            method: "POST"
-          });
-          
-          if(!responsePerso.ok){
-            const message = await responsePerso.text();
-            throw new Error(message || "Erreur lors de la création du personnage");
+      const responsePerso = await fetch("https://localhost:7061/api/Personnages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idUser: id, nom: pseudo })
+      });
+
+      if (!responsePerso.ok) {
+        const message = await responsePerso.text();
+        throw new Error(message || "Erreur lors de la création du personnage");
           }
           
           const personnage = await responsePerso.json();
-          console.log("Personnage créé :", personnage);
           localStorage.setItem("personnage", JSON.stringify(personnage));
           return personnage;
   }
