@@ -28,27 +28,130 @@ namespace MyLittleRPG.Controllers
 
         // GET: api/Tiles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tile>>> GetTilesAutour(int PositionX, int PositionY)
+        public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int PositionX, int PositionY)
         {
             List<Tile> tiles = (List<Tile>)await TileGeneration.GenererTilesAutour(PositionX, PositionY);
 
             if(tiles == null) return NotFound(new {message = "Les tuiles n'ont pas pu se générer"});
 
-            return tiles;
+            List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
+
+            foreach (var tile in tiles)
+            {
+                TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+                tileDTO.X = tile.PositionX;
+                tileDTO.Y = tile.PositionY;
+                tileDTO.TypeTuile = tile.Type.ToString();
+                tileDTO.imageUrl = tile.imageURL;
+                tileDTO.EstAccessible = tile.estTraversable;
+                var InstanceMonstre = await _context.InstanceMonstres
+                        .Include(im => im.Monster)
+                        .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
+
+                if (InstanceMonstre != null)
+                {
+                    InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+                    monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
+                    monsterDTO.Nom = InstanceMonstre.Monster.Nom;
+                    monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
+                    monsterDTO.Niveau = InstanceMonstre.niveaux;
+                    monsterDTO.X = InstanceMonstre.PositionX;
+                    monsterDTO.Y = InstanceMonstre.PositionY;
+                    monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
+                    monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
+                    monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
+                    monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
+                    monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
+
+                    tileDTO.Monstre = monsterDTO;
+
+                }
+
+                Tuiles.Add(tileDTO);
+            }
+
+            GrilleJeuDto grille = new GrilleJeuDto();
+
+            grille.Tuiles = Tuiles;
+            grille.CentreX = PositionX;
+            grille.CentreY = PositionY;
+
+            return grille;
         }
 
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
-        public async Task<ActionResult<Tile>> GetTile(int PositionX, int PositionY)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int PositionX, int PositionY)
         {
 
             Tile? tile =  await TileGeneration.GenererTile(PositionX, PositionY);
             if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });
 
-            CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);          
+            CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
 
-            return tile;
-        }      
+            TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
+            tileDTO.X = tile.PositionX;
+            tileDTO.Y = tile.PositionY;
+            tileDTO.imageUrl = tile.imageURL;
+            tileDTO.TypeTuile = tile.Type.ToString();
+            tileDTO.EstAccessible = tile.estTraversable;
+            var InstanceMonstre = await _context.InstanceMonstres
+                .Include(im => im.Monster)
+                .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
+
+            if (InstanceMonstre != null)
+            {
+                InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+
+                tileDTO.Monstre = monsterDTO;
+            }
+
+            return tileDTO;
+        }
+
+        // GET: api/Tiles/generate/all?minX=1&maxX=50&minY=1&maxY=50
+        [HttpGet("generate/all")]
+        public async Task<IActionResult> AddAllTiles(
+            int minX = 1, int maxX = 50,
+            int minY = 1, int maxY = 50)
+        {
+            if (minX > maxX || minY > maxY)
+                return BadRequest(new { message = "Bornes invalides." });
+
+            int created = 0;
+
+            // Accélère les insertions massives EF
+            var oldDetect = _context.ChangeTracker.AutoDetectChangesEnabled;
+            _context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            try
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    for (int y = minY; y <= maxY; y++)
+                    {
+                        // GenererTile évite les doublons (FindAsync d'abord)
+                        var tile = await TileGeneration.GenererTile(x, y);
+                        if (tile != null) created++;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                var total = await _context.Tiles.CountAsync();
+                return Ok(new
+                {
+                    message = "Génération terminée",
+                    created,
+                    totalTiles = total,
+                    bounds = new { minX, maxX, minY, maxY }
+                });
+            }
+            finally
+            {
+                _context.ChangeTracker.AutoDetectChangesEnabled = oldDetect;
+            }
+        }
 
         //// PUT: api/Tiles/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -127,4 +230,6 @@ namespace MyLittleRPG.Controllers
             return _context.Tiles.Any(e => e.PositionX == id);
         }
     }
+
+
 }

@@ -1,12 +1,15 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using MyLittleRPG.Data.Context;
+using MyLittleRPG.Migrations;
+using MyLittleRPG.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyLittleRPG.Data.Context;
-using MyLittleRPG.Models;
 
 namespace MyLittleRPG.Controllers
 {
@@ -16,93 +19,112 @@ namespace MyLittleRPG.Controllers
     {
         private readonly MonsterContext _context;
 
-        //public MonstersController(MonsterContext context)
-        //{
-        //    _context = context;
-        //}
+        public MonstersController(MonsterContext context)
+        {
+            _context = context;
+        }
 
-        //// GET: api/Monsters
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Monster>>> GetMonsters()
-        //{
-        //    return await _context.Monsters.ToListAsync();
-        //}
+        [HttpPut]
+        [Route("monstre/generateall")]
+        public async Task<IActionResult> generateall()
+        {
+            List<string> UsedXY = new List<string>();
 
-        //// GET: api/Monsters/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Monster>> GetMonster(int id)
-        //{
-        //    var monster = await _context.Monsters.FindAsync(id);
 
-        //    if (monster == null)
-        //    {
-        //        return NotFound();
-        //    }
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM InstanceMonstres");
+            for (int i = 0; i < 300; i++)
+            {
+                addmonstre(UsedXY);
+            }
+            await _context.SaveChangesAsync();
+            return Ok("300 monstre regenere");
+        }
 
-        //    return monster;
-        //}
+        [HttpPut]
+        [Route("monstre/generate10")]
+        public async Task<IActionResult> generate10()
+        {
+            List<string> UsedXY = new List<string>();
+            for (int i = 0; i < 10; i++)
+            {
+                addmonstre(UsedXY);
+            }
+            await _context.SaveChangesAsync();
+            return Ok("10 monstres générés avec succès !");
+        }
 
-        //// PUT: api/Monsters/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutMonster(int id, Monster monster)
-        //{
-        //    if (id != monster.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+        private void addmonstre(List<string> UsedXY)
+        {
+            Random random = new Random();
+            int x;
+            int y;
+            string verif;
 
-        //    _context.Entry(monster).State = EntityState.Modified;
+            do {
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!MonsterExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+                x = random.Next(1, 50);
+                y = random.Next(1, 50);
+                verif = x + "," + y;
+            } while (UsedXY.Contains(verif) || !isSpawnable(x, y));
 
-        //    return NoContent();
-        //}
+            UsedXY.Add(x + "," + y);
 
-        //// POST: api/Monsters
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Monster>> PostMonster(Monster monster)
-        //{
-        //    _context.Monsters.Add(monster);
-        //    await _context.SaveChangesAsync();
+            Monster monster = getRandomMonstre();
+            int level = getDistanceVille(x,y) / 3;
 
-        //    return CreatedAtAction("GetMonster", new { id = monster.Id }, monster);
-        //}
+            InstanceMonster monsterInstance = new InstanceMonster();
 
-        //// DELETE: api/Monsters/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteMonster(int id)
-        //{
-        //    var monster = await _context.Monsters.FindAsync(id);
-        //    if (monster == null)
-        //    {
-        //        return NotFound();
-        //    }
+            monsterInstance.PositionX = x;
+            monsterInstance.PositionY = y;
+            monsterInstance.MonsterId = monster.Id;
+            monsterInstance.Monster = monster;
+            monsterInstance.niveaux = level;
+            monsterInstance.PVMax = monster.pointsVieBase;
+            monsterInstance.PVactuels = monster.pointsVieBase;
 
-        //    _context.Monsters.Remove(monster);
-        //    await _context.SaveChangesAsync();
+            Console.WriteLine("ajout de " + monster.Nom +"de niveaux "+level+ "a la bd a la case "+x+" ; "+y);
+                
+            _context.InstanceMonstres.Add(monsterInstance);
+        }
 
-        //    return NoContent();
-        //}
+        private bool isSpawnable(int x, int y)
+        {
 
-        //private bool MonsterExists(int id)
-        //{
-        //    return _context.Monsters.Any(e => e.Id == id);
-        //}
+            var tile = _context.Tiles.Find(x, y);
+            if (tile == null)
+                return false;
+
+            if (!tile.estTraversable)
+                return false;
+
+            if (tile.Type == TileType.VILLE || tile.Type == TileType.ROUTE)
+                return false;
+
+            return true;
+        }
+
+        private int getDistanceVille(int x, int y)
+        {
+            int distance = 1000;
+            foreach (var tile in _context.Tiles)
+            {
+                if (tile.Type == TileType.VILLE)
+                {
+                    int newDistance = Math.Abs(x - tile.PositionX) + Math.Abs(y - tile.PositionY);
+                    if (newDistance < distance){  distance = newDistance; }
+                }
+            }
+
+            return distance;
+            throw new NotImplementedException();
+        }
+
+        private Monster getRandomMonstre()
+        {
+            Random random = new Random();
+
+            int id = random.Next(1, 809);
+            return _context.Monsters.Find(id);
+        }
     }
 }
