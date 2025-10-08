@@ -24,13 +24,11 @@ if(modalBackdrop) modalBackdrop.addEventListener('click', () => {
 });
 
 // Variables globales
-
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let user = JSON.parse(localStorage.getItem("utilisateur"));
 let selectedTileDiv = document.querySelector('.card-body.selected-tile');
 let allTiles = [];
 const tilesVisible = new Map();
-let nbMonstresVaincus = 0;
 
 function ChangementTheme() {
   const body = document.body;
@@ -52,7 +50,6 @@ function ChangementTheme() {
 document.addEventListener("DOMContentLoaded", ChangementTheme);
 
 // Simulation de combat
-
 function SimulationCombat() {
   if (!personnage || !user) return;
 
@@ -94,7 +91,7 @@ function SimulationCombat() {
     <hr>
 
     <div class="combat-results text-center">
-      <h5>Résultats (100 simulations)</h5>
+      <h5>Résultats (1000 simulations)</h5>
       <p>Victoires du joueur : <strong>${resultats.nbVictoires}</strong></p>
       <p>Défaites du joueur : <strong>${resultats.nbDefaites}</strong></p>
       <p>Égalités : <strong>${resultats.nbEgalites}</strong></p>
@@ -103,7 +100,6 @@ function SimulationCombat() {
       <p>PV moyens restants du joueur : <strong>${resultats.moyennePVRestantsJoueur.toFixed(2)}</strong></p>
       <p>PV moyens restants du monstre : <strong>${resultats.moyennePVRestantsMonstre.toFixed(2)}</strong></p>
       <hr>
-      <p>Nombre total de monstres vaincus : <strong>${nbMonstresVaincus}</strong></p>
     </div>
   `;
 
@@ -112,7 +108,7 @@ function SimulationCombat() {
   modalBackdrop.style.display = 'block';
 }
 
-function LogiqueCombat(personnage, monstre) {
+function LogiqueCombat(monstre) {
   //Variables pour les statistiques
   const nbSimulations = 1000;
   var nbVictoires = 0;
@@ -155,7 +151,6 @@ function LogiqueCombat(personnage, monstre) {
       if(PointsDeVieMonstre <= 0 && PointsDeVieJoueur > 0) 
       { 
         nbVictoires++;
-        nbMonstresVaincus++;
       }
       else if(PointsDeVieJoueur <= 0)
       {
@@ -191,8 +186,8 @@ async function AfficherGrilleInitial() {
   const centerX = personnage.positionX; // utiliser la position du joueur
   const centerY = personnage.positionY;
 
-  let fetchedTilesDto = await getTilesAroundAsync(centerX, centerY);
-  let fetchedTiles = fetchedTilesDto.tuiles;
+  let fetchedGrilleJeu = await getTilesAroundAsync(centerX, centerY);
+  let fetchedTiles = fetchedGrilleJeu.tuiles;
 
   // Create a map of fetched tiles for quick lookup
   const fetchedMap = new Map();
@@ -218,9 +213,9 @@ async function AfficherGrilleInitial() {
       } else {
         // Placeholder tile object with default image (change as needed)
         fullGridTiles.push({
-          positionX: posX,
-          positionY: posY,
-          imageUrl: "tuileCache.png",  // your default image filename
+          X: posX,
+          Y: posY,
+          imageUrl: "tuileCache.png",
           type: "PLACEHOLDER",
           monstre: null,
         });
@@ -254,7 +249,7 @@ function displayTiles(tiles) {
     
     tileDiv.addEventListener('click', async() => {
       if(tile.type == "PLACEHOLDER"){
-        const revealedTile = await getTileAsync(tile.positionX, tile.positionY);
+        const revealedTile = await getTileAsync(tile.X, tile.Y);
         if (revealedTile) {
           // Mettre à jour l'image
           img.src = 'img/' + revealedTile.imageUrl;
@@ -288,10 +283,9 @@ function displayTiles(tiles) {
 }
 
 // Récupère les tuiles autour d'une position donnée
-async function getTilesAroundAsync(x, y) {
+async function getTilesAroundAsync(X, Y) {
   try {
-    
-    const url = `https://localhost:7061/api/Tiles?PositionX=${x}&PositionY=${y}`;
+    const url = `https://localhost:7061/api/Tiles?X=${X}&Y=${Y}`;
 
     const response = await fetch(url);
     
@@ -302,15 +296,14 @@ async function getTilesAroundAsync(x, y) {
     return await response.json();
 
   } catch (error) {
-    console.error('Erreur lors du chargement:', error);
     handleAPIError(error, 'Impossible de charger les tuiles');
   }
 }
 
 // Récupère une tuile spécifique
-async function getTileAsync(x, y) {
+async function getTileAsync(X, Y) {
   try {
-    const url = `https://localhost:7061/api/Tiles/${x}%2C${y}?PositionX=${x}&PositionY=${y}`;
+    const url = `https://localhost:7061/api/Tiles/${X}%2C${Y}?X=${X}&Y=${Y}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -321,7 +314,6 @@ async function getTileAsync(x, y) {
 
     
   } catch (error) {
-    console.error('Erreur lors du chargement:', error);
     handleAPIError(error, 'Impossible de charger les tuiles');
   }
 }
@@ -329,24 +321,11 @@ async function getTileAsync(x, y) {
 
 // Met à jour la section "Tuile Sélectionnée"
 function updateSelectedTile(tile) {
-  const selectedTileDiv = document.querySelector('.card-body.selected-tile');
   selectedTileDiv.monstre = tile.monstre; // Stocker le monstre (ou null) dans la div
-  if(tile.monstre != null){
-    document.getElementById("monstreNom").textContent = tile.monstre.nom;
-    document.getElementById("monstrePV").textContent = tile.monstre.pointsVieActuels;
-    document.getElementById("monstreForce").textContent = tile.monstre.attaque;
-    document.getElementById("monstreDefense").textContent = tile.monstre.defense;
-    document.getElementById("monstrePosition").textContent = `${tile.monstre.x}, ${tile.monstre.y}`;
-  }
-  if(tile.monstre == null){
-    document.getElementById("monstreNom").textContent = "Aucun monstre";
-    document.getElementById("monstrePV").textContent = "-";
-    document.getElementById("monstreForce").textContent = "-";
-    document.getElementById("monstreDefense").textContent = "-";
-    document.getElementById("monstrePosition").textContent = "-";
-  }
 
-  const key = `${tile.x},${tile.y}`;
+  UpdateInfosMonstre(tile.monstre);
+
+  const key = `${tile.X},${tile.Y}`;
   tilesVisible.set(key, tile);
   
   var typeStr = "default";
@@ -362,10 +341,28 @@ function updateSelectedTile(tile) {
   }
   
   selectedTileDiv.innerHTML = `
-  <div class="divCard"><p>Position : ${tile.x},${tile.y}</p></div>
+  <div class="divCard"><p>Position : ${tile.X},${tile.Y}</p></div>
   <div class="divCard"><p>Type : ${typeStr}</p></div>
   <div class="divCard"><p>Traversable : ${tile.estAccessible ? 'oui' : 'non'}</p></div>
   `;
+}
+
+function UpdateInfosMonstre(selectedTileMonster)
+{
+  if(selectedTileMonster != null){
+    document.getElementById("monstreNom").textContent = selectedTileMonster.nom;
+    document.getElementById("monstrePV").textContent = selectedTileMonster.pointsVieActuels;
+    document.getElementById("monstreForce").textContent = selectedTileMonster.attaque;
+    document.getElementById("monstreDefense").textContent = selectedTileMonster.defense;
+    document.getElementById("monstrePosition").textContent = `${selectedTileMonster.x}, ${selectedTileMonster.y}`;
+  }
+  if(selectedTileMonster == null){
+    document.getElementById("monstreNom").textContent = "Aucun monstre";
+    document.getElementById("monstrePV").textContent = "-";
+    document.getElementById("monstreForce").textContent = "-";
+    document.getElementById("monstreDefense").textContent = "-";
+    document.getElementById("monstrePosition").textContent = "-";
+  }
 }
 
 
@@ -374,7 +371,7 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
   const mapTiles = new Map();
   
   tilesFetched.forEach(t => {
-    const key = `${t.positionX},${t.positionY}`;
+    const key = `${t.X},${t.Y}`;
     mapTiles.set(key, t);      
     tilesVisible.set(key, t);           
   });
@@ -392,7 +389,7 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
           fullGrid.push(tilesVisible.get(key));
         }
         else {
-          fullGrid.push({ positionX: posX, positionY: posY, imageUrl:"tuileCache.png", type:"PLACEHOLDER" });
+          fullGrid.push({ X: posX, Y: posY, imageUrl:"tuileCache.png", type:"PLACEHOLDER" });
         }
     }
   }
@@ -403,12 +400,12 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
 async function deplacer(dx, dy) {
   if (!personnage && !user) return;
   
-  const nouvelleX = personnage.positionX + dx;
-  const nouvelleY = personnage.positionY + dy;
+  const nouvelleX = personnage.X + dx;
+  const nouvelleY = personnage.Y + dy;
   
   // Appel API pour valider le déplacement
   try {
-    const response = await fetch(`https://localhost:7061/api/Personnages/Deplacement?posX=${nouvelleX}&posY=${nouvelleY}&idPerso=${personnage.id}`);
+    const response = await fetch(`https://localhost:7061/api/Personnages/Deplacement?X=${nouvelleX}&Y=${nouvelleY}&idPerso=${personnage.id}`);
     
     if (!response.ok) {
       const msg = await response.json();
@@ -438,42 +435,40 @@ async function deplacer(dx, dy) {
     }
     else if(!resultFight)
     {
-      personnage.positionX = nouvelleX;
-      personnage.positionY = nouvelleY;
+      personnage.X = nouvelleX;
+      personnage.Y = nouvelleY;
     }
     
 
-    updatePlayerPosition(personnage.positionX, personnage.positionY);
+    updatePlayerPosition(personnage.X, personnage.Y);
 
     localStorage.setItem("personnage", JSON.stringify(personnage));
     
     nouvellesTiles.forEach(tile => {
-      const key = `${tile.x},${tile.y}`;
+      const key = `${tile.X},${tile.Y}`;
       tilesVisible.set(key, tile);
     });
     
     // Reconstruire la grille complète
-    const fullGrid = buildFullGrid(personnage.positionX, personnage.positionY, tilesVisible);
+    const fullGrid = buildFullGrid(personnage.X, personnage.Y, tilesVisible);
     displayTiles(fullGrid);
     
   } catch (err) {
-    console.error("Erreur déplacement:", err);
+    handleAPIError(err, "Incapable de faire le déplacement");
   }
 }
 
 // Met à jour la position du joueur dans la grille
-function updatePlayerPosition(x, y) {
+function updatePlayerPosition(X, Y) {
   const playerDiv = document.getElementById('player');
   if (!playerDiv) return;
   
   // Taille d'une tuile (ajuste si ce n’est pas 32px)
   const tileSize = 32;
   
-  playerDiv.style.left = (x * tileSize) + "px";
-  playerDiv.style.top = (y * tileSize) + "px";
+  playerDiv.style.left = (X * tileSize) + "px";
+  playerDiv.style.top = (Y * tileSize) + "px";
 }
-
-
 
 // Gestion des boutons de déplacement
 document.addEventListener('DOMContentLoaded', () => {
@@ -504,16 +499,13 @@ async function login(email, motDePasse) {
         
         const utilisateur = await response.json();
         getPersonnageByUserId(utilisateur.id, utilisateur.pseudo);
+
         localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
         localStorage.setItem('isLoggedIn', 'true');
+
         window.location.href = "index.html";
       } catch (err) {
-        console.error("Erreur lors de la connexion:", err);
-        const errorDiv = document.getElementById('error-message');
-        if(errorDiv){
-          errorDiv.textContent = err.message;
-          errorDiv.style.display = "block";
-        }
+        handleAPIError(err, "Problème lors du login")
       }
     }
     
@@ -532,8 +524,9 @@ async function login(email, motDePasse) {
         }
         
         const utilisateur = await response.json();
-        console.log("Utilisateur créé :", utilisateur);
+
         localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+        localStorage.setItem('isLoggedIn', 'true');
         
         // Création du personnage associé
         getPersonnageById(utilisateur.id, pseudo);
@@ -542,14 +535,10 @@ async function login(email, motDePasse) {
           window.location.href = "index.html";
           
         } catch (err) {
-          console.error("Erreur lors de l'inscription:", err);
-          const errorDiv = document.getElementById('error-message');
-          if(errorDiv){
-          errorDiv.textContent = err.message;
-          errorDiv.style.display = "block";
+          handleAPIError(err, "Erreur lors de l'inscription");
         }
       }
-    }
+    
     function deconnection() {
         localStorage.setItem("utilisateur", null);
         localStorage.setItem("isLoggedIn", false);
@@ -564,39 +553,42 @@ async function login(email, motDePasse) {
       if (currentPage.endsWith('login.html') || currentPage.endsWith('register.html')) {
           return;
       }
+
       var LoggedIn = localStorage.getItem("isLoggedIn");
-      var user = localStorage.getItem("utilisateur");
 
       // Since localStorage stores everything as strings:
-      if (LoggedIn === "false" && (user === "null" || user === null || user === "")) {
+      if (LoggedIn === "false") {
           window.location.href = 'login.html'; 
       }
     }
 
+    //Bouton déconnection
     document.addEventListener('DOMContentLoaded', () => {
       const deconnectBtn = document.getElementById('btnDeconnecter');
       if(deconnectBtn) deconnectBtn.addEventListener('click', deconnection);
     });
+
 
     async function getPersonnageByUserId(userId, pseudo) {
       try {
         const response = await fetch(`https://localhost:7061/api/Personnages/User/${userId}`);
         if (!response.ok) {
           // Si le personnage n'existe pas, le créer
-          return await CreatePersonnage(userId, pseudo);
+          personnage = await CreatePersonnage(userId, pseudo);
+          return personnage;
         }
-        const personnage = await response.json();
 
-        console.log("Personnage récupéré :", personnage);
+        personnage = await response.json();
+
         localStorage.setItem("personnage", JSON.stringify(personnage));
         return personnage;
       } catch (err) {
-        console.error("Erreur lors de la récupération du personnage:", err);
-        return await CreatePersonnage(userId, pseudo);
+        handleAPIError(err, "Erreur lors de la récupération du personnage");
       }
     }
   // Récupère le personnage par ID ou le crée s'il n'existe pas
   async function CreatePersonnage(id, pseudo) {
+    try{
       const responsePerso = await fetch("https://localhost:7061/api/Personnages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -606,11 +598,16 @@ async function login(email, motDePasse) {
       if (!responsePerso.ok) {
         const message = await responsePerso.text();
         throw new Error(message || "Erreur lors de la création du personnage");
-          }
+      }
           
-          const personnage = await responsePerso.json();
-          localStorage.setItem("personnage", JSON.stringify(personnage));
-          return personnage;
+      const personnage = await responsePerso.json();
+      localStorage.setItem("personnage", JSON.stringify(personnage));
+      return personnage;
+    }
+    catch(err)
+    {
+      handleAPIError(err, "Erreur lors de la création du personnage");
+    }
   }
     
 // Pour les formulaires
