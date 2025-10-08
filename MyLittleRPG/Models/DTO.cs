@@ -60,9 +60,9 @@
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public string TypeTuile { get; set; }
+        public string? TypeTuile { get; set; }
 
-        public string imageUrl { get; set; }
+        public string? imageUrl { get; set; }
 
         // Monstre présent sur la tuile (null si aucun)
         public InstanceMonstreDto? Monstre { get; set; }
@@ -91,6 +91,7 @@
     {
         public PersonnageDto(Personnage personnage)
         {
+            this.id = personnage.Id;
             this.Niveau = personnage.Niveau;
             this.XP = personnage.XP;
             this.PV = personnage.PV;
@@ -100,7 +101,7 @@
             this.PositionX = personnage.PositionX;
             this.PositionY = personnage.PositionY;
         }
-
+        public int id { get; set; }
         public int Niveau { get; set; }
         public int XP { get; set; }
         public int PV { get; set; }

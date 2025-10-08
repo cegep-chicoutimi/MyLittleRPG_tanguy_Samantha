@@ -34,6 +34,8 @@ namespace MyLittleRPG.Models
             PositionY = positionY;
             UtilisateurId = utilisateurId;
             DateCreation = DateTime.Now;
+            PositionVilleX = 10;
+            PositionVilleY = 10;
         }
 
         internal void getexp(int exp)

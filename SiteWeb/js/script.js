@@ -4,16 +4,32 @@ window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
 //Vérifier if logged in
 document.addEventListener('DOMContentLoaded', VerifIfLoggedIn);
 
+// Modal elements
 const openModalBtn = document.getElementById('btn-simuler');
+if(openModalBtn) openModalBtn.addEventListener('click', () => {
+  myModal.style.display = 'block';
+  modalBackdrop.style.display = 'block';
+});
 const closeModalBtn = document.getElementById('closeModalBtn');
+if(closeModalBtn) closeModalBtn.addEventListener('click', () => {
+  myModal.style.display = 'none';
+  modalBackdrop.style.display = 'none';
+});
+
 const myModal = document.getElementById('myModal');
 const modalBackdrop = document.getElementById('modal-backdrop');
+if(modalBackdrop) modalBackdrop.addEventListener('click', () => {
+  myModal.style.display = 'none';
+  modalBackdrop.style.display = 'none';
+});
+
+// Variables globales
 
 let personnage = JSON.parse(localStorage.getItem("personnage"));
 let user = JSON.parse(localStorage.getItem("utilisateur"));
+let selectedTileDiv = document.querySelector('.card-body.selected-tile');
 let allTiles = [];
 const tilesVisible = new Map();
-let monsters = [];
 let nbMonstresVaincus = 0;
 
 function ChangementTheme() {
@@ -35,109 +51,134 @@ function ChangementTheme() {
 
 document.addEventListener("DOMContentLoaded", ChangementTheme);
 
-// Only add event listeners if modal exists
-if (openModalBtn && closeModalBtn && modalBackdrop && myModal) {
-  
-  openModalBtn.addEventListener('click', () => {
-    myModal.style.display = 'block';
-    modalBackdrop.style.display = 'block';
-  });
-
-  closeModalBtn.addEventListener('click', () => {
-    myModal.style.display = 'none';
-    modalBackdrop.style.display = 'none';
-  });
-
-  // Optional: close when clicking backdrop
-  modalBackdrop.addEventListener('click', () => {
-    myModal.style.display = 'none';
-    modalBackdrop.style.display = 'none';
-  });
-}
-
-// Met à jour l'affichage du nombre de monstres vaincus
-/*function updateMonstresVaincus() {
-  const compteurDiv = document.querySelector('#monstresVaincus');
-  compteurDiv.textContent = `Monstres vaincus : ${nbMonstresVaincus}`;
-}
-
-// Fonction appelée lorsqu'un monstre est vaincu
-function onMonsterDefeated(monstre) {
-  nbMonstresVaincus++;
-
-  
-  if(nbMonstresVaincus % 10 === 0) {
-    fetchMonsters10().then(newMonsters => {
-      monsters = monsters.concat(newMonsters);
-    });
-  }
-
-  updateMonstresVaincus();
-
-  for(let x = 0; x < monsters.length; x++)
-  {
-    if(monsters[x].MonstreId == monstre.MonstreId)
-    monsters.splice(x,1);
-    return;
-  }
-}
-
-// Charger les monstres au démarrage
-fetchAllMonsters().then(loadedMonsters => {
-  monsters = loadedMonsters;
-  console.log("Monstres chargés au démarrage :", monsters);
-});
-
-// Fonction pour récupérer les 10 monstres
-async function fetchMonsters10() {
-  try {
-    const response = await fetch('https://localhost:7061/api/Monstres/monstre/generateall');
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
-    const monsters = await response.json();
-    return monsters;
-  } catch (error) {
-    console.error('Erreur lors du chargement des monstres:', error);
-    handleAPIError(error, 'Impossible de charger les monstres');
-    return [];
-  }
-}
-// Fonction pour récupérer tous les monstres
-async function fetchAllMonsters() {
-  try {
-    const response = await fetch('https://localhost:7061/api/Monstres/monstre/generate10');
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
-    const monsters = await response.json();
-    return monsters;
-  } catch (error) {
-    console.error('Erreur lors du chargement des monstres:', error);
-    handleAPIError(error, 'Impossible de charger les monstres');
-    return [];
-  }
-}*/
+// Simulation de combat
 
 function SimulationCombat() {
-  if (monsters.length === 0) {
-    alert("Aucun monstre disponible pour le combat.");
-    return;
-  }
+  if (!personnage || !user) return;
+
   const monstre = selectedTileDiv.monstre;
+  const modalContent = document.querySelector('#myModal .modal-content');
 
   if(monstre == null){
-    alert("Aucun monstre sur cette tuile.");
+    modalContent.innerHTML = `<h3>Aucun monstre sur cette tuile !</h3>`;
+    myModal.style.display = 'block';
+    modalBackdrop.style.display = 'block';
     return;
   }
 
 
-  // Logique de simulation de combat ici
+  const resultats = LogiqueCombat(personnage, monstre);
+
+  modalContent.innerHTML = `
+    <h2 class="modalTitle text-center mb-3">Simulation de Combat</h2>
+    <h4 class="text-center mb-4">${personnage.nom} <span class="text-danger">vs</span> ${monstre.nom}</h4>
+
+    <div class="combat-characters d-flex justify-content-around mb-4">
+      <div class="character-card text-center p-2">
+        <img src="img/sprite.png" alt="Sprite Joueur" class="mb-2" style="width:60px;height:60px;">
+        <h5>Joueur</h5>
+        <p>Force: <strong>${personnage.force}</strong></p>
+        <p>Défense: <strong>${personnage.defense}</strong></p>
+        <p>PV: <strong>${personnage.pv}</strong></p>
+      </div>
+
+      <div class="character-card text-center p-2">
+        <img src="${monstre.spriteUrl}" alt="Sprite Monstre" class="mb-2" style="width:60px;height:60px;">
+        <h5>Monstre</h5>
+        <p>Force: <strong>${monstre.attaque}</strong></p>
+        <p>Défense: <strong>${monstre.defense}</strong></p>
+        <p>PV: <strong>${monstre.pointsVieActuels}</strong></p>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="combat-results text-center">
+      <h5>Résultats (100 simulations)</h5>
+      <p>Victoires du joueur : <strong>${resultats.nbVictoires}</strong></p>
+      <p>Défaites du joueur : <strong>${resultats.nbDefaites}</strong></p>
+      <p>Égalités : <strong>${resultats.nbEgalites}</strong></p>
+      <p>Dégâts moyens infligés par le joueur : <strong>${resultats.moyenneDegatsJoueur.toFixed(2)}</strong></p>
+      <p>Dégâts moyens infligés par le monstre : <strong>${resultats.moyenneDegatsMonstre.toFixed(2)}</strong></p>
+      <p>PV moyens restants du joueur : <strong>${resultats.moyennePVRestantsJoueur.toFixed(2)}</strong></p>
+      <p>PV moyens restants du monstre : <strong>${resultats.moyennePVRestantsMonstre.toFixed(2)}</strong></p>
+      <hr>
+      <p>Nombre total de monstres vaincus : <strong>${nbMonstresVaincus}</strong></p>
+    </div>
+  `;
+
+  // Afficher la modal
+  myModal.style.display = 'block';
+  modalBackdrop.style.display = 'block';
 }
-/*document.addEventListener('DOMContentLoaded', () => {
+
+function LogiqueCombat(personnage, monstre) {
+  //Variables pour les statistiques
+  const nbSimulations = 1000;
+  var nbVictoires = 0;
+  var nbDefaites = 0;
+  var nbEgalites = 0;
+  var moyenneDegatsJoueur = 0;
+  var moyenneDegatsMonstre = 0;
+  var moyennePVRestantsJoueur = 0;
+  var moyennePVRestantsMonstre = 0;
+
+  // Variables de combat
+  var ForceJoueur = personnage.force;
+  var DefenseJoueur = personnage.defense;
+  var ForceMonstre = monstre.attaque;
+  var DefenseMonstre = monstre.defense;
+
+  // Simulation des combats
+  for (let i = 0; i < nbSimulations; i++) {
+    //Réinitialisation des variables de combat
+    var PointsDeVieJoueur = personnage.pv;
+    var PointsDeVieMonstre = monstre.pointsVieActuels;
+    var facteurAleatoireMonstre = Math.random() * (1.25 - 0.8) + 0.8;
+    var facteurAleatoireJoueur = Math.random() * (1.25 - 0.8) + 0.8;
+    var degatsMonstre = (ForceJoueur - DefenseMonstre) * facteurAleatoireMonstre;
+    var degatsJoueur = (ForceMonstre - DefenseJoueur) * facteurAleatoireJoueur;
+
+    if (degatsMonstre < 0) degatsMonstre = 0;
+    if (degatsJoueur < 0) degatsJoueur = 0;
+
+    PointsDeVieMonstre -= degatsMonstre;
+    PointsDeVieJoueur -= degatsJoueur;
+    
+    //Mise à jour des moyennes
+    moyenneDegatsJoueur += degatsJoueur;
+    moyenneDegatsMonstre += degatsMonstre;
+    moyennePVRestantsJoueur += PointsDeVieJoueur;
+    moyennePVRestantsMonstre += PointsDeVieMonstre;
+
+  //Vérification du résultat du combat
+      if(PointsDeVieMonstre <= 0 && PointsDeVieJoueur > 0) 
+      { 
+        nbVictoires++;
+        nbMonstresVaincus++;
+      }
+      else if(PointsDeVieJoueur <= 0)
+      {
+        nbDefaites++; 
+      }
+      else{
+        nbEgalites++;
+      }
+  }
+  //Calcul des moyennes
+  moyenneDegatsJoueur = moyenneDegatsJoueur / nbSimulations;
+  moyenneDegatsMonstre = moyenneDegatsMonstre / nbSimulations;
+  moyennePVRestantsJoueur = moyennePVRestantsJoueur / nbSimulations;
+  moyennePVRestantsMonstre = moyennePVRestantsMonstre / nbSimulations;
+
+  return { nbVictoires, nbDefaites, nbEgalites, moyenneDegatsJoueur, moyenneDegatsMonstre, moyennePVRestantsJoueur, moyennePVRestantsMonstre };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
   const simulerButton = document.getElementById('btn-simuler');
-  simulerButton.addEventListener('click', SimulationCombat);
-});*/
+  if(simulerButton) simulerButton.addEventListener('click', SimulationCombat);
+});
+
 
 // Affiche la grille initiale centrée sur le personnage
 async function AfficherGrilleInitial() {
@@ -289,9 +330,22 @@ async function getTileAsync(x, y) {
 // Met à jour la section "Tuile Sélectionnée"
 function updateSelectedTile(tile) {
   const selectedTileDiv = document.querySelector('.card-body.selected-tile');
-  
-  console.log(tile)
-  
+  selectedTileDiv.monstre = tile.monstre; // Stocker le monstre (ou null) dans la div
+  if(tile.monstre != null){
+    document.getElementById("monstreNom").textContent = tile.monstre.nom;
+    document.getElementById("monstrePV").textContent = tile.monstre.pointsVieActuels;
+    document.getElementById("monstreForce").textContent = tile.monstre.attaque;
+    document.getElementById("monstreDefense").textContent = tile.monstre.defense;
+    document.getElementById("monstrePosition").textContent = `${tile.monstre.x}, ${tile.monstre.y}`;
+  }
+  if(tile.monstre == null){
+    document.getElementById("monstreNom").textContent = "Aucun monstre";
+    document.getElementById("monstrePV").textContent = "-";
+    document.getElementById("monstreForce").textContent = "-";
+    document.getElementById("monstreDefense").textContent = "-";
+    document.getElementById("monstrePosition").textContent = "-";
+  }
+
   const key = `${tile.x},${tile.y}`;
   tilesVisible.set(key, tile);
   
@@ -306,9 +360,6 @@ function updateSelectedTile(tile) {
     case "ROUTE" :typeStr="route";break;
     case "PLACEHOLDER": typeStr = "Inconnue"; break;
   }
-  
-  
-  console.log(tile.type + " ; "+ typeStr)
   
   selectedTileDiv.innerHTML = `
   <div class="divCard"><p>Position : ${tile.x},${tile.y}</p></div>
@@ -366,13 +417,34 @@ async function deplacer(dx, dy) {
     }
     
     const grilleRetour = await response.json();
+    const resultFight = grilleRetour.resultFight;
     const nouvellesTiles = grilleRetour.tuiles;
+
+    if(resultFight)
+    {
+      if(resultFight.code == "Draw")
+      {
+        alert("Égalité ! Vous êtes toujours en vie mais le monstre aussi !");
+      }
+      else if(resultFight.code == "Lose")
+      {
+        alert("Vous avez perdu le combat et êtes mort ! Vous revenez à la ville la plus proche.");
+      }
+      else if(resultFight.code == "Win")
+      {
+        alert("Vous avez vaincu le monstre !");
+      }
+      personnage = resultFight.personnage; 
+    }
+    else if(!resultFight)
+    {
+      personnage.positionX = nouvelleX;
+      personnage.positionY = nouvelleY;
+    }
     
-    // Mettre à jour la position locale correctement (même casse que le JSON)
-    personnage.positionX = nouvelleX;
-    personnage.positionY = nouvelleY;
-    updatePlayerPosition(nouvelleX,nouvelleY)
-    
+
+    updatePlayerPosition(personnage.positionX, personnage.positionY);
+
     localStorage.setItem("personnage", JSON.stringify(personnage));
     
     nouvellesTiles.forEach(tile => {
@@ -381,7 +453,7 @@ async function deplacer(dx, dy) {
     });
     
     // Reconstruire la grille complète
-    const fullGrid = buildFullGrid(nouvelleX, nouvelleY, tilesVisible);
+    const fullGrid = buildFullGrid(personnage.positionX, personnage.positionY, tilesVisible);
     displayTiles(fullGrid);
     
   } catch (err) {

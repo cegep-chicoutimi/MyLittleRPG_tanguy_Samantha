@@ -61,8 +61,7 @@ namespace MyLittleRPG.Controllers
             return personnage;
         }
 
-        [HttpGet]
-        [Route("Deplacement")]
+        [HttpGet("Deplacement")]
         public async Task<ActionResult<GrilleJeuDto>> Deplacement(int posX, int posY, int idPerso)
         {
             GrilleJeuDto grille = new GrilleJeuDto();
@@ -180,7 +179,8 @@ namespace MyLittleRPG.Controllers
                     TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
                     tileDTO.X = tile.PositionX;
                     tileDTO.Y = tile.PositionY;
-                    tileDTO.TypeTuile = tile.imageURL;
+                    tileDTO.imageUrl = tile.imageURL;
+                    tileDTO.TypeTuile = tile.Type.ToString();
                     tileDTO.EstAccessible = tile.estTraversable;
                     var InstanceMonstre = await _context.InstanceMonstres
                         .Include(im => im.Monster)
@@ -230,7 +230,8 @@ namespace MyLittleRPG.Controllers
                     TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
                     tileDTO.X = tile.PositionX;
                     tileDTO.Y = tile.PositionY;
-                    tileDTO.TypeTuile = tile.imageURL;
+                    tileDTO.imageUrl = tile.imageURL;
+                    tileDTO.TypeTuile = tile.Type.ToString();
                     tileDTO.EstAccessible = tile.estTraversable;
                     var InstanceMonstre = await _context.InstanceMonstres
                         .Include(im => im.Monster)
@@ -295,6 +296,8 @@ namespace MyLittleRPG.Controllers
             {
                 resultat.code = "Draw";
             }
+
+            _context.SaveChanges();
 
             PersonnageDto personnageDto = new PersonnageDto(personnage);
             resultat.Personnage = personnageDto;
