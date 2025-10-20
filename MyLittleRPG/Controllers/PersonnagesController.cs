@@ -26,7 +26,11 @@ namespace MyLittleRPG.Controllers
             _context = context;
             _tileGeneration = new TileGeneration(context);
         }
-
+        /// <summary>
+        /// Va chercher le personnage selon l'identifiant de l'utilisateur
+        /// </summary>
+        /// <param name="UserId">id de l'utilisateur</param>
+        /// <returns>personnage</returns>
         // GET: api/Personnages/5
         [HttpGet("User/{UserId}")]
         public async Task<ActionResult<Personnage>> GetPersonnageUserId(int UserId)
@@ -55,6 +59,13 @@ namespace MyLittleRPG.Controllers
         //    return personnage;
         //}
 
+        /// <summary>
+        /// Fait tous les actions nécessaires lorsque le personnage se déplace
+        /// </summary>
+        /// <param name="posX">Position X</param>
+        /// <param name="posY">Position Y</param>
+        /// <param name="idPerso">Id personnage</param>
+        /// <returns>grille de jeu actualiser</returns>
         [HttpGet("Deplacement")]
         public async Task<ActionResult<GrilleJeuDto>> Deplacement(int posX, int posY, int idPerso)
         {
@@ -106,7 +117,14 @@ namespace MyLittleRPG.Controllers
             }
             return BadRequest(new { message = "Déplacement non autorisé. Vous pouvez vous déplacer d'une case maximum." });        
         }
-
+        /// <summary>
+        /// Sauvegarde les données lors du déplacement
+        /// </summary>
+        /// <param name="grille">grille de jeu</param>
+        /// <param name="posX">Position X</param>
+        /// <param name="posY">Position Y</param>
+        /// <param name="idPerso">id personnage</param>
+        /// <returns>grille de jeu actualisé</returns>
         private async Task<ActionResult<GrilleJeuDto>> saveDeplacement(GrilleJeuDto grille ,int posX,int posY,int idPerso)
         {
             try
@@ -154,7 +172,13 @@ namespace MyLittleRPG.Controllers
             return grille;
         }
         
-
+        /// <summary>
+        /// Logique de combat et son résultat
+        /// </summary>
+        /// <param name="X">position X</param>
+        /// <param name="Y">Position Y</param>
+        /// <param name="id">id du personnage</param>
+        /// <returns>resultat du combat</returns>
         private ResultDto fight(int X, int Y, int id)
         {
             ResultDto resultat = new ResultDto();
@@ -207,7 +231,9 @@ namespace MyLittleRPG.Controllers
             checkMonstreVaincu();
             return resultat;
         }
-
+        /// <summary>
+        /// Appelle generate10 si 10 monstres ont été vaincus
+        /// </summary>
         private void checkMonstreVaincu()
         {
             int nbrMonstre = _context.InstanceMonstres.Count();
@@ -216,7 +242,11 @@ namespace MyLittleRPG.Controllers
         }
 
 
-
+        /// <summary>
+        /// Création d'un personnage
+        /// </summary>
+        /// <param name="persoDto">personnage</param>
+        /// <returns>personnage créé</returns>
         // POST: api/Personnages
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -240,8 +270,6 @@ namespace MyLittleRPG.Controllers
 
             return CreatedAtAction("GetPersonnage", new { id = personnage.Id }, personnage);
         }
-
-
 
         private bool PersonnageExists(int id)
         {

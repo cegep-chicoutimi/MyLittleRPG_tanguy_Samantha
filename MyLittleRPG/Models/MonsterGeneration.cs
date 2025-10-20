@@ -20,6 +20,11 @@ namespace MyLittleRPG.Models
         private readonly MonsterContext _context;
 
         public MonsterGeneration(MonsterContext _context) { this._context = _context; }
+
+        /// <summary>
+        /// Génération 10 monstre pour lorsqu'on atteint le seuil de monstre vaincu
+        /// </summary>
+        /// <returns></returns>
         public bool generate10()
         {
             List<string> UsedXY = new List<string>();
@@ -31,7 +36,10 @@ namespace MyLittleRPG.Models
             _context.SaveChanges();
             return true;
         }
-
+        /// <summary>
+        /// Ajouter un nouveau monstre
+        /// </summary>
+        /// <param name="UsedXY"></param>
         public void addmonstre(List<string> UsedXY)
         {
             Random random = new Random();
@@ -66,7 +74,12 @@ namespace MyLittleRPG.Models
 
             _context.InstanceMonstres.Add(monsterInstance);
         }
-
+        /// <summary>
+        /// Vérifie si la tuile permet de faire apparaitre un monstre
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         private bool isSpawnable(int x, int y)
         {
 
@@ -82,7 +95,12 @@ namespace MyLittleRPG.Models
 
             return true;
         }
-
+        /// <summary>
+        /// Calcul distance de la ville la plus proche
+        /// </summary>
+        /// <param name="x">Position X</param>
+        /// <param name="y">Position y</param>
+        /// <returns>distance</returns>
         private int getDistanceVille(int x, int y)
         {
             int distance = 1000;
@@ -96,9 +114,11 @@ namespace MyLittleRPG.Models
             }
 
             return distance;
-            throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// Va chercher un monstre aléatoire
+        /// </summary>
+        /// <returns>monstre</returns>
         private Monster getRandomMonstre()
         {
             Random random = new Random();

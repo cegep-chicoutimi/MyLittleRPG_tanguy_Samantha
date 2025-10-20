@@ -26,6 +26,10 @@ namespace MyLittleRPG.Controllers
             generator = new MonsterGeneration(context);
         }
 
+        /// <summary>
+        /// Générer tous les monstres du jeu
+        /// </summary>
+        /// <returns>Resultat</returns>
         [HttpPut]
         [Route("monstre/generateall")]
         public async Task<IActionResult> generateall()

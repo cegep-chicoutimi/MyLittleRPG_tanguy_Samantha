@@ -26,6 +26,12 @@ namespace MyLittleRPG.Controllers
             TileGeneration = new TileGeneration(context);
         }
 
+        /// <summary>
+        /// Va chercher les tuiles autour du personnage
+        /// </summary>
+        /// <param name="PositionX">PositionX</param>
+        /// <param name="PositionY">PositionY</param>
+        /// <returns>grille des tuiles dévoilés</returns>
         // GET: api/Tiles
         [HttpGet]
         public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int PositionX, int PositionY)
@@ -61,7 +67,12 @@ namespace MyLittleRPG.Controllers
 
             return grille;
         }
-
+        /// <summary>
+        /// Va chercher une tuile selon la position
+        /// </summary>
+        /// <param name="X">PositionX</param>
+        /// <param name="Y">PositionY</param>
+        /// <returns>tuile</returns>
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
         public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int X, int Y)
@@ -86,7 +97,14 @@ namespace MyLittleRPG.Controllers
 
             return tileDTO;
         }
-
+        /// <summary>
+        /// Générer toutes les tuiles du jeu 
+        /// </summary>
+        /// <param name="minX">taille minimum grille X</param>
+        /// <param name="maxX">taille maximum grille X</param>
+        /// <param name="minY">taille minimum grille Y</param>
+        /// <param name="maxY">taille maximum grille Y</param>
+        /// <returns>résultat</returns>
         // GET: api/Tiles/generate/all?minX=1&maxX=50&minY=1&maxY=50
         [HttpGet("generate/all")]
         public async Task<IActionResult> AddAllTiles(
@@ -129,83 +147,6 @@ namespace MyLittleRPG.Controllers
             {
                 _context.ChangeTracker.AutoDetectChangesEnabled = oldDetect;
             }
-        }
-
-        //// PUT: api/Tiles/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutTile(int id, Tile tile)
-        //{
-        //    if (id != tile.PositionX)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(tile).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!TileExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        //// POST: api/Tiles
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Tile>> PostTile(Tile tile)
-        //{
-        //    _context.Tiles.Add(tile);
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        if (TileExists(tile.PositionX))
-        //        {
-        //            return Conflict();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
-        //}
-
-        //// DELETE: api/Tiles/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteTile(int id)
-        //{
-        //    var tile = await _context.Tiles.FindAsync(id);
-        //    if (tile == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Tiles.Remove(tile);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        private bool TileExists(int id)
-        {
-            return _context.Tiles.Any(e => e.X == id);
         }
     }
 

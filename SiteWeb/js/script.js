@@ -347,6 +347,7 @@ function updateSelectedTile(tile) {
   `;
 }
 
+//mise a jour de la div monstre de la tile selectionné
 function UpdateInfosMonstre(selectedTileMonster)
 {
   if(selectedTileMonster != null){

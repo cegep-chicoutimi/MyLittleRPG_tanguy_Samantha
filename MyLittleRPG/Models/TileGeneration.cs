@@ -19,7 +19,12 @@ namespace MyLittleRPG.Models
         {
             _context = context;
         }
-
+        /// <summary>
+        /// Récupérer tuile existante ou générer nouvelle tuile
+        /// </summary>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
+        /// <returns>Tuile</returns>
         public async Task<Tile?> GenererTile(int X, int Y)
         {
             Tile? tile = await _context.Tiles.FindAsync(X, Y);
@@ -39,7 +44,13 @@ namespace MyLittleRPG.Models
 
             return tile;
         }
-
+        /// <summary>
+        /// Instancie la tuile aléatoire selon les probabilités
+        /// </summary>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
+        /// <param name="tile">Tuile</param>
+        /// <returns>Tuile</returns>
         private Tile? gettilerandom(int X, int Y, ref Tile tile)
         {
             Random random = new Random();
@@ -73,7 +84,12 @@ namespace MyLittleRPG.Models
 
             return tile;
         }
-
+        /// <summary>
+        /// Générer une liste de tuile autour de la position donnée
+        /// </summary>
+        /// <param name="posX">Position X</param>
+        /// <param name="posY">Position Y</param>
+        /// <returns>Liste des tuiles visibles</returns>
         public async Task<IEnumerable<Tile>> GenererTilesAutour(int posX, int posY)
         {
             List<Tile> tiles = new List<Tile>();
@@ -96,6 +112,9 @@ namespace MyLittleRPG.Models
             }
             return tiles;
         }
+        /// <summary>
+        /// Réinitialiser les probabilités
+        /// </summary>
         private void resetproba()
         {
             probaHerbe = 20;
@@ -105,7 +124,11 @@ namespace MyLittleRPG.Models
             probaVille = 05;
             probaRoute = 35;
         }
-
+        /// <summary>
+        /// Changer les probabilités selon la position actuel
+        /// </summary>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
         private void reglerproba(int X, int Y)
         {
             var tileW = _context.Tiles.Find(X - 1, Y);
@@ -119,7 +142,10 @@ namespace MyLittleRPG.Models
 
         }
 
-
+        /// <summary>
+        /// Vérification de la tuile et changer les probabilités
+        /// </summary>
+        /// <param name="tile">tuile à vérifier</param>
         private void checkTile(Tile? tile)
         {
             if (tile != null)

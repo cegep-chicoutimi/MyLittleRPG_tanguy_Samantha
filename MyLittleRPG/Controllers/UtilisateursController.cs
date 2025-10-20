@@ -39,7 +39,11 @@ namespace MyLittleRPG.Controllers
 
         //    return utilisateur;
         //}
-
+        /// <summary>
+        /// Permet à l'utilisateur de se connecter
+        /// </summary>
+        /// <param name="login">email et mot de passe</param>
+        /// <returns>Utilisateur connecté</returns>
         // GET: api/Utilisateurs/5
         [HttpPost]
         [Route("auth/login")]
@@ -88,7 +92,11 @@ namespace MyLittleRPG.Controllers
 
             return utilisateur;
         }
-
+        /// <summary>
+        /// Pour hash le mot de passe
+        /// </summary>
+        /// <param name="arrInput">mot de passe</param>
+        /// <returns>output</returns>
         static string ByteArrayToString(byte[] arrInput)
         {
             int i;
@@ -99,7 +107,11 @@ namespace MyLittleRPG.Controllers
             }
             return sOutput.ToString();
         }
-
+        /// <summary>
+        /// Création d'un utilisateur
+        /// </summary>
+        /// <param name="utilisateur">utilisateur</param>
+        /// <returns>résultat</returns>
         // POST: api/Utilisateurs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
