@@ -193,7 +193,7 @@ async function AfficherGrilleInitial() {
   const fetchedMap = new Map();
   fetchedTiles.forEach(tile => {
     if (tile) {
-      const key = `${tile.x},${tile.y}`;
+      const key = `${tile.X},${tile.Y}`;
     console.log("Adding tile to map:", key, tile);
       fetchedMap.set(key, tile);
       tilesVisible.set(key, tile);
@@ -522,14 +522,8 @@ async function login(email, motDePasse) {
           const message = await response.text();
           throw new Error(message || "Erreur d'inscription");
         }
-        
-        const utilisateur = await response.json();
 
-        localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
-        localStorage.setItem('isLoggedIn', 'true');
-        
-        // Création du personnage associé
-        getPersonnageById(utilisateur.id, pseudo);
+        login(email,motDePasse)
           
           // Redirection vers la carte
           window.location.href = "index.html";

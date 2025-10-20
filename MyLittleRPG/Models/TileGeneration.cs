@@ -20,49 +20,56 @@ namespace MyLittleRPG.Models
             _context = context;
         }
 
-        public async Task<Tile?> GenererTile(int PositionX, int PositionY)
+        public async Task<Tile?> GenererTile(int X, int Y)
         {
-            Tile? tile = await _context.Tiles.FindAsync(PositionX, PositionY);
+            Tile? tile = await _context.Tiles.FindAsync(X, Y);
 
             if (tile != null)
             {
                 return tile;
             }
-            reglerproba(PositionX, PositionY);
-            Random random = new Random();
-            int rand = random.Next(101);
-
-            if (rand < probaHerbe)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.HERBE, true, "Plains.png");
-            }
-            else if (rand < probaHerbe + probaEau)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.EAU, false, "River.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.MONTAGNE, false, "Mountain.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.FORET, true, "Forest.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.VILLE, true, "Town.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.ROUTE, true, "Road.png");
-
-            }
-            else { return null; }
+            reglerproba(X, Y);
+           
+            tile = gettilerandom(X, Y, ref tile);
 
             resetproba();
 
             _context.Tiles.Add(tile);
             await _context.SaveChangesAsync();
+
+            return tile;
+        }
+
+        private Tile? gettilerandom(int X, int Y, ref Tile tile)
+        {
+            Random random = new Random();
+            int rand = random.Next(101);
+            if (rand < probaHerbe)
+            {
+                tile = new Tile(X, Y, TileType.HERBE, true, "Plains.png");
+            }
+            else if (rand < probaHerbe + probaEau)
+            {
+                tile = new Tile(X, Y, TileType.EAU, false, "River.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne)
+            {
+                tile = new Tile(X, Y, TileType.MONTAGNE, false, "Mountain.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
+            {
+                tile = new Tile(X, Y, TileType.FORET, true, "Forest.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille)
+            {
+                tile = new Tile(X, Y, TileType.VILLE, true, "Town.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
+            {
+                tile = new Tile(X, Y, TileType.ROUTE, true, "Road.png");
+
+            }
+            else { return null; }
 
             return tile;
         }
@@ -99,15 +106,15 @@ namespace MyLittleRPG.Models
             probaRoute = 35;
         }
 
-        private void reglerproba(int positionX, int positionY)
+        private void reglerproba(int X, int Y)
         {
-            var tileW = _context.Tiles.Find(positionX - 1, positionY);
+            var tileW = _context.Tiles.Find(X - 1, Y);
             checkTile(tileW);
-            var tileE = _context.Tiles.Find(positionX + 1, positionY);
+            var tileE = _context.Tiles.Find(X + 1, Y);
             checkTile(tileE);
-            var tileN = _context.Tiles.Find(positionX, positionY + 1);
+            var tileN = _context.Tiles.Find(X, Y + 1);
             checkTile(tileN);
-            var tileS = _context.Tiles.Find(positionX, positionY - 1);
+            var tileS = _context.Tiles.Find(X, Y - 1);
             checkTile(tileS);
 
         }

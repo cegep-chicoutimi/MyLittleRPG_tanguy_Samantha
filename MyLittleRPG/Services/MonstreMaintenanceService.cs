@@ -22,7 +22,7 @@ namespace MyLittleRPG.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // 1er run au démarrage
-            await RunGenerateAllSafe(stoppingToken);
+            //await RunGenerateAllSafe(stoppingToken);
 
             while (!stoppingToken.IsCancellationRequested)
             {

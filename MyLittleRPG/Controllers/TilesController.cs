@@ -38,33 +38,16 @@ namespace MyLittleRPG.Controllers
 
             foreach (var tile in tiles)
             {
-                TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
-                tileDTO.X = tile.PositionX;
-                tileDTO.Y = tile.PositionY;
-                tileDTO.TypeTuile = tile.Type.ToString();
-                tileDTO.imageUrl = tile.imageURL;
-                tileDTO.EstAccessible = tile.estTraversable;
+                TuileAvecInfosDto tileDTO = new TuileAvecInfosDto(tile);
+
                 var InstanceMonstre = await _context.InstanceMonstres
                         .Include(im => im.Monster)
-                        .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
+                        .FirstOrDefaultAsync(im => im.X == tile.X && im.Y == tile.Y);
 
                 if (InstanceMonstre != null)
                 {
                     InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
-                    monsterDTO.MonstreId = InstanceMonstre.Monster.Id;
-                    monsterDTO.Nom = InstanceMonstre.Monster.Nom;
-                    monsterDTO.SpriteUrl = InstanceMonstre.Monster.spriteUrl;
-                    monsterDTO.Niveau = InstanceMonstre.niveaux;
-                    monsterDTO.X = InstanceMonstre.PositionX;
-                    monsterDTO.Y = InstanceMonstre.PositionY;
-                    monsterDTO.PointsVieActuels = InstanceMonstre.PVactuels;
-                    monsterDTO.PointsVieMax = InstanceMonstre.PVMax;
-                    monsterDTO.Attaque = InstanceMonstre.Monster.forceBase + InstanceMonstre.niveaux;
-                    monsterDTO.Defense = InstanceMonstre.Monster.defenseBase + InstanceMonstre.niveaux;
-                    monsterDTO.ExperienceDonnee = InstanceMonstre.Monster.experienceBase + (InstanceMonstre.niveaux * 10);
-
                     tileDTO.Monstre = monsterDTO;
-
                 }
 
                 Tuiles.Add(tileDTO);
@@ -81,23 +64,18 @@ namespace MyLittleRPG.Controllers
 
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
-        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int PositionX, int PositionY)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int X, int Y)
         {
 
-            Tile? tile =  await TileGeneration.GenererTile(PositionX, PositionY);
+            Tile? tile =  await TileGeneration.GenererTile(X, Y);
             if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });
 
-            CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
+            CreatedAtAction("GetTile", new { id = tile.X }, tile);
 
-            TuileAvecInfosDto tileDTO = new TuileAvecInfosDto();
-            tileDTO.X = tile.PositionX;
-            tileDTO.Y = tile.PositionY;
-            tileDTO.imageUrl = tile.imageURL;
-            tileDTO.TypeTuile = tile.Type.ToString();
-            tileDTO.EstAccessible = tile.estTraversable;
+            TuileAvecInfosDto tileDTO = new TuileAvecInfosDto(tile);
             var InstanceMonstre = await _context.InstanceMonstres
                 .Include(im => im.Monster)
-                .FirstOrDefaultAsync(im => im.PositionX == tile.PositionX && im.PositionY == tile.PositionY);
+                .FirstOrDefaultAsync(im => im.X == tile.X && im.Y == tile.Y);
 
             if (InstanceMonstre != null)
             {
@@ -227,7 +205,7 @@ namespace MyLittleRPG.Controllers
 
         private bool TileExists(int id)
         {
-            return _context.Tiles.Any(e => e.PositionX == id);
+            return _context.Tiles.Any(e => e.X == id);
         }
     }
 
