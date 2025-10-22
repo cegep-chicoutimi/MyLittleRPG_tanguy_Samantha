@@ -1,8 +1,29 @@
-// Initialisation au chargement de la page
-window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
+
 
 //Vérifier if logged in
 document.addEventListener('DOMContentLoaded', VerifIfLoggedIn);
+
+function VerifIfLoggedIn()
+    {
+      const currentPage = window.location.pathname;
+
+      // Don't redirect if already on login.html
+      if (currentPage.endsWith('login.html') || currentPage.endsWith('register.html')) {
+          return;
+      }
+
+      var LoggedIn = localStorage.getItem("isLoggedIn");
+
+      // Since localStorage stores everything as strings:
+      if (LoggedIn === "false") {
+          window.location.href = 'login.html'; 
+      }
+    }
+
+    // Initialisation au chargement de la page
+if(localStorage.getItem("isLoggedIn")){
+  window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
+}
 
 // Modal elements
 const openModalBtn = document.getElementById('btn-simuler');
@@ -183,8 +204,8 @@ async function AfficherGrilleInitial() {
   
   // Centrer la grille sur le personnage
 
-  const centerX = personnage.positionX; // utiliser la position du joueur
-  const centerY = personnage.positionY;
+  const centerX = personnage.x; // utiliser la position du joueur
+  const centerY = personnage.y;
 
   let fetchedGrilleJeu = await getTilesAroundAsync(centerX, centerY);
   let fetchedTiles = fetchedGrilleJeu.tuiles;
@@ -193,7 +214,7 @@ async function AfficherGrilleInitial() {
   const fetchedMap = new Map();
   fetchedTiles.forEach(tile => {
     if (tile) {
-      const key = `${tile.X},${tile.Y}`;
+      const key = `${tile.x},${tile.y}`;
     console.log("Adding tile to map:", key, tile);
       fetchedMap.set(key, tile);
       tilesVisible.set(key, tile);
@@ -401,8 +422,8 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
 async function deplacer(dx, dy) {
   if (!personnage && !user) return;
   
-  const nouvelleX = personnage.X + dx;
-  const nouvelleY = personnage.Y + dy;
+  const nouvelleX = personnage.x + dx;
+  const nouvelleY = personnage.y + dy;
   
   // Appel API pour valider le déplacement
   try {
@@ -436,12 +457,12 @@ async function deplacer(dx, dy) {
     }
     else if(!resultFight)
     {
-      personnage.X = nouvelleX;
-      personnage.Y = nouvelleY;
+      personnage.x = nouvelleX;
+      personnage.y = nouvelleY;
     }
     
 
-    updatePlayerPosition(personnage.X, personnage.Y);
+    updatePlayerPosition(personnage.x, personnage.y);
 
     localStorage.setItem("personnage", JSON.stringify(personnage));
     
@@ -451,7 +472,7 @@ async function deplacer(dx, dy) {
     });
     
     // Reconstruire la grille complète
-    const fullGrid = buildFullGrid(personnage.X, personnage.Y, tilesVisible);
+    const fullGrid = buildFullGrid(personnage.x, personnage.y, tilesVisible);
     displayTiles(fullGrid);
     
   } catch (err) {
@@ -540,22 +561,7 @@ async function login(email, motDePasse) {
         localStorage.setItem("personnage", null);
         VerifIfLoggedIn();
     }
-    function VerifIfLoggedIn()
-    {
-      const currentPage = window.location.pathname;
-
-      // Don't redirect if already on login.html
-      if (currentPage.endsWith('login.html') || currentPage.endsWith('register.html')) {
-          return;
-      }
-
-      var LoggedIn = localStorage.getItem("isLoggedIn");
-
-      // Since localStorage stores everything as strings:
-      if (LoggedIn === "false") {
-          window.location.href = 'login.html'; 
-      }
-    }
+    
 
     //Bouton déconnection
     document.addEventListener('DOMContentLoaded', () => {

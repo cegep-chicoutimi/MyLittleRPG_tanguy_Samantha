@@ -42,7 +42,7 @@ namespace MyLittleRPG.Controllers
                 return NotFound("Aucun utilisateur correspond à cet id");
             }
 
-            return personnage;
+            return Ok(personnage); 
         }
 
         //// GET: api/Personnages/5
@@ -62,12 +62,12 @@ namespace MyLittleRPG.Controllers
         /// <summary>
         /// Fait tous les actions nécessaires lorsque le personnage se déplace
         /// </summary>
-        /// <param name="posX">Position X</param>
-        /// <param name="posY">Position Y</param>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
         /// <param name="idPerso">Id personnage</param>
         /// <returns>grille de jeu actualiser</returns>
         [HttpGet("Deplacement")]
-        public async Task<ActionResult<GrilleJeuDto>> Deplacement(int posX, int posY, int idPerso)
+        public async Task<ActionResult<GrilleJeuDto>> Deplacement(int X, int Y, int idPerso)
         {
             GrilleJeuDto grille = new GrilleJeuDto();
             var personnage = await _context.Personnages.FindAsync(idPerso);
@@ -77,19 +77,19 @@ namespace MyLittleRPG.Controllers
                 return NotFound( new { message = "Aucun personnage correspond à cet id" });
             }
 
-            if (posX < 0 || posX > 50 || posY < 0 || posY > 50) 
+            if (X < 0 || X > 50 || Y < 0 || Y > 50) 
                 return BadRequest(new { messeage = "La position voulu est hors de la carte" });
 
-            if (!_tileGeneration.GenererTile(posX, posY).Result.estTraversable)
+            if (!_tileGeneration.GenererTile(X, Y).Result.estTraversable)
                 return BadRequest(new { messeage = "la case nest pas traversable" });
 
             var monstre = await _context.InstanceMonstres
                         .Include(im => im.Monster)
-                        .FirstOrDefaultAsync(im => im.X == posX && im.Y == posY);
+                        .FirstOrDefaultAsync(im => im.X == X && im.Y == Y);
 
             if (monstre != null)
             {
-                grille.resultFight = fight(posX, posY, idPerso);
+                grille.resultFight = fight(X, Y, idPerso);
                 personnage.savechanges(grille.resultFight.Personnage);
                 monstre.PVactuels = grille.resultFight.Monstre.PointsVieActuels;
             }
@@ -100,20 +100,20 @@ namespace MyLittleRPG.Controllers
 
             if (grille.resultFight == null|| grille.resultFight.code=="Win")
             {
-                if ((Math.Abs(posX - personnage.X) <= 1) && (Math.Abs(posY - personnage.Y) <= 1))
+                if ((Math.Abs(X - personnage.X) <= 1) && (Math.Abs(Y - personnage.Y) <= 1))
                 {
-                    personnage.X = posX;
-                    personnage.Y = posY;
+                    personnage.X = X;
+                    personnage.Y = Y;
 
 
                     _context.Entry(personnage).State = EntityState.Modified;
 
-                    saveDeplacement(grille, posX, posY, idPerso);
+                    return await saveDeplacement(grille, X, Y, idPerso);
                 }
             }
             else if(grille.resultFight.code == "Lose"|| grille.resultFight.code == "Draw")
             {
-                saveDeplacement(grille, posX, posY, idPerso);
+                return await saveDeplacement(grille, X, Y, idPerso);
             }
             return BadRequest(new { message = "Déplacement non autorisé. Vous pouvez vous déplacer d'une case maximum." });        
         }
@@ -169,7 +169,7 @@ namespace MyLittleRPG.Controllers
             grille.CentreX = posX;
             grille.CentreY = posY;
 
-            return grille;
+            return Ok(grille);
         }
         
         /// <summary>
@@ -268,7 +268,7 @@ namespace MyLittleRPG.Controllers
             _context.Personnages.Add(personnage);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPersonnage", new { id = personnage.Id }, personnage);
+            return CreatedAtAction("GetPersonnageUserId", new { UserId = personnage.UtilisateurId }, personnage);
         }
 
         private bool PersonnageExists(int id)
