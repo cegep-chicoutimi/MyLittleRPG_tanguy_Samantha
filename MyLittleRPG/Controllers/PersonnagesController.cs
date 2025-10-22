@@ -105,7 +105,12 @@ namespace MyLittleRPG.Controllers
                     personnage.X = X;
                     personnage.Y = Y;
 
-
+                    if (_context.Tiles.Find(X, Y).Type==TileType.VILLE)
+                    {
+                        personnage.PositionVilleX = X;
+                        personnage.PositionVilleY = Y;
+                        personnage.PV = personnage.PVMax;
+                    }
                     _context.Entry(personnage).State = EntityState.Modified;
 
                     return await saveDeplacement(grille, X, Y, idPerso);
@@ -209,6 +214,8 @@ namespace MyLittleRPG.Controllers
                 _context.InstanceMonstres.Remove(enemy);
                 personnage.getexp(enemy.Monster.experienceBase+(enemy.niveaux*10));
                 resultat.code = "Win";
+                personnage.X = X;
+                personnage.Y = Y;
             }else if(personnage.PV <= 0)
             {
                 personnage.backToTown();
@@ -266,7 +273,7 @@ namespace MyLittleRPG.Controllers
             if (string.IsNullOrEmpty(persoDto.Nom)) return BadRequest(new { message = "Le nom de l'utilisateur ne doit pas être vide" });
             Random random = new Random();
 
-            Personnage personnage = new Personnage(0, persoDto.Nom, 1,1,random.Next(10,15),50,random.Next(5,10),random.Next(5,10), 10, 10, persoDto.IdUser);
+            Personnage personnage = new Personnage(0, persoDto.Nom, 1,1,50,50,random.Next(15,25),random.Next(15,25), 10, 10, persoDto.IdUser);
 
             _context.Personnages.Add(personnage);
             await _context.SaveChangesAsync();

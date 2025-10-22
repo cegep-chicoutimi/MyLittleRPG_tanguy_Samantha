@@ -85,7 +85,7 @@ function SimulationCombat() {
   }
 
 
-  const resultats = LogiqueCombat(personnage, monstre);
+  const resultats = LogiqueCombat(monstre);
 
   modalContent.innerHTML = `
     <h2 class="modalTitle text-center mb-3">Simulation de Combat</h2>
@@ -116,8 +116,8 @@ function SimulationCombat() {
       <p>Victoires du joueur : <strong>${resultats.nbVictoires}</strong></p>
       <p>Défaites du joueur : <strong>${resultats.nbDefaites}</strong></p>
       <p>Égalités : <strong>${resultats.nbEgalites}</strong></p>
-      <p>Dégâts moyens infligés par le joueur : <strong>${resultats.moyenneDegatsJoueur.toFixed(2)}</strong></p>
-      <p>Dégâts moyens infligés par le monstre : <strong>${resultats.moyenneDegatsMonstre.toFixed(2)}</strong></p>
+      <p>Dégâts moyens infligés par le joueur : <strong>${resultats.moyenneDegatsMonstre.toFixed(2)}</strong></p>
+      <p>Dégâts moyens infligés par le monstre : <strong>${resultats.moyenneDegatsJoueur.toFixed(2)}</strong></p>
       <p>PV moyens restants du joueur : <strong>${resultats.moyennePVRestantsJoueur.toFixed(2)}</strong></p>
       <p>PV moyens restants du monstre : <strong>${resultats.moyennePVRestantsMonstre.toFixed(2)}</strong></p>
       <hr>
@@ -234,8 +234,8 @@ async function AfficherGrilleInitial() {
       } else {
         // Placeholder tile object with default image (change as needed)
         fullGridTiles.push({
-          X: posX,
-          Y: posY,
+          x: posX,
+          y: posY,
           imageUrl: "tuileCache.png",
           type: "PLACEHOLDER",
           monstre: null,
@@ -259,6 +259,7 @@ function displayTiles(tiles) {
     img.src = 'img/' + tile.imageUrl;
     img.classList.add("imgTuile");
     img.alt = 'Tile';
+    tileDiv.querySelectorAll('.imgSprite').forEach(el => el.remove());
     if(tile.monstre != null)
     {
       const imgSprite = document.createElement('img');
@@ -270,10 +271,19 @@ function displayTiles(tiles) {
     
     tileDiv.addEventListener('click', async() => {
       if(tile.type == "PLACEHOLDER"){
-        const revealedTile = await getTileAsync(tile.X, tile.Y);
+        const revealedTile = await getTileAsync(tile.x, tile.y);
         if (revealedTile) {
           // Mettre à jour l'image
           img.src = 'img/' + revealedTile.imageUrl;
+          tileDiv.querySelectorAll('.imgSprite').forEach(el => el.remove());
+
+          if(revealedTile.monstre){
+            const imgSprite = document.createElement('img');
+            imgSprite.src = revealedTile.monstre.spriteUrl;
+            imgSprite.classList.add("imgSprite");
+            imgSprite.alt = 'TileMonstre';
+            tileDiv.appendChild(imgSprite);
+          }
           
           // Mettre à jour l'objet tile
           Object.assign(tile, revealedTile);
@@ -362,7 +372,7 @@ function updateSelectedTile(tile) {
   }
   
   selectedTileDiv.innerHTML = `
-  <div class="divCard"><p>Position : ${tile.X},${tile.Y}</p></div>
+  <div class="divCard"><p>Position : ${tile.x},${tile.y}</p></div>
   <div class="divCard"><p>Type : ${typeStr}</p></div>
   <div class="divCard"><p>Traversable : ${tile.estAccessible ? 'oui' : 'non'}</p></div>
   `;
@@ -393,7 +403,7 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
   const mapTiles = new Map();
   
   tilesFetched.forEach(t => {
-    const key = `${t.X},${t.Y}`;
+    const key = `${t.x},${t.y}`;
     mapTiles.set(key, t);      
     tilesVisible.set(key, t);           
   });
@@ -411,7 +421,7 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
           fullGrid.push(tilesVisible.get(key));
         }
         else {
-          fullGrid.push({ X: posX, Y: posY, imageUrl:"tuileCache.png", type:"PLACEHOLDER" });
+          fullGrid.push({ x: posX, y: posY, imageUrl:"tuileCache.png", type:"PLACEHOLDER" });
         }
     }
   }
@@ -452,6 +462,8 @@ async function deplacer(dx, dy) {
       else if(resultFight.code == "Win")
       {
         alert("Vous avez vaincu le monstre !");
+
+
       }
       personnage = resultFight.personnage; 
     }
@@ -467,7 +479,7 @@ async function deplacer(dx, dy) {
     localStorage.setItem("personnage", JSON.stringify(personnage));
     
     nouvellesTiles.forEach(tile => {
-      const key = `${tile.X},${tile.Y}`;
+      const key = `${tile.x},${tile.y}`;
       tilesVisible.set(key, tile);
     });
     
