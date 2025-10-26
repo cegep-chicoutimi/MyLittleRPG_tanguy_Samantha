@@ -26,6 +26,7 @@ namespace MyLittleRPG.Controllers
             _context = context;
             _tileGeneration = new TileGeneration(context);
         }
+
         /// <summary>
         /// Va chercher le personnage selon l'identifiant de l'utilisateur
         /// </summary>
@@ -167,8 +168,6 @@ namespace MyLittleRPG.Controllers
 
                 Tuiles.Add(tileDTO);
             }
-
-
 
             grille.Tuiles = Tuiles;
             grille.CentreX = posX;

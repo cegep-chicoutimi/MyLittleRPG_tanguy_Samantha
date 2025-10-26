@@ -1,36 +1,32 @@
-
-
 //Vérifier if logged in
 document.addEventListener('DOMContentLoaded', VerifIfLoggedIn);
 
-function VerifIfLoggedIn()
-    {
-      const currentPage = window.location.pathname;
+function VerifIfLoggedIn(){
+  const currentPage = window.location.pathname;
 
-      // Don't redirect if already on login.html
-      if (currentPage.endsWith('login.html') || currentPage.endsWith('register.html')) {
-          return;
-      }
+  if (currentPage.endsWith('login.html') || currentPage.endsWith('register.html')) {
+    return;
+  }
 
-      var LoggedIn = localStorage.getItem("isLoggedIn");
+  var LoggedIn = localStorage.getItem("isLoggedIn");
 
-      // Since localStorage stores everything as strings:
-      if (LoggedIn === "false") {
-          window.location.href = 'login.html'; 
-      }
-    }
+  if (LoggedIn === "false") {
+    window.location.href = 'login.html'; 
+  } 
+}
 
-    // Initialisation au chargement de la page
+// Initialisation au chargement de la page
 if(localStorage.getItem("isLoggedIn")){
   window.addEventListener('DOMContentLoaded', AfficherGrilleInitial);
 }
 
-// Modal elements
+// Élément du modal Simulation de Combat
 const openModalBtn = document.getElementById('btn-simuler');
 if(openModalBtn) openModalBtn.addEventListener('click', () => {
   myModal.style.display = 'block';
   modalBackdrop.style.display = 'block';
 });
+
 const closeModalBtn = document.getElementById('closeModalBtn');
 if(closeModalBtn) closeModalBtn.addEventListener('click', () => {
   myModal.style.display = 'none';
@@ -51,6 +47,7 @@ let selectedTileDiv = document.querySelector('.card-body.selected-tile');
 let allTiles = [];
 const tilesVisible = new Map();
 
+// Changement de thème
 function ChangementTheme() {
   const body = document.body;
   const toggleBtn = document.getElementById('themeChange');
@@ -63,7 +60,6 @@ function ChangementTheme() {
     });
   }
 
-  // Apply saved theme
   const savedTheme = localStorage.getItem('theme') || 'dark';
   body.classList.add(savedTheme + "-theme");
 }
@@ -95,17 +91,17 @@ function SimulationCombat() {
       <div class="character-card text-center p-2">
         <img src="img/sprite.png" alt="Sprite Joueur" class="mb-2" style="width:60px;height:60px;">
         <h5>Joueur</h5>
-        <p>Force: <strong>${personnage.force}</strong></p>
-        <p>Défense: <strong>${personnage.defense}</strong></p>
-        <p>PV: <strong>${personnage.pv}</strong></p>
+        <p>Force: ${personnage.force}</p>
+        <p>Défense: ${personnage.defense}</p>
+        <p>PV: ${personnage.pv}</p>
       </div>
 
       <div class="character-card text-center p-2">
         <img src="${monstre.spriteUrl}" alt="Sprite Monstre" class="mb-2" style="width:60px;height:60px;">
         <h5>Monstre</h5>
-        <p>Force: <strong>${monstre.attaque}</strong></p>
-        <p>Défense: <strong>${monstre.defense}</strong></p>
-        <p>PV: <strong>${monstre.pointsVieActuels}</strong></p>
+        <p>Force: ${monstre.attaque}</p>
+        <p>Défense: ${monstre.defense}</p>
+        <p>PV: ${monstre.pointsVieActuels}</p>
       </div>
     </div>
 
@@ -113,13 +109,13 @@ function SimulationCombat() {
 
     <div class="combat-results text-center">
       <h5>Résultats (1000 simulations)</h5>
-      <p>Victoires du joueur : <strong>${resultats.nbVictoires}</strong></p>
-      <p>Défaites du joueur : <strong>${resultats.nbDefaites}</strong></p>
-      <p>Égalités : <strong>${resultats.nbEgalites}</strong></p>
-      <p>Dégâts moyens infligés par le joueur : <strong>${resultats.moyenneDegatsMonstre.toFixed(2)}</strong></p>
-      <p>Dégâts moyens infligés par le monstre : <strong>${resultats.moyenneDegatsJoueur.toFixed(2)}</strong></p>
-      <p>PV moyens restants du joueur : <strong>${resultats.moyennePVRestantsJoueur.toFixed(2)}</strong></p>
-      <p>PV moyens restants du monstre : <strong>${resultats.moyennePVRestantsMonstre.toFixed(2)}</strong></p>
+      <p>Victoires du joueur : ${resultats.nbVictoires}</p>
+      <p>Défaites du joueur : ${resultats.nbDefaites}</p>
+      <p>Égalités : ${resultats.nbEgalites}</p>
+      <p>Dégâts moyens infligés par le joueur : ${resultats.moyenneDegatsMonstre.toFixed(2)}</p>
+      <p>Dégâts moyens infligés par le monstre : ${resultats.moyenneDegatsJoueur.toFixed(2)}</p>
+      <p>PV moyens restants du joueur : ${resultats.moyennePVRestantsJoueur.toFixed(2)}</p>
+      <p>PV moyens restants du monstre : ${resultats.moyennePVRestantsMonstre.toFixed(2)}</p>
       <hr>
     </div>
   `;
@@ -190,6 +186,7 @@ function LogiqueCombat(monstre) {
   return { nbVictoires, nbDefaites, nbEgalites, moyenneDegatsJoueur, moyenneDegatsMonstre, moyennePVRestantsJoueur, moyennePVRestantsMonstre };
 }
 
+// Bouton de simulation de combat
 document.addEventListener('DOMContentLoaded', () => {
   const simulerButton = document.getElementById('btn-simuler');
   if(simulerButton) simulerButton.addEventListener('click', SimulationCombat);
@@ -203,25 +200,23 @@ async function AfficherGrilleInitial() {
     personnage = await CreatePersonnage(user.id, user.pseudo);
   
   // Centrer la grille sur le personnage
-
-  const centerX = personnage.x; // utiliser la position du joueur
+  const centerX = personnage.x;
   const centerY = personnage.y;
 
   let fetchedGrilleJeu = await getTilesAroundAsync(centerX, centerY);
   let fetchedTiles = fetchedGrilleJeu.tuiles;
 
-  // Create a map of fetched tiles for quick lookup
+  // Créer une map des tuiles récupérées pour accès rapide
   const fetchedMap = new Map();
   fetchedTiles.forEach(tile => {
     if (tile) {
       const key = `${tile.x},${tile.y}`;
-    console.log("Adding tile to map:", key, tile);
       fetchedMap.set(key, tile);
       tilesVisible.set(key, tile);
     }
   });
 
-  // Build the full 5x5 tiles grid, including placeholders where tiles are missing
+  // Construire la grille avec des placeholders lorsque nécessaire
   let fullGridTiles = [];
 
   for (let dx = -2; dx <= 2; dx++) {
@@ -232,12 +227,12 @@ async function AfficherGrilleInitial() {
       if (fetchedMap.has(key)) {
         fullGridTiles.push(fetchedMap.get(key));
       } else {
-        // Placeholder tile object with default image (change as needed)
+        //Placeholder
         fullGridTiles.push({
           x: posX,
           y: posY,
           imageUrl: "tuileCache.png",
-          type: "PLACEHOLDER",
+          typeTuile: "PLACEHOLDER",
           monstre: null,
         });
       }
@@ -270,7 +265,7 @@ function displayTiles(tiles) {
     }
     
     tileDiv.addEventListener('click', async() => {
-      if(tile.type == "PLACEHOLDER"){
+      if(tile.typeTuile == "PLACEHOLDER"){
         const revealedTile = await getTileAsync(tile.x, tile.y);
         if (revealedTile) {
           // Mettre à jour l'image
@@ -287,14 +282,8 @@ function displayTiles(tiles) {
           
           // Mettre à jour l'objet tile
           Object.assign(tile, revealedTile);
-
-          // Mettre à jour la partie "Tuile Sélectionnée"
-          updateSelectedTile(revealedTile);
         }
-      } else {
-        // Si déjà révélée → juste mise à jour infos
-        updateSelectedTile(tile);
-      }
+      } 
       
       document.querySelectorAll('.tile').forEach(t => t.classList.remove('selected'));
       tileDiv.classList.add('selected');
@@ -345,7 +334,7 @@ async function getTileAsync(X, Y) {
 
     
   } catch (error) {
-    handleAPIError(error, 'Impossible de charger les tuiles');
+    handleAPIError(error, 'Impossible de charger la tuile spécifique');
   }
 }
 
@@ -356,7 +345,7 @@ function updateSelectedTile(tile) {
 
   UpdateInfosMonstre(tile.monstre);
 
-  const key = `${tile.X},${tile.Y}`;
+  const key = `${tile.x},${tile.y}`;
   tilesVisible.set(key, tile);
   
   var typeStr = "default";
@@ -421,7 +410,7 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
           fullGrid.push(tilesVisible.get(key));
         }
         else {
-          fullGrid.push({ x: posX, y: posY, imageUrl:"tuileCache.png", type:"PLACEHOLDER" });
+          fullGrid.push({ x: posX, y: posY, imageUrl:"tuileCache.png", typeTuile:"PLACEHOLDER" });
         }
     }
   }
@@ -431,10 +420,18 @@ function buildFullGrid(centerX, centerY, tilesFetched) {
 // Déplacement du personnage
 async function deplacer(dx, dy) {
   if (!personnage && !user) return;
-  
+
   const nouvelleX = personnage.x + dx;
   const nouvelleY = personnage.y + dy;
-  
+
+  if(tilesVisible.has(`${nouvelleX},${nouvelleY}`)) {
+    const tileCible = tilesVisible.get(`${nouvelleX},${nouvelleY}`);
+    if(!tileCible.estAccessible) {
+      alert("Déplacement impossible : tuile non accessible.");
+      return;
+    }
+  }
+
   // Appel API pour valider le déplacement
   try {
     const response = await fetch(`https://localhost:7061/api/Personnages/Deplacement?X=${nouvelleX}&Y=${nouvelleY}&idPerso=${personnage.id}`);
@@ -462,8 +459,6 @@ async function deplacer(dx, dy) {
       else if(resultFight.code == "Win")
       {
         alert("Vous avez vaincu le monstre !");
-
-
       }
       personnage = resultFight.personnage; 
     }
@@ -519,145 +514,171 @@ document.addEventListener('DOMContentLoaded', () => {
     
 // Fonctions de connexion et d'inscription
 async function login(email, motDePasse) {
-      try {
-        const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, motDePasse })
-        });
-    
-        if (!response.ok) {
-          const message = await response.text();
-          throw new Error(message || "Erreur de connexion");
-        }
-        
-        const utilisateur = await response.json();
-        getPersonnageByUserId(utilisateur.id, utilisateur.pseudo);
+  try {
+    var userMessage = "Erreur lors de la connexion";
+    var nbMinChars = 5;
+    if(!email.includes("@") || email.length < nbMinChars)
+    {
+      userMessage = "L'email n'est pas valide.";
+      throw new Error(userMessage);
+    }
+    if(motDePasse.length < nbMinChars)
+    {
+      userMessage = `Le mot de passe doit contenir au moins ${nbMinChars} caractères.`;
+      throw new Error(userMessage);
+    }
 
-        localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
-        localStorage.setItem('isLoggedIn', 'true');
+    const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, motDePasse })
+    });
 
-        window.location.href = "index.html";
-      } catch (err) {
-        handleAPIError(err, "Problème lors du login")
-      }
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Erreur de connexion");
     }
     
-    // Inscription avec création du personnage
-    async function register(pseudo, email, motDePasse) {
-      try {
-        const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pseudo, email, motDePasse })
-        });
-        
-        if (!response.ok) {
-          const message = await response.text();
-          throw new Error(message || "Erreur d'inscription");
-        }
+    const utilisateur = await response.json();
+    getPersonnageByUserId(utilisateur.id, utilisateur.pseudo);
 
-        login(email,motDePasse)
-          
-          // Redirection vers la carte
-          window.location.href = "index.html";
-          
-        } catch (err) {
-          handleAPIError(err, "Erreur lors de l'inscription");
-        }
-      }
+    localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+    localStorage.setItem('isLoggedIn', 'true');
+
+    window.location.href = "index.html";
+  } catch (err) {
+    handleAPIError(err, userMessage);
+  }
+}
     
-    function deconnection() {
-        localStorage.setItem("utilisateur", null);
-        localStorage.setItem("isLoggedIn", false);
-        localStorage.setItem("personnage", null);
-        VerifIfLoggedIn();
+// Inscription avec création du personnage
+async function register(pseudo, email, motDePasse) {
+  try {
+    var userMessage = "Erreur lors de l'inscription";
+    var nbMinChars = 5;
+    if(!email.includes("@") || email.length < nbMinChars)
+    {
+      userMessage = "L'email n'est pas valide.";
+      throw new Error(userMessage);
     }
-    
+    if(pseudo.length < nbMinChars || motDePasse.length < nbMinChars)
+    {
+      userMessage = `Le pseudo et le mot de passe doivent contenir au moins ${nbMinChars} caractères.`;
+      throw new Error(userMessage);
+    }
 
-    //Bouton déconnection
-    document.addEventListener('DOMContentLoaded', () => {
-      const deconnectBtn = document.getElementById('btnDeconnecter');
+    const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pseudo, email, motDePasse })
+    });
+    
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Erreur d'inscription");
+    }
+
+    login(email,motDePasse)
+      
+      // Redirection vers la carte
+      window.location.href = "index.html";
+      
+    } catch (err) {
+      handleAPIError(err, userMessage);
+    }
+  }
+    
+function deconnection() {
+    localStorage.setItem("utilisateur", null);
+    localStorage.setItem("isLoggedIn", false);
+    localStorage.setItem("personnage", null);
+    VerifIfLoggedIn();
+}
+
+//Bouton déconnection
+document.addEventListener('DOMContentLoaded', () => {
+  const deconnectBtn = document.getElementById('btnDeconnecter');
       if(deconnectBtn) deconnectBtn.addEventListener('click', deconnection);
     });
 
 
-    async function getPersonnageByUserId(userId, pseudo) {
-      try {
-        const response = await fetch(`https://localhost:7061/api/Personnages/User/${userId}`);
-        if (!response.ok) {
-          // Si le personnage n'existe pas, le créer
-          personnage = await CreatePersonnage(userId, pseudo);
-          return personnage;
-        }
-
-        personnage = await response.json();
-
-        localStorage.setItem("personnage", JSON.stringify(personnage));
-        return personnage;
-      } catch (err) {
-        handleAPIError(err, "Erreur lors de la récupération du personnage");
-      }
-    }
-  // Récupère le personnage par ID ou le crée s'il n'existe pas
-  async function CreatePersonnage(id, pseudo) {
-    try{
-      const responsePerso = await fetch("https://localhost:7061/api/Personnages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idUser: id, nom: pseudo })
-      });
-
-      if (!responsePerso.ok) {
-        const message = await responsePerso.text();
-        throw new Error(message || "Erreur lors de la création du personnage");
-      }
-          
-      const personnage = await responsePerso.json();
-      localStorage.setItem("personnage", JSON.stringify(personnage));
+async function getPersonnageByUserId(userId, pseudo) {
+  try {
+    const response = await fetch(`https://localhost:7061/api/Personnages/User/${userId}`);
+    if (!response.ok) {
+      // Si le personnage n'existe pas, le créer
+      personnage = await CreatePersonnage(userId, pseudo);
       return personnage;
     }
-    catch(err)
-    {
-      handleAPIError(err, "Erreur lors de la création du personnage");
-    }
+
+    personnage = await response.json();
+
+    localStorage.setItem("personnage", JSON.stringify(personnage));
+    return personnage;
+  } catch (err) {
+    handleAPIError(err, "Erreur lors de la récupération du personnage");
   }
+}
+
+// Récupère le personnage par ID ou le crée s'il n'existe pas
+async function CreatePersonnage(id, pseudo) {
+  try{
+    const responsePerso = await fetch("https://localhost:7061/api/Personnages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idUser: id, nom: pseudo })
+    });
+
+    if (!responsePerso.ok) {
+      const message = await responsePerso.text();
+      throw new Error(message || "Erreur lors de la création du personnage");
+    }
+        
+    const personnage = await responsePerso.json();
+    localStorage.setItem("personnage", JSON.stringify(personnage));
+    return personnage;
+  }
+  catch(err)
+  {
+    handleAPIError(err, "Erreur lors de la création du personnage");
+  }
+}
     
 // Pour les formulaires
 document.addEventListener('DOMContentLoaded', () => {
-      const loginForm = document.getElementById("loginForm");
-      if (loginForm) {
-        loginForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          login(email, password);
-        });
-      }
-      // Formulaire d'inscription
-      const registerForm = document.getElementById("registerForm");
-      if (registerForm) {
-        registerForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          const pseudo = document.getElementById("pseudo").value;
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          register(pseudo, email, password);
-        });
-      }
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+      loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        login(email, password);
+      });
+    }
+  // Formulaire d'inscription
+  const registerForm = document.getElementById("registerForm");
+  if (registerForm) {
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const pseudo = document.getElementById("pseudo").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      register(pseudo, email, password);
     });
+  }
+});
 
 // Gestion des erreurs API
 function handleAPIError(error, userMessage = 'Une erreur est survenue') {
-      console.error('Erreur API:', error);
-      
-      // Afficher un message à l'utilisateur
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.textContent = userMessage;
-      errorDiv.style.display = 'block';
-      
-      // Cacher le message après 5 secondes
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-      }, 5000);
-    }
+  console.error('Erreur :', error.toString());
+
+  // Afficher un message à l'utilisateur
+  const errorDiv = document.getElementById('error-message');
+  errorDiv.textContent = userMessage;
+  errorDiv.style.display = 'block';
+
+  // Cacher le message après 5 secondes
+  setTimeout(() => {
+    errorDiv.style.display = 'none';
+  }, 5000);
+}
