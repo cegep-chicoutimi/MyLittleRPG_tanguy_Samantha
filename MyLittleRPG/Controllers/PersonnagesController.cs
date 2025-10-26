@@ -46,20 +46,6 @@ namespace MyLittleRPG.Controllers
             return Ok(personnage); 
         }
 
-        //// GET: api/Personnages/5
-        //[HttpGet("{Id}")]
-        //public async Task<ActionResult<Personnage>> GetPersonnage(int Id)
-        //{
-        //    var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == Id);
-
-        //    if (personnage == null)
-        //    {
-        //        return NotFound("Aucun personnage correspond à cet id");
-        //    }
-
-        //    return personnage;
-        //}
-
         /// <summary>
         /// Fait tous les actions nécessaires lorsque le personnage se déplace
         /// </summary>

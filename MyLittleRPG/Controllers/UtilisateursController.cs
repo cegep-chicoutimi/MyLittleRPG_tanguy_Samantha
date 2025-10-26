@@ -26,19 +26,6 @@ namespace MyLittleRPG.Controllers
             _context = context;
         }
 
-
-        //[HttpGet("{email}")]
-        //public async Task<ActionResult<Utilisateur>> GetUtilisateur(string email)
-        //{
-        //    var utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Email == email);
-
-        //    if (utilisateur == null)
-        //    {
-        //        return NotFound(new {message = "L'email entrée ne correspond à aucun utilisateur"});
-        //    }
-
-        //    return utilisateur;
-        //}
         /// <summary>
         /// Permet à l'utilisateur de se connecter
         /// </summary>
