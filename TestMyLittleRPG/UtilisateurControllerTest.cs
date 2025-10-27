@@ -5,9 +5,20 @@ namespace TestMyLittleRPG
 {
     public class UtilisateurControllerTest :IClassFixture<WebApplicationFactory<Program>>
     {
-        [Fact]
-        public void Test1()
+        private readonly WebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
+
+        public UtilisateurControllerTest(WebApplicationFactory<Program> factory)
         {
+            _factory = factory;
+            _client = factory.CreateClient();
+        }
+
+        [Fact]
+        public async Task Registration_Works()
+        {
+            await Task.Delay(2000);
+
 
         }
     }
