@@ -12,15 +12,15 @@ namespace MyLittleRPG.Models
         public int PVMax { get; set; }
         public int Force { get; set; }
         public int Defense { get; set; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public int UtilisateurId { get; set; }
         public DateTime DateCreation { get; set; }
 
         public int PositionVilleX { get; set; }
         public int PositionVilleY { get; set; }
 
-        public Personnage(int id, string nom, int niveau, int xP, int pV, int pVMax, int force, int defense, int positionX, int positionY, int utilisateurId)
+        public Personnage(int id, string nom, int niveau, int xP, int pV, int pVMax, int force, int defense, int X, int Y, int utilisateurId)
         {
             Id = id;
             Nom = nom;
@@ -30,8 +30,8 @@ namespace MyLittleRPG.Models
             PVMax = pVMax;
             Force = force;
             Defense = defense;
-            PositionX = positionX;
-            PositionY = positionY;
+            this.X = X;
+            this.Y = Y;
             UtilisateurId = utilisateurId;
             DateCreation = DateTime.Now;
             PositionVilleX = 10;
@@ -54,8 +54,8 @@ namespace MyLittleRPG.Models
 
         internal void backToTown()
         {
-            PositionX = PositionVilleX; 
-            PositionY = PositionVilleY;
+            X = PositionVilleX; 
+            Y = PositionVilleY;
             PV = PVMax;
         }
 
@@ -67,8 +67,8 @@ namespace MyLittleRPG.Models
             PVMax = personnage.PVMax;
             Force = personnage.Force;
             Defense = personnage.Defense;
-            PositionX = personnage.PositionX;
-            PositionY = personnage.PositionY;
+            X = personnage.X;
+            Y = personnage.Y;
         }
     }
 }

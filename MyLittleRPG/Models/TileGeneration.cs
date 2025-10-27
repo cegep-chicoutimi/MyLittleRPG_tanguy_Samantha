@@ -19,45 +19,23 @@ namespace MyLittleRPG.Models
         {
             _context = context;
         }
-
-        public async Task<Tile?> GenererTile(int PositionX, int PositionY)
+        /// <summary>
+        /// Récupérer tuile existante ou générer nouvelle tuile
+        /// </summary>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
+        /// <returns>Tuile</returns>
+        public async Task<Tile?> GenererTile(int X, int Y)
         {
-            Tile? tile = await _context.Tiles.FindAsync(PositionX, PositionY);
+            Tile? tile = await _context.Tiles.FindAsync(X, Y);
 
             if (tile != null)
             {
                 return tile;
             }
-            reglerproba(PositionX, PositionY);
-            Random random = new Random();
-            int rand = random.Next(101);
-
-            if (rand < probaHerbe)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.HERBE, true, "Plains.png");
-            }
-            else if (rand < probaHerbe + probaEau)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.EAU, false, "River.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.MONTAGNE, false, "Mountain.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.FORET, true, "Forest.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.VILLE, true, "Town.png");
-            }
-            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
-            {
-                tile = new Tile(PositionX, PositionY, TileType.ROUTE, true, "Road.png");
-
-            }
-            else { return null; }
+            reglerproba(X, Y);
+           
+            tile = gettilerandom(X, Y, ref tile);
 
             resetproba();
 
@@ -66,7 +44,52 @@ namespace MyLittleRPG.Models
 
             return tile;
         }
+        /// <summary>
+        /// Instancie la tuile aléatoire selon les probabilités
+        /// </summary>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
+        /// <param name="tile">Tuile</param>
+        /// <returns>Tuile</returns>
+        private Tile? gettilerandom(int X, int Y, ref Tile tile)
+        {
+            Random random = new Random();
+            int rand = random.Next(101);
+            if (rand < probaHerbe)
+            {
+                tile = new Tile(X, Y, TileType.HERBE, true, "Plains.png");
+            }
+            else if (rand < probaHerbe + probaEau)
+            {
+                tile = new Tile(X, Y, TileType.EAU, false, "River.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne)
+            {
+                tile = new Tile(X, Y, TileType.MONTAGNE, false, "Mountain.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
+            {
+                tile = new Tile(X, Y, TileType.FORET, true, "Forest.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille)
+            {
+                tile = new Tile(X, Y, TileType.VILLE, true, "Town.png");
+            }
+            else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
+            {
+                tile = new Tile(X, Y, TileType.ROUTE, true, "Road.png");
 
+            }
+            else { return null; }
+
+            return tile;
+        }
+        /// <summary>
+        /// Générer une liste de tuile autour de la position donnée
+        /// </summary>
+        /// <param name="posX">Position X</param>
+        /// <param name="posY">Position Y</param>
+        /// <returns>Liste des tuiles visibles</returns>
         public async Task<IEnumerable<Tile>> GenererTilesAutour(int posX, int posY)
         {
             List<Tile> tiles = new List<Tile>();
@@ -89,6 +112,9 @@ namespace MyLittleRPG.Models
             }
             return tiles;
         }
+        /// <summary>
+        /// Réinitialiser les probabilités
+        /// </summary>
         private void resetproba()
         {
             probaHerbe = 20;
@@ -98,21 +124,28 @@ namespace MyLittleRPG.Models
             probaVille = 05;
             probaRoute = 35;
         }
-
-        private void reglerproba(int positionX, int positionY)
+        /// <summary>
+        /// Changer les probabilités selon la position actuel
+        /// </summary>
+        /// <param name="X">Position X</param>
+        /// <param name="Y">Position Y</param>
+        private void reglerproba(int X, int Y)
         {
-            var tileW = _context.Tiles.Find(positionX - 1, positionY);
+            var tileW = _context.Tiles.Find(X - 1, Y);
             checkTile(tileW);
-            var tileE = _context.Tiles.Find(positionX + 1, positionY);
+            var tileE = _context.Tiles.Find(X + 1, Y);
             checkTile(tileE);
-            var tileN = _context.Tiles.Find(positionX, positionY + 1);
+            var tileN = _context.Tiles.Find(X, Y + 1);
             checkTile(tileN);
-            var tileS = _context.Tiles.Find(positionX, positionY - 1);
+            var tileS = _context.Tiles.Find(X, Y - 1);
             checkTile(tileS);
 
         }
 
-
+        /// <summary>
+        /// Vérification de la tuile et changer les probabilités
+        /// </summary>
+        /// <param name="tile">tuile à vérifier</param>
         private void checkTile(Tile? tile)
         {
             if (tile != null)

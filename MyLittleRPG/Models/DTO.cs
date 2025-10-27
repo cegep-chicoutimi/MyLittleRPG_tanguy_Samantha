@@ -24,8 +24,8 @@
             this.Nom = enemy.Monster.Nom;
             this.SpriteUrl = enemy.Monster.spriteUrl;
             this.Niveau = enemy.niveaux;
-            this.X = enemy.PositionX;
-            this.Y = enemy.PositionY;
+            this.X = enemy.X;
+            this.Y = enemy.Y;
             this.PointsVieActuels = enemy.PVactuels;
             this.PointsVieMax = enemy.PVMax;
             this.Attaque = enemy.Monster.forceBase;
@@ -58,6 +58,18 @@
     // DTO pour une tuile avec informations complètes (incluant monstre s'il y en a un)
     public class TuileAvecInfosDto
     {
+        private Tile tile;
+
+        public TuileAvecInfosDto(Tile tile)
+        {
+            this.tile = tile;
+            this.X = tile.X;
+            this.Y = tile.Y;
+            this.TypeTuile = tile.Type.ToString();
+            this.imageUrl = tile.imageURL;
+            this.EstAccessible = tile.estTraversable;
+        }
+
         public int X { get; set; }
         public int Y { get; set; }
         public string? TypeTuile { get; set; }
@@ -98,8 +110,8 @@
             this.PVMax = personnage.PVMax;
             this.Force = personnage.Force;
             this.Defense = personnage.Defense;
-            this.PositionX = personnage.PositionX;
-            this.PositionY = personnage.PositionY;
+            this.X = personnage.X;
+            this.Y = personnage.Y;
         }
         public int id { get; set; }
         public int Niveau { get; set; }
@@ -108,7 +120,7 @@
         public int PVMax { get; set; }
         public int Force { get; set; }
         public int Defense { get; set; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }

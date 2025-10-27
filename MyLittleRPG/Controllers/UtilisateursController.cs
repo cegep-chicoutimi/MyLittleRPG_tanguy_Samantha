@@ -5,9 +5,12 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pag
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MyLittleRPG.Data.Context;
 using MyLittleRPG.Models;
+using NuGet.Protocol.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MyLittleRPG.Controllers
@@ -23,26 +26,11 @@ namespace MyLittleRPG.Controllers
             _context = context;
         }
 
-        // GET: api/Utilisateurs
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Utilisateur>>> GetUtilisateurs()
-        //{
-        //    return await _context.Utilisateurs.ToListAsync();
-        //}
-
-        [HttpGet("{email}")]
-        public async Task<ActionResult<Utilisateur>> GetUtilisateur(string email)
-        {
-            var utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Email == email);
-
-            if (utilisateur == null)
-            {
-                return NotFound(new {message = "L'email entrée ne correspond à aucun utilisateur"});
-            }
-
-            return utilisateur;
-        }
-
+        /// <summary>
+        /// Permet à l'utilisateur de se connecter
+        /// </summary>
+        /// <param name="login">email et mot de passe</param>
+        /// <returns>Utilisateur connecté</returns>
         // GET: api/Utilisateurs/5
         [HttpPost]
         [Route("auth/login")]
@@ -56,7 +44,17 @@ namespace MyLittleRPG.Controllers
                 return Unauthorized(new { message = "L'email entrée ne correspond à aucun utilisateur" });
             }
 
-            if (utilisateur.MotDePasse != login.MotDePasse)
+            byte[] tmpSource;
+            byte[] tmpHash;
+
+            //Create a byte array from source data
+            tmpSource = ASCIIEncoding.ASCII.GetBytes(login.MotDePasse);
+
+            //Compute hash based on source data
+            tmpHash = new MD5CryptoServiceProvider().ComputeHash(tmpSource);
+            Console.WriteLine(ByteArrayToString(tmpHash));
+
+            if (utilisateur.MotDePasse != ByteArrayToString(tmpHash))//attention erreure potentielle
             {
                 return Unauthorized(new { message = "Mot de passe incorrect" });
             }
@@ -81,43 +79,26 @@ namespace MyLittleRPG.Controllers
 
             return utilisateur;
         }
-
-        // PUT: api/Utilisateurs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut]
-        //[Route("auth/logout/{id}")]
-        //public async Task<IActionResult> PutUtilisateur(int id)
-        //{
-        //    Utilisateur? utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Id == id);
-
-        //    if (utilisateur == null)
-        //    {
-        //        return BadRequest("Cet utilisateur n'existe pas");
-        //    }
-
-        //    utilisateur.TempsConexion = null;
-
-        //    _context.Entry(utilisateur).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!UtilisateurExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
+        /// <summary>
+        /// Pour hash le mot de passe
+        /// </summary>
+        /// <param name="arrInput">mot de passe</param>
+        /// <returns>output</returns>
+        static string ByteArrayToString(byte[] arrInput)
+        {
+            int i;
+            StringBuilder sOutput = new StringBuilder(arrInput.Length);
+            for (i = 0; i < arrInput.Length; i++)
+            {
+                sOutput.Append(arrInput[i].ToString("X2"));
+            }
+            return sOutput.ToString();
+        }
+        /// <summary>
+        /// Création d'un utilisateur
+        /// </summary>
+        /// <param name="utilisateur">utilisateur</param>
+        /// <returns>résultat</returns>
         // POST: api/Utilisateurs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -131,29 +112,23 @@ namespace MyLittleRPG.Controllers
                 return Unauthorized(new { message = "L'email est déjà utilisé" });
             }
 
+            byte[] tmpSource;
+            byte[] tmpHash;
+
+            //Create a byte array from source data
+            tmpSource = ASCIIEncoding.ASCII.GetBytes(utilisateur.MotDePasse);
+
+            //Compute hash based on source data
+            tmpHash = new MD5CryptoServiceProvider().ComputeHash(tmpSource);
+            utilisateur.MotDePasse=ByteArrayToString(tmpHash);
+
             utilisateur.DateInscription = DateTime.Now;
             
             _context.Utilisateurs.Add(utilisateur);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUtilisateur", new { email = utilisateur.Email }, utilisateur);
+            return Ok("utilisateur créer");
         }
-
-        //// DELETE: api/Utilisateurs/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUtilisateur(int id)
-        //{
-        //    var utilisateur = await _context.Utilisateurs.FindAsync(id);
-        //    if (utilisateur == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Utilisateurs.Remove(utilisateur);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
 
         private bool UtilisateurExists(int id)
         {

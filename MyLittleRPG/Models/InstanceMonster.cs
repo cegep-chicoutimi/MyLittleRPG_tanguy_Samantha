@@ -2,11 +2,11 @@
 
 namespace MyLittleRPG.Models
 {
-    [PrimaryKey(nameof(PositionX), nameof(PositionY))]
+    [PrimaryKey(nameof(X), nameof(Y))]
     public class InstanceMonster
     {
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public int MonsterId { get; set; }
         public Monster Monster { get; set; }
