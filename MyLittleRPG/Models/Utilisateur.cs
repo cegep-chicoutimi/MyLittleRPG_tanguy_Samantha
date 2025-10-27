@@ -10,12 +10,11 @@
 
         public DateTime? TempsConexion { get; set; }
 
-        public Utilisateur(int id, string email, string motDePasse, string pseudo) 
+        public Utilisateur(RegisterDTO register) 
         {
-            Id = id;
-            Email = email;
-            MotDePasse = motDePasse;
-            Pseudo = pseudo;
+            Email = register.email;
+            MotDePasse = register.password;
+            Pseudo = register.pseudo;
             DateInscription = DateTime.Now;
             TempsConexion = null;
         }
