@@ -3,14 +3,14 @@
     // DTO pour la connexion
     public class LoginDTO()
     {
-        public string email;
-        public string password;
+        public string email { get; set; }
+        public string password { get; set; }
     }
     public class RegisterDTO()
     {
-        public string pseudo;
-        public string email; 
-        public string password;
+        public string pseudo { get; set; }
+        public string email { get; set; }
+        public string password { get; set; }
     }
 
     public class ResultDto

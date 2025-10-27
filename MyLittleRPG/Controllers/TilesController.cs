@@ -34,8 +34,14 @@ namespace MyLittleRPG.Controllers
         /// <returns>grille des tuiles dévoilés</returns>
         // GET: api/Tiles
         [HttpGet]
-        public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int X, int Y)
+        public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int X, int Y,int UserId)
         {
+            if (!_context.Utilisateurs.FirstOrDefault(e => e.Id == UserId).isConnected)
+            {
+                return Unauthorized();
+            }
+
+
             List<Tile> tiles = (List<Tile>)await TileGeneration.GenererTilesAutour(X, Y);
 
             if(tiles == null) return NotFound(new {message = "Les tuiles n'ont pas pu se générer"});

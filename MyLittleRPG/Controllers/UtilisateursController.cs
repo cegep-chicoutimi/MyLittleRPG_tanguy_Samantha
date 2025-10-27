@@ -60,6 +60,8 @@ namespace MyLittleRPG.Controllers
             }
 
             utilisateur.TempsConexion = DateTime.Now;
+            utilisateur.isConnected = true;
+
             _context.Entry(utilisateur).State = EntityState.Modified;
             try
             {
@@ -127,6 +129,52 @@ namespace MyLittleRPG.Controllers
 
             return Ok("utilisateur créer");
         }
+
+        /// <summary>
+        /// Permet à l'utilisateur de se déconnecter
+        /// </summary>
+        /// <param name="id">Id de l'utilisateur</param>
+        /// <returns>Résultat de la déconnexion</returns>
+        [HttpPost]
+        [Route("auth/logout/{id}")]
+        public async Task<ActionResult> Logout(int id)
+        {
+            var utilisateur = await _context.Utilisateurs.FindAsync(id);
+
+            if (utilisateur == null)
+            {
+                return NotFound(new { message = "Utilisateur non trouvé" });
+            }
+
+            if (!utilisateur.isConnected)
+            {
+                return BadRequest(new { message = "L'utilisateur est déjà déconnecté" });
+            }
+
+            utilisateur.isConnected = false;
+            utilisateur.TempsConexion = DateTime.Now;
+
+            _context.Entry(utilisateur).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UtilisateurExists(id))
+                {
+                    return NotFound(new { message = "Utilisateur introuvable lors de la mise à jour" });
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(new { message = "Déconnexion réussie" });
+        }
+
 
         private bool UtilisateurExists(int id)
         {

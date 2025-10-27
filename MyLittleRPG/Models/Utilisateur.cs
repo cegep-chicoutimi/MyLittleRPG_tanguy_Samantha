@@ -10,6 +10,10 @@
 
         public DateTime? TempsConexion { get; set; }
 
+        public bool isConnected { get; set; } = false;
+
+        public Utilisateur() { }
+
         public Utilisateur(RegisterDTO register) 
         {
             Email = register.email;
@@ -17,6 +21,7 @@
             Pseudo = register.pseudo;
             DateInscription = DateTime.Now;
             TempsConexion = null;
+            isConnected = false;
         }
 
     }

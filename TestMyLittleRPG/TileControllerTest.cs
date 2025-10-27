@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MyLittleRPG.Models;
+using MyLittleRPG;
 
-namespace MyLittleRPG.Tests
+namespace TestMyLittleRPG
 {
-    public class TileControllerTest
+    public class TileControllerTest : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
@@ -20,9 +17,8 @@ namespace MyLittleRPG.Tests
         }
 
         [Fact]
-        public async Task GetTuiles_WithAuthenticatedUser_Returns3x3Grid()
+        public async Task GetTuiles_WithAuthenticatedUser_IncludesMonsterData()
         {
-            Assert.True(true);
 
 
         }
