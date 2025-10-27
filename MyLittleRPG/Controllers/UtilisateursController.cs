@@ -103,11 +103,11 @@ namespace MyLittleRPG.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Route("auth/register")]
-        public async Task<ActionResult<Utilisateur>> PostUtilisateur([FromBody] Utilisateur utilisateur)
+        public async Task<ActionResult<Utilisateur>> PostUtilisateur([FromBody] RegisterDTO utilisateur)
         {   
             if(utilisateur == null) return Unauthorized(new {message = "L'utilisateur entré est null"});
             
-            if(UtilisateurExists(utilisateur.Email))
+            if(UtilisateurExists(utilisateur.email))
             {
                 return Unauthorized(new { message = "L'email est déjà utilisé" });
             }
@@ -116,15 +116,13 @@ namespace MyLittleRPG.Controllers
             byte[] tmpHash;
 
             //Create a byte array from source data
-            tmpSource = ASCIIEncoding.ASCII.GetBytes(utilisateur.MotDePasse);
+            tmpSource = ASCIIEncoding.ASCII.GetBytes(utilisateur.password);
 
             //Compute hash based on source data
             tmpHash = new MD5CryptoServiceProvider().ComputeHash(tmpSource);
-            utilisateur.MotDePasse=ByteArrayToString(tmpHash);
-
-            utilisateur.DateInscription = DateTime.Now;
+            utilisateur.password=ByteArrayToString(tmpHash);
             
-            _context.Utilisateurs.Add(utilisateur);
+            _context.Utilisateurs.Add(new Utilisateur(utilisateur));
             await _context.SaveChangesAsync();
 
             return Ok("utilisateur créer");
