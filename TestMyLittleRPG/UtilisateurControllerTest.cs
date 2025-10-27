@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using MyLittleRPG.Models;
 using MyLittleRPG;
+using System.Net.Http.Json;
 
 namespace TestMyLittleRPG
 {
@@ -28,13 +29,18 @@ namespace TestMyLittleRPG
 
             var registerDto = new RegisterDTO
             {
+                pseudo = testPseudo,
                 email = testEmail,
-                password = testMDP,
-                pseudo = testPseudo
-
+                password = testMDP
             };
 
-           // var registerResponse = await _client
+            var registerResponse = await _client.PostAsJsonAsync(
+                    "/api/Utilisateurs/auth/register",
+                    registerDto
+                );
+
+            Assert.True(registerResponse.IsSuccessStatusCode,
+                $"Registration failed: {await registerResponse.Content.ReadAsStringAsync()}");
 
         }
     }
