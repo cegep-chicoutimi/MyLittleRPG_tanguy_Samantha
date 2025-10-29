@@ -253,7 +253,7 @@ namespace MyLittleRPG.Controllers
             }
             var persoexist = await _context.Personnages.FirstOrDefaultAsync(p => p.UtilisateurId == persoDto.IdUser);
             if (persoexist != null)
-                return Ok(persoexist);
+                return Unauthorized("Le personnage existe déjà");
 
             if (string.IsNullOrEmpty(persoDto.Nom)) return BadRequest(new { message = "Le nom de l'utilisateur ne doit pas être vide" });
             Random random = new Random();

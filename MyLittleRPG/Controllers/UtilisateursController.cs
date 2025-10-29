@@ -25,6 +25,23 @@ namespace MyLittleRPG.Controllers
         {
             _context = context;
         }
+        /// <summary>
+        /// Va chercher l'utilisateur selon l'identifiant de l'utilisateur
+        /// </summary>
+        /// <param name="UserId">id de l'utilisateur</param>
+        /// <returns>utilisateru</returns>
+        [HttpGet("User/{email}")]
+        public async Task<ActionResult<Utilisateur>> GetUserByEmail(string email)
+        {
+            var user = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return NotFound("Aucun utilisateur correspond à cet email");
+            }
+
+            return Ok(user);
+        }
 
         /// <summary>
         /// Permet à l'utilisateur de se connecter
@@ -108,8 +125,17 @@ namespace MyLittleRPG.Controllers
         public async Task<ActionResult<Utilisateur>> PostUtilisateur([FromBody] RegisterDTO utilisateur)
         {   
             if(utilisateur == null) return Unauthorized(new {message = "L'utilisateur entré est null"});
-            
-            if(UtilisateurExists(utilisateur.email))
+
+            if (string.IsNullOrEmpty(utilisateur.password) || string.IsNullOrEmpty(utilisateur.pseudo))
+            {
+                return BadRequest("Le pseudo ou le mot de passe de l'utilisateur entré ne sont pas valide");
+            }
+            if (!utilisateur.email.Contains('@') || string.IsNullOrEmpty(utilisateur.email))
+            {
+                return BadRequest("L'email entré de l'utilisateur n'est pas valide");
+            }
+
+            if (UtilisateurExists(utilisateur.email))
             {
                 return Unauthorized(new { message = "L'email est déjà utilisé" });
             }
@@ -123,11 +149,13 @@ namespace MyLittleRPG.Controllers
             //Compute hash based on source data
             tmpHash = new MD5CryptoServiceProvider().ComputeHash(tmpSource);
             utilisateur.password=ByteArrayToString(tmpHash);
+
+            Utilisateur newUser = new Utilisateur(utilisateur);
             
-            _context.Utilisateurs.Add(new Utilisateur(utilisateur));
+            _context.Utilisateurs.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return Ok("utilisateur créer");
+            return CreatedAtAction("GetUserByEmail", new { email = utilisateur.email }, newUser);
         }
 
         /// <summary>
