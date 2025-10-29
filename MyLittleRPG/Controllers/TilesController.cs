@@ -36,7 +36,7 @@ namespace MyLittleRPG.Controllers
         [HttpGet]
         public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int X, int Y,int UserId)
         {
-            if (!_context.Utilisateurs.FirstOrDefault(e => e.Id == UserId).isConnected)
+            if (_context.Utilisateurs.FirstOrDefault(e => e.Id == UserId) == null || !_context.Utilisateurs.FirstOrDefault(e => e.Id == UserId).isConnected)
             {
                 return Unauthorized();
             }

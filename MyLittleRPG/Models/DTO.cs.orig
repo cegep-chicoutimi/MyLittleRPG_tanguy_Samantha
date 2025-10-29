@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace MyLittleRPG.Models
+﻿namespace MyLittleRPG.Models
 {
     // DTO pour la connexion
     public class LoginDTO()
@@ -10,8 +8,13 @@ namespace MyLittleRPG.Models
     }
     public class RegisterDTO()
     {
+<<<<<<< HEAD
+        public string pseudo { get; set; }
+        public string email { get; set; }
+=======
         public string pseudo {  get; set; }
         public string email {  get; set; }
+>>>>>>> 6ffc88d1f7581e7e285a5e23a8f92131a24a787e
         public string password { get; set; }
     }
 
@@ -26,38 +29,6 @@ namespace MyLittleRPG.Models
     // DTO pour représenter un monstre instancié sur la carte
     public class InstanceMonstreDto
     {
-
-        [JsonConstructor]
-        public InstanceMonstreDto(
-        int id,
-        int monstreId,
-        string nom,
-        string spriteUrl,
-        int niveau,
-        int x,
-        int y,
-        int pointsVieActuels,
-        int pointsVieMax,
-        int attaque,
-        int defense,
-        int experienceDonnee,
-        bool estVivant)
-        {
-            Id = id;
-            MonstreId = monstreId;
-            Nom = nom;
-            SpriteUrl = spriteUrl;
-            Niveau = niveau;
-            X = x;
-            Y = y;
-            PointsVieActuels = pointsVieActuels;
-            PointsVieMax = pointsVieMax;
-            Attaque = attaque;
-            Defense = defense;
-            ExperienceDonnee = experienceDonnee;
-            EstVivant = estVivant;
-        }
-
         public InstanceMonstreDto(InstanceMonster enemy)
         {
             this.MonstreId = enemy.MonsterId;
@@ -99,14 +70,6 @@ namespace MyLittleRPG.Models
     public class TuileAvecInfosDto
     {
         private Tile tile;
-
-        [JsonConstructor]
-        public TuileAvecInfosDto(int x, int y, string? typeTuile, string? imageUrl,
-                             InstanceMonstreDto? monstre, bool estAccessible)
-        {
-            X = x; Y = y; TypeTuile = typeTuile; this.imageUrl = imageUrl;
-            Monstre = monstre; EstAccessible = estAccessible;
-        }
 
         public TuileAvecInfosDto(Tile tile)
         {
