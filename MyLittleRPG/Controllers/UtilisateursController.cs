@@ -53,6 +53,12 @@ namespace MyLittleRPG.Controllers
         [Route("auth/login")]
         public async Task<ActionResult<Utilisateur>> Login([FromBody] LoginUser login)
         {
+
+            if(string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.MotDePasse))
+            {
+                return BadRequest("Le email ou  le mot de passe entre n'est pas valide");
+            }
+
             var utilisateur = await _context.Utilisateurs
                 .FirstOrDefaultAsync(u => u.Email == login.Email);
 
@@ -96,7 +102,7 @@ namespace MyLittleRPG.Controllers
                 }
             }
 
-            return utilisateur;
+            return Ok(utilisateur);
         }
         /// <summary>
         /// Pour hash le mot de passe
