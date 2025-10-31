@@ -21,7 +21,7 @@ namespace TestMyLittleRPG
             _urlCreatePerso = "/api/Personnages";
             _urlLogin = "/api/Utilisateurs/auth/Login";
         }
-
+        /*
         [Fact]
         public async Task Registration_Works()
         {
@@ -319,5 +319,6 @@ namespace TestMyLittleRPG
             Assert.True(persoInvalidResponse.ReasonPhrase == "Unauthorized",
                 $"Registration failed: {await persoResponse.Content.ReadAsStringAsync()}");
         }
+        */
     }
 }

@@ -75,10 +75,10 @@ namespace TestMyLittleRPG
             grille = await GetTilesResponse3.Content.ReadFromJsonAsync<GrilleJeuDto>();
             listOfTiles.AddRange(grille.Tuiles);
 
-            List<InstanceMonstreDto> listOfMonstres= new List<InstanceMonstreDto>() ;
+            List<InstanceMonstreDto> listOfMonstres = new List<InstanceMonstreDto>();
 
-            foreach (var tile in listOfTiles) 
-            { 
+            foreach (var tile in listOfTiles)
+            {
                 if (tile.Monstre != null)
                 {
                     listOfMonstres.Add(tile.Monstre);
@@ -87,9 +87,142 @@ namespace TestMyLittleRPG
 
 
             Assert.NotEqual(0, listOfMonstres.Count);
-            Assert.NotNull( listOfMonstres.First().Id);
-            Assert.NotNull( listOfMonstres.First().Attaque);
+            Assert.NotNull(listOfMonstres.First().Id);
+            Assert.NotNull(listOfMonstres.First().Attaque);
 
+
+        }
+        [Fact]
+        public async Task ExplorerTuile_WithinRange_ReturnsTuileData()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/11%2C11?X=11&Y=11&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+            Assert.NotNull(Tile);
+            Assert.Equal(11, Tile.X);
+            Assert.Equal(11, Tile.Y);
+            Assert.Equal("ROUTE", Tile.TypeTuile);
+            Assert.True(Tile.EstAccessible);
+        }
+        [Fact]
+        public async Task ExplorerTuile_WithinRange_ReturnsMonsterIfPresent()
+        {
+            //ce test peut echouer puisque generation de monstre aleatoire merci de le relance jusqua son bon fonctionement
+
+            await _client.PutAsync("/api/Monsters/monstre/generateall", null);
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/11%2C11?X=10&Y=11&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+            Assert.NotNull(Tile);
+            Assert.NotNull(Tile.Monstre);
+        }
+        [Fact]
+        public async Task ExplorerTuile_WithinRange_ReturnsNullMonsterIfEmpty()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/11%2C11?X=11&Y=11&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+            Assert.NotNull(Tile);
+            Assert.Null(Tile.Monstre);
+        }
+        [Fact]
+        public async Task ExplorerTuile_TwoStepsAway_Succeeds()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/12%2C10?X=11&Y=11&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+            Assert.NotNull(Tile);
+        }
+        [Fact]
+        public async Task ExplorerTuile_FiveStepsAway_ReturnsForbidden()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/12%2C10?X=20&Y=20&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+
+            Assert.False(GetTilesResponse.IsSuccessStatusCode);
+            Assert.Equal("Unauthorized", GetTilesResponse.ReasonPhrase);
+        }
+        [Fact]
+        public async Task ExplorerTuile_BeyondMapBoundaries_ReturnsForbidden()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/12%2C10?X=51&Y=51&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+
+            Assert.False(GetTilesResponse.IsSuccessStatusCode);
+            Assert.Equal("Unauthorized", GetTilesResponse.ReasonPhrase);
+        }
+        [Fact]
+        public async Task ExplorerTuile_NegativeCoordinates_ReturnsForbidden()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/12%2C10?X=51&Y=51&UserId=37");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+
+            Assert.False(GetTilesResponse.IsSuccessStatusCode);
+            Assert.Equal("Unauthorized", GetTilesResponse.ReasonPhrase);
+        }
+        [Fact]
+        public async Task ExplorerTuile_WithoutAuthentication_ReturnsForbidden()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/12%2C10?X=1&Y=1&UserId=2");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+
+            Assert.False(GetTilesResponse.IsSuccessStatusCode);
+            Assert.Equal("Unauthorized", GetTilesResponse.ReasonPhrase);
+        }
+        [Fact]
+        public async Task ExplorerTuile_WithDisconnectedUser_ReturnsForbidden()
+        {
+
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles/12%2C10?X=1&Y=1&UserId=39");
+
+
+            TuileAvecInfosDto Tile = await GetTilesResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+
+
+            Assert.False(GetTilesResponse.IsSuccessStatusCode);
+            Assert.Equal("Unauthorized", GetTilesResponse.ReasonPhrase);
+        }
+
+        [Fact]
+        public async Task GetTuiles_OnedgeOfMap_returnonlyValidTile()
+        {
+
+            //ce test ne fonctionne pqs pour le moment cqr le progrqmme ne sadapte pas au coord pour savoir le taille du tableau a renvoyer
+            var GetTilesResponse = await _client.GetAsync("/api/Tiles?X=1&Y=1&UserId=40");
+            GrilleJeuDto grille = await GetTilesResponse.Content.ReadFromJsonAsync<GrilleJeuDto>();
+
+            Assert.NotNull(grille);
+            Assert.Equal(1, grille.CentreX);
+            Assert.Equal(1, grille.CentreY);
+            Assert.Equal(4, grille.Tuiles.Count);
 
         }
     }
