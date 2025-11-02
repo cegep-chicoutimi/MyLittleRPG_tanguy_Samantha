@@ -137,7 +137,7 @@ namespace TestMyLittleRPG
 
             userCreated.Should().NotBeNull();
 
-            //Création Personnage valide
+            //CrÃ©ation Personnage valide
             var createPersoDto = new CreatePersonnageDto
             {
                 IdUser = userCreated.Id,
@@ -165,7 +165,7 @@ namespace TestMyLittleRPG
 
             userCreated.Should().NotBeNull();
 
-            //Création Personnage valide
+            //CrÃ©ation Personnage valide
             var createPersoDto = new CreatePersonnageDto
             {
                 IdUser = userCreated.Id,
@@ -187,7 +187,7 @@ namespace TestMyLittleRPG
 
             Utilisateur user = new Utilisateur();
 
-            //Création Personnage invalide
+            //CrÃ©ation Personnage invalide
             var createPersoDto = new CreatePersonnageDto
             {
                 IdUser = user.Id,
@@ -215,7 +215,7 @@ namespace TestMyLittleRPG
 
             userCreated.Should().NotBeNull();
 
-            //Création Personnage valide
+            //CrÃ©ation Personnage valide
             var createPersoDto = new CreatePersonnageDto
             {
                 IdUser = userCreated.Id,
@@ -230,7 +230,7 @@ namespace TestMyLittleRPG
             persoResponse.IsSuccessStatusCode.Should().BeTrue($"Registration failed: {await persoResponse.Content.ReadAsStringAsync()}");
 
 
-            //Création perso dupliquer invalide
+            //CrÃ©ation perso dupliquer invalide
             var persoInvalidResponse = await _client.PostAsJsonAsync(
                     _urlCreatePerso,
                     createPersoDto
@@ -288,7 +288,7 @@ namespace TestMyLittleRPG
 
             loginResponse.IsSuccessStatusCode.Should().BeTrue($"Registration failed: {await loginResponse.Content.ReadAsStringAsync()}");
 
-            //Création Personnage valide
+            //CrÃ©ation Personnage valide
             var createPersoDto = new CreatePersonnageDto
             {
                 IdUser = userCreated.Id,
