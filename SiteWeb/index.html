@@ -115,18 +115,56 @@
                 </div>
                 <!-- Section droite -->
                 <div class="col-3">
-                    <div class="card mb-3">
-                        <div class="card-header text-white">
-                            Monstres selectionnés
+                    <!-- Carte avec onglets -->
+                    <div class="card mt-4">
+                    <div class="card-header p-0">
+                        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="monstre-tab" data-toggle="tab" href="#monstre" role="tab" aria-controls="monstre" aria-selected="true">
+                            <i class="fa-solid fa-dragon"></i> Monstre
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tuile-tab" data-toggle="tab" href="#tuile" role="tab" aria-controls="tuile" aria-selected="false">
+                            <i class="fa-solid fa-square"></i> Tuile sélectionnée
+                            </a>
+                        </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body tab-content">
+                        <!-- Onglet Monstre -->
+                        <div class="tab-pane fade show active" id="monstre" role="tabpanel" aria-labelledby="monstre-tab">
+                            <div class="card mb-3">
+                                <div class="card-header text-white">
+                                    Monstres selectionnés
+                                </div>
+                                <div class="card-body selected-monster">
+                                    <div class="divCard"><p>Nom : <span id="monstreNom"></span></p></div>
+                                    <div class="divCard"><p>PV : <span id="monstrePV"></span></p></div>
+                                    <div class="divCard"><p>Force : <span id="monstreForce"></span></p></div>
+                                    <div class="divCard"><p>Défense : <span id="monstreDefense"></span></p></div>
+                                    <div class="divCard"><p>Position : <span id="monstrePosition"></span></p></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body selected-monster">
-                            <div class="divCard"><p>Nom : <span id="monstreNom"></span></p></div>
-                            <div class="divCard"><p>PV : <span id="monstrePV"></span></p></div>
-                            <div class="divCard"><p>Force : <span id="monstreForce"></span></p></div>
-                            <div class="divCard"><p>Défense : <span id="monstreDefense"></span></p></div>
-                            <div class="divCard"><p>Position : <span id="monstrePosition"></span></p></div>
+
+                        <!-- Onglet Tuile sélectionnée -->
+                        <div class="tab-pane fade" id="tuile" role="tabpanel" aria-labelledby="tuile-tab">
+                            <div class="divCard card mb-3">
+                                <div class="card-header text-white">
+                                    Tuile Sélectionnée
+                                </div>
+                                <div class="card-body selected-tile">
+                                    <div class="divCard"><p>Position : </p></div>
+                                    <div class="divCard"><p>Type : </p></div>
+                                    <div class="divCard"><p>Traversable : </p></div>
+                                    <div class="divCard"><p>Description : </p></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                     <div class="card mb-3">
                         <div class="card-header text-white">
                             Simulation Monstres
@@ -137,16 +175,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="divCard card mb-3">
-                        <div class="card-header text-white">
-                            Tuile Sélectionnée
-                        </div>
-                        <div class="card-body selected-tile">
-                            <div class="divCard"><p>Position : </p></div>
-                            <div class="divCard"><p>Type : </p></div>
-                            <div class="divCard"><p>Traversable : </p></div>
-                            <div class="divCard"><p>Description : </p></div>
-                        </div>
+
                     </div>
                 </div>
             </div>

@@ -258,3 +258,27 @@ body.dark-theme {
 .dark-theme .modal-content {
   background-color: #2d8ef7;
 }
+
+/* Réduit la hauteur des onglets */
+.nav-tabs .nav-link {
+    padding: 10px 10px; /* Ajuste selon tes goûts */
+    font-size: 0.85rem; /* Plus compact */
+}
+
+/* Met les onglets sur la même ligne */
+.nav-tabs {
+    display: flex;
+    justify-content: space-between; /* ou: center / flex-start */
+    flex-wrap: nowrap;
+}
+
+.nav-tabs .nav-item {
+    flex: 1;                /* prend toute la largeur dispo */
+    text-align: center;     /* centre le texte + icône */
+}
+
+/* Optionnel : onglet actif plus visible */
+.nav-tabs .nav-link.active {
+  background-color: #2d8ef7;
+    font-weight: bold;
+}
