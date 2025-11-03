@@ -70,7 +70,6 @@ namespace MyLittleRPG.Models
             monsterInstance.PVMax = monster.pointsVieBase;
             monsterInstance.PVactuels = monster.pointsVieBase;
 
-            Console.WriteLine("ajout de " + monster.Nom + "de niveaux " + level + "a la bd a la case " + x + " ; " + y);
 
             _context.InstanceMonstres.Add(monsterInstance);
         }

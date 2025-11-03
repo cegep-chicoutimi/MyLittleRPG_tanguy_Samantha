@@ -26,24 +26,99 @@ namespace MyLittleRPG.Controllers
             generator = new MonsterGeneration(context);
         }
 
-        /// <summary>
-        /// Générer tous les monstres du jeu
-        /// </summary>
-        /// <returns>Resultat</returns>
         [HttpPut]
         [Route("monstre/generateall")]
-        public async Task<IActionResult> generateall()
+        public async Task<IActionResult> GenerateAll()
         {
-            List<string> UsedXY = new List<string>();
+            const int N = 300;
 
-
+            // 1) Reset (éviter les triggers lents : DELETE direct)
             await _context.Database.ExecuteSqlRawAsync("DELETE FROM InstanceMonstres");
-            for (int i = 0; i < 300; i++)
+
+            // 2) Préchargements SANS tracking (un seul round-trip chacun)
+            var tiles = await _context.Tiles
+                .AsNoTracking()
+                .Select(t => new { t.X, t.Y, t.estTraversable, t.Type })
+                .ToListAsync();
+
+            var spawnables = tiles
+                .Where(t => t.estTraversable && t.Type != TileType.VILLE && t.Type != TileType.ROUTE)
+                .Select(t => (t.X, t.Y))
+                .ToList();
+
+            if (spawnables.Count < N)
+                return BadRequest(new { message = $"Pas assez de tuiles spawnables ({spawnables.Count}) pour {N} monstres." });
+
+            var villes = tiles
+                .Where(t => t.Type == TileType.VILLE)
+                .Select(t => (t.X, t.Y))
+                .ToList();
+
+            var monsters = await _context.Monsters
+                .AsNoTracking()
+                .Select(m => new { m.Id, m.pointsVieBase })
+                .ToListAsync();
+
+            if (monsters.Count == 0)
+                return BadRequest(new { message = "Aucun monstre maître dans la table Monsters." });
+
+            // 3) Mélange et sélection de N cases distinctes (pas de do/while ni HashSet string)
+            var rng = new Random();
+            // Fisher-Yates
+            for (int i = spawnables.Count - 1; i > 0; i--)
             {
-                generator.addmonstre(UsedXY);
+                int j = rng.Next(i + 1);
+                (spawnables[i], spawnables[j]) = (spawnables[j], spawnables[i]);
             }
-            await _context.SaveChangesAsync();
-            return Ok("300 monstre regenere");
+            var picked = spawnables.Take(N).ToList();
+
+            // 4) Calcul du niveau = min distance manhattan à une ville (en mémoire)
+            int DistanceVille(int x, int y)
+            {
+                if (villes.Count == 0) return 0;
+                int best = int.MaxValue;
+                foreach (var (vx, vy) in villes)
+                {
+                    int d = Math.Abs(x - vx) + Math.Abs(y - vy);
+                    if (d < best) best = d;
+                    if (best == 0) break;
+                }
+                return best;
+            }
+
+            // 5) Construction en mémoire
+            var instances = new List<InstanceMonster>(N);
+            foreach (var (x, y) in picked)
+            {
+                var m = monsters[rng.Next(monsters.Count)];
+                var level = DistanceVille(x, y) / 3;
+
+                instances.Add(new InstanceMonster
+                {
+                    X = x,
+                    Y = y,
+                    MonsterId = m.Id,
+                    niveaux = level,
+                    PVMax = m.pointsVieBase,
+                    PVactuels = m.pointsVieBase
+                });
+            }
+
+            // 6) Insertion en une passe (accélération EF)
+            var oldDetect = _context.ChangeTracker.AutoDetectChangesEnabled;
+            _context.ChangeTracker.AutoDetectChangesEnabled = false;
+            try
+            {
+                await _context.InstanceMonstres.AddRangeAsync(instances);
+                await _context.SaveChangesAsync();
+            }
+            finally
+            {
+                _context.ChangeTracker.AutoDetectChangesEnabled = oldDetect;
+            }
+
+            return Ok($"{N} monstres régénérés");
         }
+
     }
 }

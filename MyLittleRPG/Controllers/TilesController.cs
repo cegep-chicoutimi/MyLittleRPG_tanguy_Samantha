@@ -81,8 +81,31 @@ namespace MyLittleRPG.Controllers
         /// <returns>tuile</returns>
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
-        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int X, int Y)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int X, int Y, int UserId)
         {
+            Utilisateur? user = _context.Utilisateurs.FirstOrDefault(e => e.Id == UserId);
+            if (user == null || !user.isConnected)
+            {
+                return Unauthorized();
+            }
+
+            if (X <= 0 || Y <= 0)
+            {
+                return Unauthorized(new { message = "Les positions entrées ne sont pas valide" });
+            }
+
+            if (X > 50 || Y > 50)
+            {
+                return Unauthorized(new { message = "Les positions entrées ne sont pas valide" });
+            }
+
+            var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.UtilisateurId == UserId);
+
+            if (X>personnage.X+2 || X < personnage.X - 2 || Y > personnage.Y + 2 || Y < personnage.Y - 2)
+            {
+                return Unauthorized(new { message = "cette tuile se trouve trop loin de votre personnage" });
+            }
+
 
             Tile? tile =  await TileGeneration.GenererTile(X, Y);
             if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });

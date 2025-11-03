@@ -59,7 +59,7 @@ namespace MyLittleRPG.Services
                 var controller = new MonstersController(context);
 
                 _logger.LogInformation("Régénération des monstres (300) démarrée...");
-                var result = await controller.generateall(); // appelle ta méthode existante
+                var result = await controller.GenerateAll(); // appelle ta méthode existante
                 _logger.LogInformation("Régénération terminée: {ResultType}", result?.GetType().Name);
             }
             catch (Exception ex)
