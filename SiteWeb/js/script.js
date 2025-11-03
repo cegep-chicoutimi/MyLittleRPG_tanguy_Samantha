@@ -305,7 +305,7 @@ function displayTiles(tiles) {
 // Récupère les tuiles autour d'une position donnée
 async function getTilesAroundAsync(X, Y) {
   try {
-    const url = `https://localhost:7061/api/Tiles?X=${X}&Y=${Y}`;
+    const url = `https://localhost:7061/api/Tiles?X=${X}&Y=${Y}&UserId=${user.id}`;
 
     const response = await fetch(url);
     
@@ -323,7 +323,7 @@ async function getTilesAroundAsync(X, Y) {
 // Récupère une tuile spécifique
 async function getTileAsync(X, Y) {
   try {
-    const url = `https://localhost:7061/api/Tiles/${X}%2C${Y}?X=${X}&Y=${Y}`;
+    const url = `https://localhost:7061/api/Tiles/${X}%2C${Y}?X=${X}&Y=${Y}&UserId=${user.id}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -552,7 +552,7 @@ async function login(email, motDePasse) {
 }
     
 // Inscription avec création du personnage
-async function register(pseudo, email, motDePasse) {
+async function register(pseudo, email, password) {
   try {
     var userMessage = "Erreur lors de l'inscription";
     var nbMinChars = 5;
@@ -561,7 +561,7 @@ async function register(pseudo, email, motDePasse) {
       userMessage = "L'email n'est pas valide.";
       throw new Error(userMessage);
     }
-    if(pseudo.length < nbMinChars || motDePasse.length < nbMinChars)
+    if(pseudo.length < nbMinChars || password.length < nbMinChars)
     {
       userMessage = `Le pseudo et le mot de passe doivent contenir au moins ${nbMinChars} caractères.`;
       throw new Error(userMessage);
@@ -570,15 +570,19 @@ async function register(pseudo, email, motDePasse) {
     const response = await fetch("https://localhost:7061/api/Utilisateurs/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pseudo, email, motDePasse })
+      body: JSON.stringify({ pseudo, email, password })
     });
-    
+
+
+    var test = JSON.stringify({ pseudo, email, motDePasse: password });
+
+
     if (!response.ok) {
       const message = await response.text();
       throw new Error(message || "Erreur d'inscription");
     }
 
-    login(email,motDePasse)
+    login(email,password)
       
       // Redirection vers la carte
       window.location.href = "index.html";
