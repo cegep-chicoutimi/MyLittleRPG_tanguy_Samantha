@@ -31,6 +31,7 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddHostedService<MonstreMaintenanceService>();
+        builder.Services.AddHostedService<QuestService>();
 
         var app = builder.Build();
 
