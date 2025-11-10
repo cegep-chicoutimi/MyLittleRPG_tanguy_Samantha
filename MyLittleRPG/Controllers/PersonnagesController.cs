@@ -20,11 +20,13 @@ namespace MyLittleRPG.Controllers
     {
         private readonly MonsterContext _context;
         private TileGeneration _tileGeneration;
+        private QuestManager _questManager;
 
         public PersonnagesController(MonsterContext context)
         {
             _context = context;
             _tileGeneration = new TileGeneration(context);
+            _questManager = new QuestManager(context);
         }
 
         /// <summary>
@@ -79,18 +81,28 @@ namespace MyLittleRPG.Controllers
                 grille.resultFight = fight(X, Y, idPerso);
                 personnage.savechanges(grille.resultFight.Personnage);
                 monstre.PVactuels = grille.resultFight.Monstre.PointsVieActuels;
+                if(grille.resultFight.code == "Win")
+                {
+                   //Verif quetes vaincre monstres
+                   grille.questResult = await _questManager.UpdateQueteVaicreMonstreState(personnage, monstre.Monster, grille.questResult);
+                   //Verif quete niveau atteint
+                   grille.questResult = await _questManager.UpdateQueteniveauAtteintState(personnage, grille.questResult);
+                }
             }
             else
             {
                 grille.resultFight = null;
             }
 
-            if (grille.resultFight == null|| grille.resultFight.code=="Win")
+            if (grille.resultFight == null || grille.resultFight.code=="Win")
             {
                 if ((Math.Abs(X - personnage.X) <= 1) && (Math.Abs(Y - personnage.Y) <= 1))
                 {
                     personnage.X = X;
                     personnage.Y = Y;
+
+                    //Verif quete visiter Tuile
+                    grille.questResult = await _questManager.UpdateQueteVisiterTuileState(personnage, grille.questResult);
 
                     if (_context.Tiles.Find(X, Y).Type==TileType.VILLE)
                     {
@@ -177,12 +189,13 @@ namespace MyLittleRPG.Controllers
                .Include(im => im.Monster)
                .FirstOrDefault(im => im.X == X && im.Y == Y);
 
+
             Random random = new Random();
-            double factmonster = (random.Next(80, 125) / 100.0);
+            double factmonster = (random.Next(80, 125) / 100.00);
             double factperso = (random.Next(80, 125) / 100.0);
 
-            int damageMonster = (int)((personnage.Force - (enemy.Monster.defenseBase + enemy.niveaux)) * factmonster);
-            int damagePlayer = (int)(((enemy.Monster.forceBase + enemy.niveaux) - personnage.Defense) * factperso);
+            int damageMonster = (int)((personnage.Force - (enemy.Monster.defenseBase + enemy.niveaux)) * factmonster) + personnage.Force;
+            int damagePlayer = (int)(((enemy.Monster.forceBase + enemy.niveaux) - personnage.Defense) * factperso) + enemy.Monster.forceBase;
 
             if (damageMonster > 0)
             {

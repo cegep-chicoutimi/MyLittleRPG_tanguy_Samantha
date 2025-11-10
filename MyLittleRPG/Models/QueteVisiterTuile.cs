@@ -17,6 +17,8 @@
         {
             X = x;
             Y = y;
+            DistanceX = distanceX;
+            DistanceY = distanceY;
             TileType = type;
             IdPersonnage = idPerso;
             IsActive = true;
