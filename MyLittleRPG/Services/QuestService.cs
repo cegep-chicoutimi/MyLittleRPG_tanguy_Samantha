@@ -53,18 +53,18 @@ namespace MyLittleRPG.Services
             switch (nbRandomQuete)
             {
                 case 1:
-                    QueteNiveauAtteint queteNiveau = new QueteNiveauAtteint(personnage.Niveau + rnd.Next(1, 3), personnage.Id);
-                    context.QuetesNiveauAtteint.Add(queteNiveau);
+                    //QueteNiveauAtteint queteNiveau = new QueteNiveauAtteint(personnage.Niveau + rnd.Next(1, 3), personnage.Id);
+                    //context.QuetesNiveauAtteint.Add(queteNiveau);
                     break;
                 case 2:
                     int type = (rnd.Next(0, typesMonstre.Count));
-                    QueteVaincreMonstres queteMonstre = new QueteVaincreMonstres(rnd.Next(3, 10), typesMonstre[type], personnage.Id);
-                    context.QuetesVaincreMonstres.Add(queteMonstre);
+                    //QueteVaincreMonstres queteMonstre = new QueteVaincreMonstres(rnd.Next(3, 10), typesMonstre[type], personnage.Id);
+                    //context.QuetesVaincreMonstres.Add(queteMonstre);
                     break;
                 case 3:
                     Tile? tileRandom = await GetTuileRandom();
-                    QueteVisiterTuile queteTuile = new QueteVisiterTuile(tileRandom.X, tileRandom.Y, tileRandom.Type, personnage.Id);
-                    context.QuetesVisiterTuile.Add(queteTuile);
+                    //QueteVisiterTuile queteTuile = new QueteVisiterTuile(tileRandom.X, tileRandom.Y, tileRandom.Type, personnage.Id);
+                    //context.QuetesVisiterTuile.Add(queteTuile);
                     break;
                 default:
                     break;
