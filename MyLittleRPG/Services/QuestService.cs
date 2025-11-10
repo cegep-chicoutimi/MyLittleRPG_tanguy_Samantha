@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MyLittleRPG.Data.Context;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MyLittleRPG.Controllers;
+using MyLittleRPG.Data.Context;
 using MyLittleRPG.Models;
 
 namespace MyLittleRPG.Services
@@ -42,31 +43,59 @@ namespace MyLittleRPG.Services
                 }
             }
         }
-        private async Task CreateQuest(CancellationToken ct, Personnage personnage)
+        private async Task CreateQuest(MonsterContext context, CancellationToken ct, Personnage personnage)
         {
             List<string> typesMonstre = new List<string>() { "grass", "poison", "fire", "water", "normal", "electric", "ground", "fairy", "fighting", "psychic", "rock", "steel",
             "ghost", "dragon", "flying", "bug", "ice", "dark"};
             Random rnd = new Random();
             int nbRandomQuete = rnd.Next(1, 4);
 
-            switch(nbRandomQuete)
+            switch (nbRandomQuete)
             {
                 case 1:
                     QueteNiveauAtteint queteNiveau = new QueteNiveauAtteint(personnage.Niveau + rnd.Next(1, 3), personnage.Id);
+                    context.QuetesNiveauAtteint.Add(queteNiveau);
                     break;
                 case 2:
                     int type = (rnd.Next(0, typesMonstre.Count));
                     QueteVaincreMonstres queteMonstre = new QueteVaincreMonstres(rnd.Next(3, 10), typesMonstre[type], personnage.Id);
+                    context.QuetesVaincreMonstres.Add(queteMonstre);
                     break;
                 case 3:
-                    //TODO: Refaire logique random tuile
-                    int x = rnd.Next(0, 50);
-                    int y = rnd.Next(0, 50);
-                    QueteVisiterTuile queteTuile = new QueteVisiterTuile();
+                    Tile? tileRandom = await GetTuileRandom();
+                    QueteVisiterTuile queteTuile = new QueteVisiterTuile(tileRandom.X, tileRandom.Y, tileRandom.Type, personnage.Id);
+                    context.QuetesVisiterTuile.Add(queteTuile);
                     break;
                 default:
                     break;
             }
+        }
+        private async Task<Tile?> GetTuileRandom()
+        {
+            Tile? tileRandom;
+            bool valide = false;
+            Random rnd = new Random();
+            do
+            {
+                int x = rnd.Next(0, 50);
+                int y = rnd.Next(0, 50);
+
+                using var scope = _sp.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<MonsterContext>();
+
+                tileRandom = await context.Tiles.FindAsync(x, y);
+
+                if(tileRandom == null || tileRandom.estTraversable == false)
+                {
+                    valide = false;
+                }else
+                {
+                    valide = true;
+                }
+
+            } while (!valide);
+
+            return tileRandom;
         }
 
         private async Task CheckNbQuest(CancellationToken ct)
@@ -84,18 +113,22 @@ namespace MyLittleRPG.Services
 
                 _logger.LogInformation("Régénérer les quêtes démaré");
 
-                foreach(Personnage p in context.Personnages)
+                var personnages = await context.Personnages.ToListAsync(ct);
+
+                foreach (Personnage p in personnages)
                 {
-                    if(p.NbQuetes >= 0 && p.NbQuetes < 3)
+                    if (p.NbQuetes >= 0 && p.NbQuetes < 3)
                     {
-                        for(int i = 0; i < 3; i++)
+                        for (int i = p.NbQuetes; i < 3; i++)
                         {
-                            await CreateQuest(ct, p);
+                            await CreateQuest(context, ct, p);
+                            p.NbQuetes++;
                         }
                     }
                 }
+                await context.SaveChangesAsync(ct);
 
-                //_logger.LogInformation("Régénération terminée: {ResultType}", result?.GetType().Name);
+                _logger.LogInformation("Régénération terminée");
             }
             catch (Exception ex)
             {
@@ -105,7 +138,6 @@ namespace MyLittleRPG.Services
             {
                 _mutex.Release();
             }
-            throw new NotImplementedException();
         }
     }
 }

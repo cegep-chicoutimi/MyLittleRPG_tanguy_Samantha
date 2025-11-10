@@ -28,6 +28,9 @@ namespace MyLittleRPG.Data.Context
                 .HasOne(im => im.Monster)
                 .WithMany()
                 .HasForeignKey(im => im.MonsterId);
+
+            modelBuilder.Ignore<QuestDTO>();
         }
+        public DbSet<MyLittleRPG.Models.QuestDTO> QuestDTO { get; set; } = default!;
     }
 }

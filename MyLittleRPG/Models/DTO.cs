@@ -171,4 +171,32 @@ namespace MyLittleRPG.Models
         public int X { get; set; }
         public int Y { get; set; }
     }
+    //DTO quest
+    public class QuestDTO
+    {
+        public QuestDTO(List<QueteNiveauAtteint> queteNiveauAtteint, List<QueteVaincreMonstres> queteVaincreMonstres, List<QueteVisiterTuile> queteVisiterTuiles)
+        {
+            this.QuetesVaincreMonstre = queteVaincreMonstres;
+            this.QuetesVisiterTuile = queteVisiterTuiles;
+            this.QueteNiveauAtteints = queteNiveauAtteint;
+            this.nbQuetes = QuetesVaincreMonstre.Count + QuetesVisiterTuile.Count + QueteNiveauAtteints.Count;
+            this.NbQuetesMAX = 3;
+        }
+        public QuestDTO()
+        {
+            this.QuetesVaincreMonstre = new List<QueteVaincreMonstres>();
+            this.QuetesVisiterTuile = new List<QueteVisiterTuile>();
+            this.QueteNiveauAtteints = new List<QueteNiveauAtteint>();
+            this.nbQuetes = 0;
+            this.NbQuetesMAX = 3;
+        }
+        public int Id { get; set; }
+        public List<QueteNiveauAtteint> QueteNiveauAtteints { get; set; }
+        public List<QueteVaincreMonstres> QuetesVaincreMonstre {  get; set; }
+        public List<QueteVisiterTuile> QuetesVisiterTuile { get; set; }
+
+        public int nbQuetes { get; set; }
+        public int NbQuetesMAX { get; }
+
+    }
 }
