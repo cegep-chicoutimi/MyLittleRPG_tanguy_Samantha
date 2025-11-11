@@ -540,7 +540,7 @@ async function login(email, motDePasse) {
     }
     
     const utilisateur = await response.json();
-    getPersonnageByUserId(utilisateur.id, utilisateur.pseudo);
+    await getPersonnageByUserId(utilisateur.id, utilisateur.pseudo);
 
     localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
     localStorage.setItem('isLoggedIn', 'true');
@@ -582,7 +582,7 @@ async function register(pseudo, email, password) {
       throw new Error(message || "Erreur d'inscription");
     }
 
-    login(email,password)
+     await login(email,password)
       
       // Redirection vers la carte
       window.location.href = "index.html";
