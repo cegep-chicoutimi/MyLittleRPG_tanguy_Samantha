@@ -452,15 +452,18 @@ async function deplacer(dx, dy) {
     {
       if(resultFight.code == "Draw")
       {
-        alert("Égalité ! Vous êtes toujours en vie mais le monstre aussi !");
+        //alert("Égalité ! Vous êtes toujours en vie mais le monstre aussi !");
+        showToast("Combat", "Vous avez fait une egalite contre le monstre", "draw");
       }
       else if(resultFight.code == "Lose")
       {
-        alert("Vous avez perdu le combat et êtes mort ! Vous revenez à la ville la plus proche.");
+        //alert("Vous avez perdu le combat et êtes mort ! Vous revenez à la ville la plus proche.");
+        showToast("Combat", "Vous avez ete vaincu par le monstre !", "lost");
       }
       else if(resultFight.code == "Win")
       {
-        alert("Vous avez vaincu le monstre !");
+        //alert("Vous avez vaincu le monstre !");
+        showToast("Combat", "Vous avez vaincu le monstre !", "success");
       }
       personnage = resultFight.personnage; 
     }
@@ -679,6 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleAPIError(error, userMessage = 'Une erreur est survenue') {
   console.error('Erreur :', error.toString());
 
+  showToast("Erreur", userMessage, "error");
+
   // Afficher un message à l'utilisateur
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = userMessage;
@@ -749,6 +754,9 @@ function RenderQuetes(questDTO) {
 
   if (badge) badge.textContent = total;
 
+  if(total<3)
+    showToast("Quête terminée", "Vous avez complété une quête !", "success");
+
   clear(lvlList); clear(mobList); clear(tileList);
 
   // Niveaux
@@ -781,3 +789,36 @@ function RenderQuetes(questDTO) {
   if (emptyDiv && total === 0) emptyDiv.textContent = 'Aucune quête active.';
   if (blocQuetes) blocQuetes.style.display = (total > 0) ? 'block' : 'none';
 }
+
+/**
+ * Affiche un toast Bootstrap.
+ * @param {string} title - Titre du toast
+ * @param {string} message - Message à afficher
+ * @param {'info'|'success'|'warning'|'error'} [type='info'] - Type de notification
+ * @param {number} [delay=4000] - Durée d’affichage en ms
+ */
+function showToast(title, message, type = 'info', delay = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    // Création du toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="toast-header">
+            <strong class="mr-auto">${title}</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Fermer">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">${message}</div>
+    `;
+    container.appendChild(toast);
+
+    // Affichage avec Bootstrap
+    $(toast).toast({ delay }).toast('show').on('hidden.bs.toast', () => toast.remove());
+}
+
