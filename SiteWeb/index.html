@@ -1,3 +1,4 @@
+<!--Faire template + faire vérif if connected if not redirect to register-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,19 +19,33 @@
             <h2>Visualiseur de Monde RPG</h2>
             <p>Explorer le monde généré par votre API - Position:(2,2)</p>
         </div>
+        <div class="container text-center bg-primary">
+            <button class="btn btn-primary" id="themeChange">Clair/Obscur</button>
+            <button id="btnDeconnecter" class="btn btn-primary">Déconnexion</button>
+        </div>
+        <div class="container" id="error-message" hidden>
+
+        </div>
     </header>
     <main>
-        <div class="container text-center bg-secondary">
-            <div class="row h-120">
+        <div id="modal-backdrop" class="modal-backdrop"></div>
+        <div id="myModal" class="modal">
+            <div class="container modal-container">
+                <div class="modal-content"></div>
+                <button class="btn btn-primary" id="closeModalBtn">Close</button>
+            </div>
+        </div>
+        <div class="container text-center">
+            <div class="row">
                 <!-- Section gauche -->
-                <div class="col-4">
+                <div class="col-3">                  
                     <div class="card mb-3">
                         <div class="card-header text-white">
                             Informations
                         </div>
                         <div class="card-body">
                             <div class="divCard"><p>Taille du monde: 50x50</p></div>
-                            <div class="divCard"><p>Zone affichée: 20x20 tuiles</p></div>
+                            <div class="divCard"><p>Zone affichée: 5x5 tuiles</p></div>
                             <div class="divCard"><p>Statut API : Connecté</p></div>
                             <div class="divCard"><p>Tuile chargée: 9</p></div>
                         </div>
@@ -39,16 +54,11 @@
                         <div class="card-header text-white">
                             Navigation
                         </div>
-                        <div class="card-body">
-                            <button class="btn btn-primary mb-1" onclick=""><i class="fas fa-arrow-up"></i>Nord</button>
-                            <div class="divCard row d-flex justify-content-center mb-2">
-                                <div class="divCard">
-                                    <button class="btn btn-primary mr-1" onclick=""><i class="fas fa-arrow-left"></i>Ouest</button>
-                                    <button id="btn-refresh" class="btn btn-primary btn-sm  ml-1" onclick=""><i class="fa-solid fa-arrow-rotate-right"></i>Actualiser</button>
-                                    <button class="btn btn-primary ml-1" onclick=""><i class="fas fa-arrow-right"></i>Est</button>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary mt-1" onclick=""><i class="fas fa-arrow-down"></i>Sud</button>
+                        <div class="fleches">
+                            <button id="btn-nord" class="btn btn-primary mb-1"><i class="fas fa-arrow-up"></i></button>
+                            <button id="btn-sud" class="btn btn-primary mt-1"><i class="fas fa-arrow-down"></i></button>
+                            <button id="btn-ouest" class="btn btn-primary mr-1"><i class="fas fa-arrow-left"></i></button>
+                            <button id="btn-est" class="btn btn-primary ml-1"><i class="fas fa-arrow-right"></i></button>
                         </div>
                     </div>
                     <div class="card mb-3">
@@ -63,53 +73,139 @@
                                 </label>
                             </div>
                             <div class="divCard form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
-                                <label class="form-check-label" for="flexCheckChecked">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked1" checked>
+                                <label class="form-check-label" for="flexCheckChecked1">
                                     <i class="fa-solid fa-droplet"></i> Eau
                                 </label>
                             </div>
                             <div class="divCard form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
-                                <label class="form-check-label" for="flexCheckChecked">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked2">
+                                <label class="form-check-label" for="flexCheckChecked2">
                                     <i class="fa-solid fa-mountain"></i> Montagne
                                 </label>
                             </div>
                             <div class="divCard form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
-                                <label class="form-check-label" for="flexCheckChecked">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked3">
+                                <label class="form-check-label" for="flexCheckChecked3">
                                     <i class="fa-solid fa-tree"></i> Foret
                                 </label>
                             </div>
                             <div class="divCard form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
-                                <label class="form-check-label" for="flexCheckChecked">
+                                <input class="form-check-input " type="checkbox" value="" id="flexCheckChecked4">
+                                <label class="form-check-label" for="flexCheckChecked4">
                                     <i class="fa-solid fa-city"></i> Ville
                                 </label>
                             </div>
                             <div class="divCard form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" >
-                                <label class="form-check-label" for="flexCheckChecked">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked5" >
+                                <label class="form-check-label" for="flexCheckChecked5">
                                     <i class="fa-solid fa-road"></i> Route
                                 </label>
                             </div>
                         </div>
                     </div>
-                    <div class="divCard card mb-3">
-                        <div class="card-header text-white">
-                            Tuile Sélectionnée
-                        </div>
-                        <div class="card-body">
-                            <div class="divCard"><p>Position : (1,1)</p></div>
-                            <div class="divCard"><p>Type : Herbe</p></div>
-                            <div class="divCard"><p>Traversable : Oui</p></div>
-                            <div class="divCard"><p>Description : </p></div>
-                        </div>
-                    </div>
+                    
                 </div>
                 <!-- Grille -->
-                <div class="col">
+                <div class="col-6">
                     <h2 class="text-white">Carte du Monde</h2>
-                    <div class="grille"></div>
+                    <div class="grille">
+                        <div id="player"></div>
+                    </div>
+                </div>
+                <!-- Section droite -->
+                <div class="col-3">
+                    <!-- Carte avec onglets -->
+                    <div class="card mt-4">
+                    <div class="card-header p-0">
+                        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="monstre-tab" data-toggle="tab" href="#monstre" role="tab" aria-controls="monstre" aria-selected="true">
+                            <i class="fa-solid fa-dragon"></i> Monstre
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tuile-tab" data-toggle="tab" href="#tuile" role="tab" aria-controls="tuile" aria-selected="false">
+                            <i class="fa-solid fa-square"></i> Tuile sélectionnée
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="quetes-tab" data-toggle="tab" href="#quetes" role="tab"
+                                aria-controls="quetes" aria-selected="false">
+                                <i class="fa-solid fa-scroll"></i> Quêtes
+                                <span class="badge badge-light ml-1" id="badge-quêtes" title="Quêtes actives">0</span>
+                            </a>
+                        </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body tab-content">
+                        <!-- Onglet Monstre -->
+                        <div class="tab-pane fade show active" id="monstre" role="tabpanel" aria-labelledby="monstre-tab">
+                            <div class="card mb-3">
+                                <div class="card-header text-white">
+                                    Monstres selectionnés
+                                </div>
+                                <div class="card-body selected-monster">
+                                    <div class="divCard"><p>Nom : <span id="monstreNom"></span></p></div>
+                                    <div class="divCard"><p>PV : <span id="monstrePV"></span></p></div>
+                                    <div class="divCard"><p>Force : <span id="monstreForce"></span></p></div>
+                                    <div class="divCard"><p>Défense : <span id="monstreDefense"></span></p></div>
+                                    <div class="divCard"><p>Position : <span id="monstrePosition"></span></p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Onglet Tuile sélectionnée -->
+                        <div class="tab-pane fade" id="tuile" role="tabpanel" aria-labelledby="tuile-tab">
+                            <div class="divCard card mb-3">
+                                <div class="card-header text-white">
+                                    Tuile Sélectionnée
+                                </div>
+                                <div class="card-body selected-tile">
+                                    <div class="divCard"><p>Position : </p></div>
+                                    <div class="divCard"><p>Type : </p></div>
+                                    <div class="divCard"><p>Traversable : </p></div>
+                                    <div class="divCard"><p>Description : </p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Onglet Quêtes -->
+                        <div class="tab-pane fade" id="quetes" role="tabpanel" aria-labelledby="quetes-tab">
+                        <div class="card mb-3">
+                            <div class="card-header text-white">Quêtes actives</div>
+                            <div class="card-body p-2">
+                            <div id="quetes-empty" class="text-muted">Chargement des quêtes…</div>
+
+                            <div id="bloc-quetes" style="display:none">
+                                <h6 class="mt-2">Atteindre un niveau</h6>
+                                <ul class="list-group list-group-flush" id="list-quetes-niveau"></ul>
+
+                                <h6 class="mt-3">Vaincre des monstres</h6>
+                                <ul class="list-group list-group-flush" id="list-quetes-monstres"></ul>
+
+                                <h6 class="mt-3">Visiter des tuiles</h6>
+                                <ul class="list-group list-group-flush" id="list-quetes-tuiles"></ul>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header text-white">
+                            Simulation Monstres
+                        </div>
+                        <div class="card-body">
+                            <div class="divCard">
+                                <button id="btn-simuler" class="btn btn-danger">Simuler Combat</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -121,6 +217,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     </footer>
+    <!-- Zone pour les notifications -->
+<div id="toast-container" aria-live="polite" aria-atomic="true" class="position-fixed" style="top: 1rem; right: 1rem; z-index: 1080;"></div>
 </body>
 
 </html>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyLittleRPG.Data.Context;
 
@@ -11,43 +12,18 @@ using MyLittleRPG.Data.Context;
 namespace MyLittleRPG.Migrations
 {
     [DbContext(typeof(MonsterContext))]
-    partial class MonsterContextModelSnapshot : ModelSnapshot
+    [Migration("20250917123643_modifUser2")]
+    partial class modifUser2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.21")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("MyLittleRPG.Models.InstanceMonster", b =>
-                {
-                    b.Property<int>("X")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Y")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MonsterId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PVMax")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PVactuels")
-                        .HasColumnType("int");
-
-                    b.Property<int>("niveaux")
-                        .HasColumnType("int");
-
-                    b.HasKey("X", "Y");
-
-                    b.HasIndex("MonsterId");
-
-                    b.ToTable("InstanceMonstres");
-                });
 
             modelBuilder.Entity("MyLittleRPG.Models.Monster", b =>
                 {
@@ -108,9 +84,6 @@ namespace MyLittleRPG.Migrations
                     b.Property<int>("Force")
                         .HasColumnType("int");
 
-                    b.Property<int>("NbQuetes")
-                        .HasColumnType("int");
-
                     b.Property<int>("Niveau")
                         .HasColumnType("int");
 
@@ -124,22 +97,16 @@ namespace MyLittleRPG.Migrations
                     b.Property<int>("PVMax")
                         .HasColumnType("int");
 
-                    b.Property<int>("PositionVilleX")
+                    b.Property<int>("PositionX")
                         .HasColumnType("int");
 
-                    b.Property<int>("PositionVilleY")
+                    b.Property<int>("PositionY")
                         .HasColumnType("int");
 
                     b.Property<int>("UtilisateurId")
                         .HasColumnType("int");
 
-                    b.Property<int>("X")
-                        .HasColumnType("int");
-
                     b.Property<int>("XP")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Y")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -147,99 +114,12 @@ namespace MyLittleRPG.Migrations
                     b.ToTable("Personnages");
                 });
 
-            modelBuilder.Entity("MyLittleRPG.Models.QueteNiveauAtteint", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("IdPersonnage")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("NiveauAAtteindre")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NiveauPerso")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("QuetesNiveauAtteint");
-                });
-
-            modelBuilder.Entity("MyLittleRPG.Models.QueteVaincreMonstres", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("IdPersonnage")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("NbMonstresAVaincre")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NbMonstresVaincu")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TypeMonstre")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("QuetesVaincreMonstres");
-                });
-
-            modelBuilder.Entity("MyLittleRPG.Models.QueteVisiterTuile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DistanceX")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DistanceY")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdPersonnage")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("TileType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("X")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Y")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("QuetesVisiterTuile");
-                });
-
             modelBuilder.Entity("MyLittleRPG.Models.Tile", b =>
                 {
-                    b.Property<int>("X")
+                    b.Property<int>("PositionX")
                         .HasColumnType("int");
 
-                    b.Property<int>("Y")
+                    b.Property<int>("PositionY")
                         .HasColumnType("int");
 
                     b.Property<int>("Type")
@@ -252,7 +132,7 @@ namespace MyLittleRPG.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("X", "Y");
+                    b.HasKey("PositionX", "PositionY");
 
                     b.ToTable("Tiles");
                 });
@@ -283,23 +163,9 @@ namespace MyLittleRPG.Migrations
                     b.Property<DateTime?>("TempsConexion")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("isConnected")
-                        .HasColumnType("tinyint(1)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Utilisateurs");
-                });
-
-            modelBuilder.Entity("MyLittleRPG.Models.InstanceMonster", b =>
-                {
-                    b.HasOne("MyLittleRPG.Models.Monster", "Monster")
-                        .WithMany()
-                        .HasForeignKey("MonsterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Monster");
                 });
 #pragma warning restore 612, 618
         }

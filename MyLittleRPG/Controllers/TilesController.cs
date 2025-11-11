@@ -15,209 +15,169 @@ namespace MyLittleRPG.Controllers
     [ApiController]
     public class TilesController : ControllerBase
     {
-        private int probaHerbe = 20;
-        private int probaEau = 10;
-        private int probaMontagne = 15;
-        private int probaForet = 15;
-        private int probaVille = 05;
-        private int probaRoute = 35;
+
+        private TileGeneration TileGeneration;
 
         private readonly MonsterContext _context;
 
         public TilesController(MonsterContext context)
         {
             _context = context;
+            TileGeneration = new TileGeneration(context);
         }
 
+        /// <summary>
+        /// Va chercher les tuiles autour du personnage
+        /// </summary>
+        /// <param name="PositionX">PositionX</param>
+        /// <param name="PositionY">PositionY</param>
+        /// <returns>grille des tuiles dévoilés</returns>
         // GET: api/Tiles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tile>>> GetTiles()
+        public async Task<ActionResult<GrilleJeuDto>> GetTilesAutour(int X, int Y,int UserId)
         {
-            return await _context.Tiles.ToListAsync();
-        }
+            if (_context.Utilisateurs.FirstOrDefault(e => e.Id == UserId) == null || !_context.Utilisateurs.FirstOrDefault(e => e.Id == UserId).isConnected)
+            {
+                return Unauthorized();
+            }
 
+
+            List<Tile> tiles = (List<Tile>)await TileGeneration.GenererTilesAutour(X, Y);
+
+            if(tiles == null) return NotFound(new {message = "Les tuiles n'ont pas pu se générer"});
+
+            List<TuileAvecInfosDto> Tuiles = new List<TuileAvecInfosDto>();
+
+            foreach (var tile in tiles)
+            {
+                TuileAvecInfosDto tileDTO = new TuileAvecInfosDto(tile);
+
+                var InstanceMonstre = await _context.InstanceMonstres
+                        .Include(im => im.Monster)
+                        .FirstOrDefaultAsync(im => im.X == tile.X && im.Y == tile.Y);
+
+                if (InstanceMonstre != null)
+                {
+                    InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+                    tileDTO.Monstre = monsterDTO;
+                }
+
+                Tuiles.Add(tileDTO);
+            }
+
+            GrilleJeuDto grille = new GrilleJeuDto();
+
+            grille.Tuiles = Tuiles;
+            grille.CentreX = X;
+            grille.CentreY = Y;
+
+            return grille;
+        }
+        /// <summary>
+        /// Va chercher une tuile selon la position
+        /// </summary>
+        /// <param name="X">PositionX</param>
+        /// <param name="Y">PositionY</param>
+        /// <returns>tuile</returns>
         // GET: api/Tiles/5
         [HttpGet("{PositionX,PositionY}")]
-        public async Task<ActionResult<Tile>> GetTile(int PositionX, int PositionY)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTile(int X, int Y, int UserId)
         {
-            var tile = await _context.Tiles.FindAsync(PositionX, PositionY);
-
-            if (tile == null)
+            Utilisateur? user = _context.Utilisateurs.FirstOrDefault(e => e.Id == UserId);
+            if (user == null || !user.isConnected)
             {
-                reglerproba(PositionX, PositionY);
-                Random random = new Random();
-                int rand = random.Next(101);
-                if (rand < probaHerbe)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.HERBE, true, "Plains.png");
-                }
-                else if (rand < probaHerbe+probaEau)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.EAU, false, "River.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.MONTAGNE, false, "Mountain.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne + probaForet)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.FORET, true, "Forest.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne + probaForet+ probaVille)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.VILLE, true, "Town.png");
-                }
-                else if (rand < probaHerbe + probaEau + probaMontagne + probaForet + probaVille + probaRoute)
-                {
-                    tile = new Tile(PositionX, PositionY, TileType.ROUTE, true, "Road.png");
-             
-                }else { return NotFound(); }
-
-                resetproba();
-
-
-                _context.Tiles.Add(tile);
-                await _context.SaveChangesAsync();
+                return Unauthorized();
             }
 
-            return tile;
-        }
-
-        private void resetproba()
-        {
-            probaHerbe = 20;
-            probaEau = 10;
-            probaMontagne = 15;
-            probaForet = 15;
-            probaVille = 05;
-            probaRoute = 35;
-        }
-
-        private void reglerproba(int positionX, int positionY)
-        {
-            var tileW = _context.Tiles.FindAsync(positionX-1, positionY);
-            checkTile(tileW.Result);
-            var tileE = _context.Tiles.FindAsync(positionX+1, positionY);
-            checkTile(tileE.Result);
-            var tileN = _context.Tiles.FindAsync(positionX, positionY+1);
-            checkTile(tileN.Result);
-            var tileS = _context.Tiles.FindAsync(positionX, positionY-1);
-            checkTile(tileN.Result);
-
-        }
-
-
-        private void checkTile(Tile? tile)
-        {
-            if (tile != null)
+            if (X <= 0 || Y <= 0)
             {
-                if (tile.Type == TileType.FORET)
-                {
-                    probaForet += 10;
-                    probaHerbe -= 2;
-                    probaEau -= 2;
-                    probaMontagne -= 2;
-                    probaVille -= 2;
-                    probaRoute -= 2;
-                }
-                else if (tile.Type == TileType.EAU)
-                {
-                    probaEau += 10;
-                    probaHerbe -= 2;
-                    probaForet -= 2;
-                    probaMontagne -= 2;
-                    probaVille -= 2;
-                    probaRoute -= 2;
-                }
-                else if (tile.Type == TileType.MONTAGNE)
-                {
-                    probaMontagne += 10;
-                    probaHerbe -= 2;
-                    probaForet -= 2;
-                    probaEau -= 2;
-                    probaVille -= 2;
-                    probaRoute -= 2;
-                }
-
-            }
-        }
-
-
-        // PUT: api/Tiles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTile(int id, Tile tile)
-        {
-            if (id != tile.PositionX)
-            {
-                return BadRequest();
+                return Unauthorized(new { message = "Les positions entrées ne sont pas valide" });
             }
 
-            _context.Entry(tile).State = EntityState.Modified;
+            if (X > 50 || Y > 50)
+            {
+                return Unauthorized(new { message = "Les positions entrées ne sont pas valide" });
+            }
+
+            var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.UtilisateurId == UserId);
+
+            if (X>personnage.X+2 || X < personnage.X - 2 || Y > personnage.Y + 2 || Y < personnage.Y - 2)
+            {
+                return Unauthorized(new { message = "cette tuile se trouve trop loin de votre personnage" });
+            }
+
+
+            Tile? tile =  await TileGeneration.GenererTile(X, Y);
+            if (tile == null) return BadRequest(new { message = "Les positions entrées ne sont pas valide" });
+
+            CreatedAtAction("GetTile", new { id = tile.X }, tile);
+
+            TuileAvecInfosDto tileDTO = new TuileAvecInfosDto(tile);
+            var InstanceMonstre = await _context.InstanceMonstres
+                .Include(im => im.Monster)
+                .FirstOrDefaultAsync(im => im.X == tile.X && im.Y == tile.Y);
+
+            if (InstanceMonstre != null)
+            {
+                InstanceMonstreDto monsterDTO = new InstanceMonstreDto(InstanceMonstre);
+
+                tileDTO.Monstre = monsterDTO;
+            }
+
+            return tileDTO;
+        }
+        /// <summary>
+        /// Générer toutes les tuiles du jeu 
+        /// </summary>
+        /// <param name="minX">taille minimum grille X</param>
+        /// <param name="maxX">taille maximum grille X</param>
+        /// <param name="minY">taille minimum grille Y</param>
+        /// <param name="maxY">taille maximum grille Y</param>
+        /// <returns>résultat</returns>
+        // GET: api/Tiles/generate/all?minX=1&maxX=50&minY=1&maxY=50
+        [HttpGet("generate/all")]
+        public async Task<IActionResult> AddAllTiles(
+            int minX = 1, int maxX = 50,
+            int minY = 1, int maxY = 50)
+        {
+            if (minX > maxX || minY > maxY)
+                return BadRequest(new { message = "Bornes invalides." });
+
+            int created = 0;
+
+            // Accélère les insertions massives EF
+            var oldDetect = _context.ChangeTracker.AutoDetectChangesEnabled;
+            _context.ChangeTracker.AutoDetectChangesEnabled = false;
 
             try
             {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    for (int y = minY; y <= maxY; y++)
+                    {
+                        // GenererTile évite les doublons (FindAsync d'abord)
+                        var tile = await TileGeneration.GenererTile(x, y);
+                        if (tile != null) created++;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TileExists(id))
+
+                var total = await _context.Tiles.CountAsync();
+                return Ok(new
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    message = "Génération terminée",
+                    created,
+                    totalTiles = total,
+                    bounds = new { minX, maxX, minY, maxY }
+                });
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Tiles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Tile>> PostTile(Tile tile)
-        {
-            _context.Tiles.Add(tile);
-            try
+            finally
             {
-                await _context.SaveChangesAsync();
+                _context.ChangeTracker.AutoDetectChangesEnabled = oldDetect;
             }
-            catch (DbUpdateException)
-            {
-                if (TileExists(tile.PositionX))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetTile", new { id = tile.PositionX }, tile);
-        }
-
-        // DELETE: api/Tiles/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTile(int id)
-        {
-            var tile = await _context.Tiles.FindAsync(id);
-            if (tile == null)
-            {
-                return NotFound();
-            }
-
-            _context.Tiles.Remove(tile);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool TileExists(int id)
-        {
-            return _context.Tiles.Any(e => e.PositionX == id);
         }
     }
+
+
 }
