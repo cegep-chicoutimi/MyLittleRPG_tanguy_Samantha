@@ -239,6 +239,8 @@ async function AfficherGrilleInitial() {
     }
   }
 
+  await ChargerQuetes();
+
   displayTiles(fullGridTiles);
 }
 
@@ -480,6 +482,7 @@ async function deplacer(dx, dy) {
     
     // Reconstruire la grille complète
     const fullGrid = buildFullGrid(personnage.x, personnage.y, tilesVisible);
+    await ChargerQuetes();
     displayTiles(fullGrid);
     
   } catch (err) {
@@ -685,4 +688,96 @@ function handleAPIError(error, userMessage = 'Une erreur est survenue') {
   setTimeout(() => {
     errorDiv.style.display = 'none';
   }, 5000);
+}
+
+async function ChargerQuetes() {
+  try {
+    if (!personnage || !personnage.id) return;
+
+    // UI: état "chargement"
+    const emptyDiv = document.getElementById('quetes-empty');
+    const blocQuetes = document.getElementById('bloc-quetes');
+    if (emptyDiv) { emptyDiv.style.display = 'block'; emptyDiv.textContent = 'Chargement des quêtes…'; }
+    if (blocQuetes) blocQuetes.style.display = 'none';
+
+    const url = `https://localhost:7061/api/Quest/QuetesPerso/${personnage.id}`;
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      // 404 => aucune quête, autres => erreur
+      if (resp.status === 404) {
+        RenderQuetes({ QueteNiveauAtteints: [], QuetesVaincreMonstre: [], QuetesVisiterTuile: [], nbQuetes: 0 });
+        return;
+      }
+      const txt = await resp.text();
+      throw new Error(txt || 'Erreur de chargement des quêtes');
+    }
+
+    const questDTO = await resp.json();
+    RenderQuetes(questDTO);
+  } catch (err) {
+    handleAPIError(err, "Impossible de récupérer les quêtes du joueur");
+    // Met UI en état "vide"
+    RenderQuetes({ QueteNiveauAtteints: [], QuetesVaincreMonstre: [], QuetesVisiterTuile: [], nbQuetes: 0 });
+  }
+}
+
+function RenderQuetes(questDTO) {
+  const lvlList = document.getElementById('list-quetes-niveau');
+  const mobList = document.getElementById('list-quetes-monstres');
+  const tileList = document.getElementById('list-quetes-tuiles');
+  const badge = document.getElementById('badge-quêtes');
+  const emptyDiv = document.getElementById('quetes-empty');
+  const blocQuetes = document.getElementById('bloc-quetes');
+
+  // Helpers
+  const clear = (el) => { if (el) el.innerHTML = ''; };
+  const li = (html) => {
+    const e = document.createElement('li');
+    e.className = 'list-group-item py-2';
+    e.innerHTML = html;
+    return e;
+  };
+  const safe = (o, ...keys) => {
+    for (const k of keys) if (o && o[k] != null) return o[k];
+    return null;
+  };
+
+  const niveaux = questDTO?.queteNiveauAtteints || [];
+  const monstres = questDTO?.quetesVaincreMonstre || [];
+  const tuiles = questDTO?.quetesVisiterTuile || [];
+  const total = (questDTO?.nbQuetes ?? (niveaux.length + monstres.length + tuiles.length)) | 0;
+
+  if (badge) badge.textContent = total;
+
+  clear(lvlList); clear(mobList); clear(tileList);
+
+  // Niveaux
+  if (lvlList) {
+    if (niveaux.length === 0) lvlList.appendChild(li('<em>Aucune</em>'));
+    else niveaux.forEach(q => {
+      lvlList.appendChild(li(`<i class="fa-solid fa-level-up-alt mr-1"></i> Atteindre le niveau <strong>${q.niveauAAtteindre}</strong>`));
+    });
+  }
+
+  // Monstres
+  if (mobList) {
+    if (monstres.length === 0) mobList.appendChild(li('<em>Aucune</em>'));
+    else monstres.forEach(q => {
+      mobList.appendChild(li(`<i class="fa-solid fa-dragon mr-1"></i> Vaincre <strong>${q.nbMonstresVaincu}</strong>/ <strong>${q.nbMonstresAVaincre}</strong> × <strong>${q.typeMonstre}</strong>`));
+    });
+  }
+
+  // Tuiles
+  if (tileList) {
+    if (tuiles.length === 0) tileList.appendChild(li('<em>Aucune</em>'));
+    else tuiles.forEach(q => {
+      const x = safe(q, 'x', 'X') ?? '?';
+      const y = safe(q, 'y', 'Y') ?? '?';
+      tileList.appendChild(li(`<i class="fa-solid fa-square mr-1"></i> Visiter la tuile <strong>(${x}, ${y})</strong>`));
+    });
+  }
+
+  if (emptyDiv) emptyDiv.style.display = (total === 0) ? 'block' : 'none';
+  if (emptyDiv && total === 0) emptyDiv.textContent = 'Aucune quête active.';
+  if (blocQuetes) blocQuetes.style.display = (total > 0) ? 'block' : 'none';
 }

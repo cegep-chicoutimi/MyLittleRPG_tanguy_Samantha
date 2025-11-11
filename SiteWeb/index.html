@@ -129,6 +129,13 @@
                             <i class="fa-solid fa-square"></i> Tuile sélectionnée
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="quetes-tab" data-toggle="tab" href="#quetes" role="tab"
+                                aria-controls="quetes" aria-selected="false">
+                                <i class="fa-solid fa-scroll"></i> Quêtes
+                                <span class="badge badge-light ml-1" id="badge-quêtes" title="Quêtes actives">0</span>
+                            </a>
+                        </li>
                         </ul>
                     </div>
 
@@ -163,6 +170,28 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Onglet Quêtes -->
+                        <div class="tab-pane fade" id="quetes" role="tabpanel" aria-labelledby="quetes-tab">
+                        <div class="card mb-3">
+                            <div class="card-header text-white">Quêtes actives</div>
+                            <div class="card-body p-2">
+                            <div id="quetes-empty" class="text-muted">Chargement des quêtes…</div>
+
+                            <div id="bloc-quetes" style="display:none">
+                                <h6 class="mt-2">Atteindre un niveau</h6>
+                                <ul class="list-group list-group-flush" id="list-quetes-niveau"></ul>
+
+                                <h6 class="mt-3">Vaincre des monstres</h6>
+                                <ul class="list-group list-group-flush" id="list-quetes-monstres"></ul>
+
+                                <h6 class="mt-3">Visiter des tuiles</h6>
+                                <ul class="list-group list-group-flush" id="list-quetes-tuiles"></ul>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
                     </div>
 
                     <div class="card mb-3">

@@ -277,8 +277,93 @@ body.dark-theme {
     text-align: center;     /* centre le texte + icône */
 }
 
-/* Optionnel : onglet actif plus visible */
 .nav-tabs .nav-link.active {
   background-color: #2d8ef7;
     font-weight: bold;
+}
+
+
+#quetes .card,
+#quetes .card-body,
+#quetes .card-header,
+#quetes .list-group,
+#quetes .list-group-item {
+  background: transparent;
+  color: inherit;
+}
+
+#quetes .card-header {
+  border: none;
+  font-weight: 600;
+}
+
+#quetes h6 {
+  margin-bottom: 6px;
+  font-weight: 700;
+  opacity: .95;
+}
+
+
+#quetes .list-group {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#quetes .list-group-item {
+  border-left: 0;
+  border-right: 0;
+  padding: .5rem .75rem;
+  transition: background-color .15s ease, transform .05s ease;
+}
+
+#quetes .list-group-item:first-child { border-top: 0; }
+#quetes .list-group-item:last-child  { border-bottom: 0; }
+
+#quetes .list-group-item:hover {
+  transform: translateY(-1px);
+}
+
+
+#quetes #quetes-empty {
+  opacity: .85;
+  font-style: italic;
+}
+
+
+[id="badge-quêtes"] {
+  border-radius: 10px;
+  padding: 0.15rem 0.4rem;
+  font-size: .75rem;
+  vertical-align: middle;
+}
+
+#quetes .list-group-item i {
+  margin-right: .35rem;
+}
+
+
+body.light-theme #quetes .list-group-item {
+  border-color: rgba(0, 0, 0, 0.10);
+}
+body.light-theme #quetes .list-group-item:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+body.light-theme [id="badge-quêtes"] {
+  background-color: #2d8ef7;
+  color: #fff;
+}
+
+body.dark-theme #quetes .list-group-item {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+body.dark-theme #quetes .list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-theme [id="badge-quêtes"] {
+  background-color: #c898ff;
+  color: #001;
+}
+
+.nav-tabs .nav-link#quetes-tab.active {
+  font-weight: 800;
 }
