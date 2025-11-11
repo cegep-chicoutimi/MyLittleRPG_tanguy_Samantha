@@ -134,12 +134,19 @@ namespace MyLittleRPG.Models
     // DTO pour une grille 3x3 autour du joueur (comme demandé précédemment)
     public class GrilleJeuDto
     {
-        public List<TuileAvecInfosDto> Tuiles { get; set; }
+        public GrilleJeuDto()
+        {
+            Tuiles = new List<TuileAvecInfosDto>();
+            resultFight = new ResultDto();
+            questResult = new QuestResultDTO();
+        }
+        public List<TuileAvecInfosDto>? Tuiles { get; set; }
 
         // Position centrale de la grille (position du joueur)
         public int CentreX { get; set; }
         public int CentreY { get; set; }
         public ResultDto resultFight { get; set; }
+        public QuestResultDTO questResult { get; set; }
     }
     public class CreatePersonnageDto
     {
@@ -170,5 +177,42 @@ namespace MyLittleRPG.Models
         public int Defense { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+    }
+    //DTO quest
+    public class QuestDTO
+    {
+        public QuestDTO()
+        {
+            this.QuetesVaincreMonstre = new List<QueteVaincreMonstres>();
+            this.QuetesVisiterTuile = new List<QueteVisiterTuile>();
+            this.QueteNiveauAtteints = new List<QueteNiveauAtteint>();
+            this.nbQuetes = 0;
+            this.NbQuetesMAX = 3;
+        }
+        public int Id { get; set; }
+        public List<QueteNiveauAtteint> QueteNiveauAtteints { get; set; }
+        public List<QueteVaincreMonstres> QuetesVaincreMonstre {  get; set; }
+        public List<QueteVisiterTuile> QuetesVisiterTuile { get; set; }
+
+        public int nbQuetes { get; set; }
+        public int NbQuetesMAX { get; }
+
+    }
+    public class QuestResultDTO
+    {
+        public QuestResultDTO()
+        {
+            this.QuetesVaincreMonstreReussi = new List<QueteVaincreMonstres>();
+            this.QuetesVisiterTuileReussi = new List<QueteVisiterTuile>();
+            this.QueteNiveauAtteintsReussi = new List<QueteNiveauAtteint>();
+            this.nbQuetesReussi = 0;
+        }
+        public int Id { get; set; }
+        public List<QueteNiveauAtteint> QueteNiveauAtteintsReussi { get; set; }
+        public List<QueteVaincreMonstres> QuetesVaincreMonstreReussi { get; set; }
+        public List<QueteVisiterTuile> QuetesVisiterTuileReussi { get; set; }
+
+        public int nbQuetesReussi { get; set; }
+
     }
 }

@@ -19,6 +19,7 @@ namespace MyLittleRPG.Models
 
         public int PositionVilleX { get; set; }
         public int PositionVilleY { get; set; }
+        public int NbQuetes { get; set; }
 
         public Personnage(int id, string nom, int niveau, int xP, int pV, int pVMax, int force, int defense, int X, int Y, int utilisateurId)
         {
@@ -36,6 +37,7 @@ namespace MyLittleRPG.Models
             DateCreation = DateTime.Now;
             PositionVilleX = 10;
             PositionVilleY = 10;
+            NbQuetes = 0;
         }
 
         internal void getexp(int exp)
