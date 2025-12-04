@@ -214,6 +214,7 @@ namespace MyLittleRPG.Controllers
                 resultat.code = "Win";
                 personnage.X = X;
                 personnage.Y = Y;
+                _context.Pokedex.Add(new PokedexEntry(personnage, enemy.Monster));
             }else if(personnage.PV <= 0)
             {
                 personnage.backToTown();

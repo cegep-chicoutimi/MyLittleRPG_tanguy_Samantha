@@ -22,6 +22,17 @@ namespace MyLittleRPG.Models
         public PersonnageDto Personnage { get; set; }
     } 
 
+    public class MonstreVaincuDto
+    {
+        public Monster monstre { get; set; }
+        public Boolean EstVaincu { get; set; }
+    }
+    public class PokedexDto
+    {
+        public PersonnageDto Personnage { get; set; }
+
+        public List<MonstreVaincuDto> pokedex { get; set;}
+    }
 
     // DTO pour représenter un monstre instancié sur la carte
     public class InstanceMonstreDto

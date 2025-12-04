@@ -21,6 +21,10 @@ namespace MyLittleRPG.Models
         public int PositionVilleY { get; set; }
         public int NbQuetes { get; set; }
 
+        public Personnage()
+        {
+        }
+
         public Personnage(int id, string nom, int niveau, int xP, int pV, int pVMax, int force, int defense, int X, int Y, int utilisateurId)
         {
             Id = id;
