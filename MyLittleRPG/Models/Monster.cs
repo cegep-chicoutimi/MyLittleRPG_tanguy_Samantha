@@ -1,5 +1,14 @@
 ﻿namespace MyLittleRPG.Models
 {
+
+    public enum MonsterRarity
+    {
+        Common = 0,
+        Uncommon = 1,
+        Rare = 2,
+        Legendary = 3,
+        Mythical = 4
+    }
     public class Monster
     {
 
@@ -13,6 +22,7 @@
         public string spriteUrl { get; set; }
         public string? type1 { get; set; }
         public string? type2 { get; set; }
+        public MonsterRarity Rarity { get; set; } = MonsterRarity.Common;
 
         public Monster()
         {

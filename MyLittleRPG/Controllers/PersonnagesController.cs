@@ -285,6 +285,92 @@ namespace MyLittleRPG.Controllers
             return _context.Personnages.Any(e => e.Id == id);
         }
 
-        
+        /// <summary>
+        /// Classement des personnages selon la catégorie sélectionnée.
+        /// Catégories possibles : "niveau" ou "monstrestues".
+        /// </summary>
+        [HttpGet("Leaderboard")]
+        public async Task<ActionResult<LeaderboardResponseDto>> GetLeaderboard(
+            [FromQuery] string categorie = "niveau")
+        {
+            categorie = categorie?.ToLower() ?? "niveau";
+
+            var response = new LeaderboardResponseDto
+            {
+                Categorie = categorie
+            };
+
+            // -------------------------------
+            // 🔹 CLASSEMENT PAR NIVEAU
+            // -------------------------------
+            if (categorie == "niveau")
+            {
+                var persos = await _context.Personnages
+                    .OrderByDescending(p => p.Niveau)
+                    .ThenByDescending(p => p.XP)
+                    .Take(10)
+                    .ToListAsync();
+
+                int rang = 1;
+                foreach (var p in persos)
+                {
+                    response.Entries.Add(new LeaderboardEntryDto
+                    {
+                        Rang = rang++,
+                        PersonnageId = p.Id,
+                        NomPersonnage = p.Nom,
+                        Niveau = p.Niveau,
+                        Score = p.Niveau // Score = niveau
+                    });
+                }
+
+                return Ok(response);
+            }
+
+            // -------------------------------
+            // 🔹 CLASSEMENT PAR MONSTRES TUÉS
+            // -------------------------------
+            if (categorie == "monstrestues")
+            {
+                // Regrouper le nombre de monstres tués par personnage
+                var kills = await _context.Pokedex
+                    .GroupBy(p => p.PersonnageId)
+                    .Select(g => new
+                    {
+                        PersonnageId = g.Key,
+                        Kills = g.Count()
+                    })
+                    .ToListAsync();
+
+                // Récupérer les personnages correspondants
+                var query = from k in kills
+                            join p in _context.Personnages on k.PersonnageId equals p.Id
+                            orderby k.Kills descending, p.Niveau descending
+                            select new { Perso = p, k.Kills };
+
+                var top10 = query.Take(10).ToList();
+
+                int rang = 1;
+                foreach (var x in top10)
+                {
+                    response.Entries.Add(new LeaderboardEntryDto
+                    {
+                        Rang = rang++,
+                        PersonnageId = x.Perso.Id,
+                        NomPersonnage = x.Perso.Nom,
+                        Niveau = x.Perso.Niveau,
+                        Score = x.Kills // Score = kills
+                    });
+                }
+
+                return Ok(response);
+            }
+
+            return BadRequest("Catégorie invalide. Utilisez 'niveau' ou 'monstrestues'.");
+        }
+
+
+
+
     }
 }

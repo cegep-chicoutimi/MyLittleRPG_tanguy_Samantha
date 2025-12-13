@@ -20,11 +20,27 @@ namespace MyLittleRPG.Models
         public string code { get; set; }
         public InstanceMonstreDto Monstre { get; set; }
         public PersonnageDto Personnage { get; set; }
-    } 
+    }
+
+    public class MonsterDto
+    {
+        public int Id { get; set; }
+        public int PokemonId { get; set; }
+        public string Nom { get; set; }
+        public int pointsVieBase { get; set; }
+        public int forceBase { get; set; }
+        public int defenseBase { get; set; }
+        public int experienceBase { get; set; }
+        public string spriteUrl { get; set; }
+        public string? type1 { get; set; }
+        public string? type2 { get; set; }
+
+        public int rarity { get; set; } // 👈 0..4 (Common..Mythical)
+    }
 
     public class MonstreVaincuDto
     {
-        public Monster monstre { get; set; }
+        public MonsterDto monstre { get; set; }
         public Boolean EstVaincu { get; set; }
     }
     public class PokedexDto
@@ -226,4 +242,20 @@ namespace MyLittleRPG.Models
         public int nbQuetesReussi { get; set; }
 
     }
+
+    public class LeaderboardEntryDto
+    {
+        public int Rang { get; set; }
+        public int PersonnageId { get; set; }
+        public string NomPersonnage { get; set; }
+        public int Niveau { get; set; }
+        public int Score { get; set; }      // niveau ou nombre de monstres tués
+    }
+
+    public class LeaderboardResponseDto
+    {
+        public string Categorie { get; set; } = string.Empty;
+        public List<LeaderboardEntryDto> Entries { get; set; } = new List<LeaderboardEntryDto>();
+    }
+
 }
