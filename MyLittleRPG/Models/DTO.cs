@@ -215,4 +215,31 @@ namespace MyLittleRPG.Models
         public int nbQuetesReussi { get; set; }
 
     }
+    //Monstre Pokedex
+    public class PokedexDTO
+    {
+        public int page { get; set; }
+
+        public string filtre { get; set; }
+        public List<MonstrePokedexDTO> monstres { get; set; }
+        public PokedexDTO() { }
+
+        public PokedexDTO( int page, string filtre)
+        {
+            this.page = page;
+            this.filtre = filtre;
+        }
+
+    }
+    public class MonstrePokedexDTO
+    {
+        public MonstrePokedexDTO(Monster monstre, bool ishunted)
+        {
+            Monstre = monstre;
+            IsHunted = ishunted;
+        }
+
+        public Monster Monstre { get; set; }
+        public bool IsHunted { get; set; }
+    }
 }

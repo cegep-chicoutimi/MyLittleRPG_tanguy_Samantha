@@ -18,6 +18,8 @@ namespace MyLittleRPG.Data.Context
         public DbSet<QueteVaincreMonstres> QuetesVaincreMonstres { get; set; }
 
         public DbSet<QueteVisiterTuile> QuetesVisiterTuile { get; set; }
+
+        public DbSet<MonsterHunted> MonsterHunted { get; set; }
         public MonsterContext(DbContextOptions<MonsterContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

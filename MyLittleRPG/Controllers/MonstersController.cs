@@ -25,6 +25,59 @@ namespace MyLittleRPG.Controllers
             _context = context;
             generator = new MonsterGeneration(context);
         }
+        private void GetMonstresByFiltre(string type)
+        {
+            type = type.Trim().ToLower();
+            List<Monster> monsters = new List<Monster>();
+            foreach (Monster m in _context.Monsters)
+            {
+                switch (type)
+                {
+                    case "fire":
+                        if (m.type1 == type || m.type2 == type)
+                        {
+                            monsters.Add(m);
+                        }
+                        break;
+                    default:
+                        monsters.Add(m);
+                        break;
+                }
+            }
+        }
+
+        [HttpGet]
+        [Route("{idPerso}/{numeroPage}/{typeFiltre}")]
+        public async Task<IActionResult> GetMonstres(int idPerso, int numeroPage, string typeFiltre)
+        {
+            var monstres = _context.Monsters;
+            var monstresChasses = await _context.MonsterHunted
+                .Where(monstre => monstre.IdPerso == idPerso)
+                .ToListAsync();
+
+            for (int i = 0; i < 20; i++)
+            {
+                
+            }
+
+            PokedexDTO pokeDTO = new PokedexDTO(numeroPage, typeFiltre);
+
+
+            foreach (MonsterHunted m in monstresChasses)
+            {
+                var monstre = await _context.Monsters.FindAsync(m.IdMonstre);
+                if (monstre != null)
+                {
+                    pokeDTO.monstres.Add(new MonstrePokedexDTO(monstre, true));
+                }
+            }
+            foreach(Monster m in monstres)
+            {
+                
+            }
+
+            return Ok();
+        }
 
         [HttpPut]
         [Route("monstre/generateall")]
