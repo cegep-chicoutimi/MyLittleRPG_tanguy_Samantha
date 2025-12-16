@@ -9,6 +9,7 @@ using MyLittleRPG.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyLittleRPG.Controllers
@@ -25,58 +26,126 @@ namespace MyLittleRPG.Controllers
             _context = context;
             generator = new MonsterGeneration(context);
         }
-        private void GetMonstresByFiltre(string type)
+        private List<Monster> GetMonstersSection(int page, string type)
         {
-            type = type.Trim().ToLower();
-            List<Monster> monsters = new List<Monster>();
-            foreach (Monster m in _context.Monsters)
+            int x = 0;
+            List<Monster> monsters = GetMonstresByFiltre(type.Trim().ToLower());
+            List<Monster> monstersInPage = new List<Monster>();
+
+            if (page == 1 || page <= 0) x = 0; else x = (page - 1) * 20;
+
+            for (int i = x; i< x + 20 && i < monsters.Count; i++)
             {
-                switch (type)
-                {
-                    case "fire":
-                        if (m.type1 == type || m.type2 == type)
-                        {
-                            monsters.Add(m);
-                        }
-                        break;
-                    default:
-                        monsters.Add(m);
-                        break;
-                }
+                monstersInPage.Add(monsters[i]);
             }
+            return monstersInPage;
+        }
+        private List<Monster> GetMonstresByFiltre(string type)
+        {
+            List<Monster> monsters = new List<Monster>();
+            type = type?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(type) || type == "all")
+                return _context.Monsters.ToList();
+
+            return _context.Monsters
+                .Where(m => m.type1 == type || m.type2 == type)
+                .ToList();
         }
 
         [HttpGet]
         [Route("{idPerso}/{numeroPage}/{typeFiltre}")]
         public async Task<IActionResult> GetMonstres(int idPerso, int numeroPage, string typeFiltre)
         {
-            var monstres = _context.Monsters;
-            var monstresChasses = await _context.MonsterHunted
-                .Where(monstre => monstre.IdPerso == idPerso)
-                .ToListAsync();
-
-            for (int i = 0; i < 20; i++)
+            try
             {
-                
-            }
+                bool isHunted = false;
+                List<Monster> monsters = GetMonstersSection(numeroPage, typeFiltre);
 
-            PokedexDTO pokeDTO = new PokedexDTO(numeroPage, typeFiltre);
+                int nbPages = (int)Math.Ceiling(_context.Monsters.Count() / 20.0);
+                var monstresChasses = await _context.MonsterHunted
+                    .Where(monstre => monstre.IdPerso == idPerso)
+                    .ToListAsync();
 
 
-            foreach (MonsterHunted m in monstresChasses)
-            {
-                var monstre = await _context.Monsters.FindAsync(m.IdMonstre);
-                if (monstre != null)
+                PokedexDTO pokeDTO = new PokedexDTO(numeroPage, typeFiltre, nbPages);
+                foreach (var monster in monsters)
                 {
-                    pokeDTO.monstres.Add(new MonstrePokedexDTO(monstre, true));
+                    isHunted = false;
+                    foreach (var mHunted in monstresChasses)
+                    {
+                        if (monster.Id == mHunted.IdMonstre)
+                        {
+                            isHunted = true;
+                            pokeDTO.monstres.Add(new MonstrePokedexDTO(monster, isHunted));
+                            break;
+                        }
+                        else
+                        {
+                            isHunted = false;
+                        }
+                    }
+                    if (isHunted == false)
+                    {
+                        pokeDTO.monstres.Add(new MonstrePokedexDTO(monster, isHunted));
+                    }
                 }
+
+                return Ok(pokeDTO);
+
             }
-            foreach(Monster m in monstres)
+            catch (Exception ex)
             {
-                
+                return BadRequest(ex.Message);
             }
 
-            return Ok();
+        }
+        [HttpGet]
+        [Route("{idPerso}/{nomRecherche}")]
+        public async Task<IActionResult> GetMonstres(int idPerso, string nomRecherche)
+        {
+            try
+            {
+                bool isHunted = false;
+                List<Monster> monstres = GetMonstresByFiltre("all");
+
+                var monstresChasses = await _context.MonsterHunted
+                    .Where(monstre => monstre.IdPerso == idPerso)
+                    .ToListAsync();
+
+                PokedexDTO pokedex = new PokedexDTO(0, "all", _context.Monsters.Count()/20 );
+                foreach(Monster m in _context.Monsters)
+                {
+                    if(m.Nom.Trim().ToLower().Contains(nomRecherche.Trim().ToLower()))
+                    {
+                        isHunted = false;
+                        foreach (var mHunted in monstresChasses)
+                        {
+                            if (m.Id == mHunted.IdMonstre)
+                            {
+                                isHunted = true;
+                                pokedex.monstres.Add(new MonstrePokedexDTO(m, isHunted));
+                                break;
+                            }
+                            else
+                            {
+                                isHunted = false;
+                            }
+                        }
+                        if (isHunted == false)
+                        {
+                            pokedex.monstres.Add(new MonstrePokedexDTO(m, isHunted));
+                        }
+                    }
+                }
+                return Ok(pokedex);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPut]

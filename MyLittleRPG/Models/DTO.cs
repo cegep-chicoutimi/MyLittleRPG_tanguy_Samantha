@@ -219,15 +219,18 @@ namespace MyLittleRPG.Models
     public class PokedexDTO
     {
         public int page { get; set; }
+        public int nbPages { get; set; }
 
         public string filtre { get; set; }
         public List<MonstrePokedexDTO> monstres { get; set; }
         public PokedexDTO() { }
 
-        public PokedexDTO( int page, string filtre)
+        public PokedexDTO( int page, string filtre, int nbPages )
         {
             this.page = page;
             this.filtre = filtre;
+            monstres = new List<MonstrePokedexDTO>();
+            this.nbPages = nbPages;
         }
 
     }
