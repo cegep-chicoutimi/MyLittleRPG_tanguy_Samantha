@@ -9,6 +9,7 @@ using MyLittleRPG.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,15 +27,29 @@ namespace MyLittleRPG.Controllers
             _context = context;
             generator = new MonsterGeneration(context);
         }
-        private List<Monster> GetMonstersSection(int page, string type)
+        private List<int> GetListIDs()
         {
-            int x = 0;
+            List<MonsterHunted> monstreHunted = _context.MonsterHunted.ToList();
+            List<int> idsMonsterH = new List<int>();
+            foreach (MonsterHunted m in monstreHunted)
+            {
+                idsMonsterH.Add(m.Id);
+            }
+            return idsMonsterH;
+        }
+        private List<Monster> GetMonstersSection(int page, string type, ref int nbTotalMonstre)
+        {
             List<Monster> monsters = GetMonstresByFiltre(type.Trim().ToLower());
             List<Monster> monstersInPage = new List<Monster>();
 
-            if (page == 1 || page <= 0) x = 0; else x = (page - 1) * 20;
+            nbTotalMonstre = monsters.Count;
+            int x = 0;
+            int pageSize = 20;
+            int totalMonsters = monsters.Count;
 
-            for (int i = x; i< x + 20 && i < monsters.Count; i++)
+            if (page == 1 || page <= 0) x = 0; else x = (page - 1) * pageSize;
+
+            for (int i = x; i< x + pageSize && i < monsters.Count; i++)
             {
                 monstersInPage.Add(monsters[i]);
             }
@@ -42,55 +57,56 @@ namespace MyLittleRPG.Controllers
         }
         private List<Monster> GetMonstresByFiltre(string type)
         {
-            List<Monster> monsters = new List<Monster>();
+            List<Monster> monsters = _context.Monsters.ToList();
+            List<int> idsMonsterH = GetListIDs();
+
             type = type?.Trim().ToLower();
 
-            if (string.IsNullOrEmpty(type) || type == "all")
-                return _context.Monsters.ToList();
-
-            return _context.Monsters
-                .Where(m => m.type1 == type || m.type2 == type)
-                .ToList();
+            if (!string.IsNullOrEmpty(type))
+            {
+                if (type == "hunted")
+                {
+                    monsters = monsters
+                        .Where(m => idsMonsterH.Contains(m.Id))
+                        .ToList();
+                }
+                else if (type == "nothunted")
+                {
+                    monsters = monsters
+                        .Where(m => !idsMonsterH.Contains(m.Id))
+                        .ToList();
+                }
+                else if (type != "all")
+                {
+                    monsters = monsters
+                        .Where(m => m.type1 == type || m.type2 == type)
+                        .ToList();
+                }
+            }
+            return monsters;
         }
 
         [HttpGet]
-        [Route("{idPerso}/{numeroPage}/{typeFiltre}")]
+        [Route("obtenirMonstre/{idPerso}/{numeroPage}/{typeFiltre}")]
         public async Task<IActionResult> GetMonstres(int idPerso, int numeroPage, string typeFiltre)
         {
             try
             {
-                bool isHunted = false;
-                List<Monster> monsters = GetMonstersSection(numeroPage, typeFiltre);
+                int nbPages = 0, nbTotalMonstres = 0;
+                List<Monster> monsters = GetMonstersSection(numeroPage, typeFiltre, ref nbTotalMonstres);
 
-                int nbPages = (int)Math.Ceiling(_context.Monsters.Count() / 20.0);
-                var monstresChasses = await _context.MonsterHunted
-                    .Where(monstre => monstre.IdPerso == idPerso)
-                    .ToListAsync();
+                List<int> ids = GetListIDs();
 
-
+                nbPages = (int)Math.Ceiling(nbTotalMonstres / 20.0);
                 PokedexDTO pokeDTO = new PokedexDTO(numeroPage, typeFiltre, nbPages);
+
                 foreach (var monster in monsters)
                 {
-                    isHunted = false;
-                    foreach (var mHunted in monstresChasses)
-                    {
-                        if (monster.Id == mHunted.IdMonstre)
-                        {
-                            isHunted = true;
-                            pokeDTO.monstres.Add(new MonstrePokedexDTO(monster, isHunted));
-                            break;
-                        }
-                        else
-                        {
-                            isHunted = false;
-                        }
-                    }
-                    if (isHunted == false)
-                    {
-                        pokeDTO.monstres.Add(new MonstrePokedexDTO(monster, isHunted));
-                    }
+                    bool isHunted = ids.Contains(monster.Id);
+                    pokeDTO.monstres.Add(new MonstrePokedexDTO(monster, isHunted));
                 }
 
+                
                 return Ok(pokeDTO);
 
             }
@@ -101,7 +117,7 @@ namespace MyLittleRPG.Controllers
 
         }
         [HttpGet]
-        [Route("{idPerso}/{nomRecherche}")]
+        [Route("obtenirMonstre/{idPerso}/{nomRecherche}")]
         public async Task<IActionResult> GetMonstres(int idPerso, string nomRecherche)
         {
             try
