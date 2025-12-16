@@ -27,19 +27,19 @@ namespace MyLittleRPG.Controllers
             _context = context;
             generator = new MonsterGeneration(context);
         }
-        private List<int> GetListIDs()
+        private List<int> GetListIDs(int idPerso)
         {
             List<MonsterHunted> monstreHunted = _context.MonsterHunted.ToList();
             List<int> idsMonsterH = new List<int>();
             foreach (MonsterHunted m in monstreHunted)
             {
-                idsMonsterH.Add(m.Id);
+                if(m.IdPerso == idPerso) idsMonsterH.Add(m.Id);
             }
             return idsMonsterH;
         }
-        private List<Monster> GetMonstersSection(int page, string type, ref int nbTotalMonstre)
+        private List<Monster> GetMonstersSection(int page, string type, ref int nbTotalMonstre, int idPerso)
         {
-            List<Monster> monsters = GetMonstresByFiltre(type.Trim().ToLower());
+            List<Monster> monsters = GetMonstresByFiltre(type.Trim().ToLower(), idPerso);
             List<Monster> monstersInPage = new List<Monster>();
 
             nbTotalMonstre = monsters.Count;
@@ -55,10 +55,10 @@ namespace MyLittleRPG.Controllers
             }
             return monstersInPage;
         }
-        private List<Monster> GetMonstresByFiltre(string type)
+        private List<Monster> GetMonstresByFiltre(string type, int idPerso)
         {
             List<Monster> monsters = _context.Monsters.ToList();
-            List<int> idsMonsterH = GetListIDs();
+            List<int> idsMonsterH = GetListIDs(idPerso);
 
             type = type?.Trim().ToLower();
 
@@ -93,9 +93,9 @@ namespace MyLittleRPG.Controllers
             try
             {
                 int nbPages = 0, nbTotalMonstres = 0;
-                List<Monster> monsters = GetMonstersSection(numeroPage, typeFiltre, ref nbTotalMonstres);
+                List<Monster> monsters = GetMonstersSection(numeroPage, typeFiltre, ref nbTotalMonstres, idPerso);
 
-                List<int> ids = GetListIDs();
+                List<int> ids = GetListIDs(idPerso);
 
                 nbPages = (int)Math.Ceiling(nbTotalMonstres / 20.0);
                 PokedexDTO pokeDTO = new PokedexDTO(numeroPage, typeFiltre, nbPages);
@@ -123,7 +123,7 @@ namespace MyLittleRPG.Controllers
             try
             {
                 bool isHunted = false;
-                List<Monster> monstres = GetMonstresByFiltre("all");
+                List<Monster> monstres = GetMonstresByFiltre("all", idPerso);
 
                 var monstresChasses = await _context.MonsterHunted
                     .Where(monstre => monstre.IdPerso == idPerso)
