@@ -66,21 +66,15 @@ namespace MyLittleRPG.Controllers
             {
                 if (type == "hunted")
                 {
-                    monsters = monsters
-                        .Where(m => idsMonsterH.Contains(m.Id))
-                        .ToList();
+                    monsters = monsters.Where(m => idsMonsterH.Contains(m.Id)).ToList();
                 }
                 else if (type == "nothunted")
                 {
-                    monsters = monsters
-                        .Where(m => !idsMonsterH.Contains(m.Id))
-                        .ToList();
+                    monsters = monsters.Where(m => !idsMonsterH.Contains(m.Id)).ToList();
                 }
                 else if (type != "all")
                 {
-                    monsters = monsters
-                        .Where(m => m.type1 == type || m.type2 == type)
-                        .ToList();
+                    monsters = monsters.Where(m => m.type1 == type || m.type2 == type).ToList();
                 }
             }
             return monsters;
@@ -92,6 +86,11 @@ namespace MyLittleRPG.Controllers
         {
             try
             {
+                if(idPerso <= 0 || !await _context.Personnages.AnyAsync(p => p.Id == idPerso))
+                {
+                    return NotFound("L'id du personnage est invalide");
+                }
+
                 int nbPages = 0, nbTotalMonstres = 0;
                 List<Monster> monsters = GetMonstersSection(numeroPage, typeFiltre, ref nbTotalMonstres, idPerso);
 
@@ -122,6 +121,11 @@ namespace MyLittleRPG.Controllers
         {
             try
             {
+                if (idPerso <= 0 || !await _context.Personnages.AnyAsync(p => p.Id == idPerso))
+                {
+                    return NotFound("L'id du personnage est invalide");
+                }
+
                 bool isHunted = false;
                 List<Monster> monstres = GetMonstresByFiltre("all", idPerso);
 
@@ -130,6 +134,7 @@ namespace MyLittleRPG.Controllers
                     .ToListAsync();
 
                 PokedexDTO pokedex = new PokedexDTO(0, "all", _context.Monsters.Count()/20 );
+
                 foreach(Monster m in _context.Monsters)
                 {
                     if(m.Nom.Trim().ToLower().Contains(nomRecherche.Trim().ToLower()))

@@ -159,6 +159,7 @@ namespace MyLittleRPG.Models
         public PersonnageDto(Personnage personnage)
         {
             this.id = personnage.Id;
+            this.nom = personnage.Nom;
             this.Niveau = personnage.Niveau;
             this.XP = personnage.XP;
             this.PV = personnage.PV;
@@ -169,6 +170,8 @@ namespace MyLittleRPG.Models
             this.Y = personnage.Y;
         }
         public int id { get; set; }
+        public string nom { get; set; }
+        public int nbMonstresVaincus { get; set; }
         public int Niveau { get; set; }
         public int XP { get; set; }
         public int PV { get; set; }
@@ -245,4 +248,14 @@ namespace MyLittleRPG.Models
         public Monster Monstre { get; set; }
         public bool IsHunted { get; set; }
     }
+
+    //Classement
+    public class Classement
+    {
+        public List<PersonnageDto> personnages { get; set; }
+        public string category { get; set; }
+
+        public int maxPersonnages { get; set; }
+    }
+
 }

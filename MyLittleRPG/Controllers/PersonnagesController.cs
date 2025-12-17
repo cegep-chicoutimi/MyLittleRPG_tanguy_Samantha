@@ -7,6 +7,7 @@ using MyLittleRPG.Data.Context;
 using MyLittleRPG.Migrations;
 using MyLittleRPG.Models;
 using MySqlConnector;
+using NuGet.Protocol.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,66 @@ namespace MyLittleRPG.Controllers
             }
 
             return Ok(personnage); 
+        }
+        [HttpGet("Classement/{category}")]
+        public async Task<ActionResult<Classement>> GetClassement(string category)
+        {
+            if (string.IsNullOrEmpty(category))
+            {
+                return BadRequest("La categorie n'est pas valide");
+            }
+
+            category = category.Trim().ToLower();
+            Classement classement = new Classement();
+            classement.maxPersonnages = 10;
+            List<Personnage> persosDb = await _context.Personnages.ToListAsync();
+
+            switch(category)
+            {
+                case "niveau":
+                    classement.personnages = GetPersoByCategory(persosDb.OrderByDescending(p => p.Niveau).ToList(),classement.maxPersonnages);
+                    break;
+                case "monstresvaincus":
+                    List<MonsterHunted> monsterHunteds = await _context.MonsterHunted.ToListAsync();
+                    classement.personnages = GetPersoByMonstresVaincus(persosDb, monsterHunteds, classement.maxPersonnages);
+                    break ;
+                case "xp":
+                    classement.personnages = GetPersoByCategory(persosDb.OrderByDescending(p => p.XP).ToList(), classement.maxPersonnages);
+                    break ;
+                case "force":
+                    classement.personnages = GetPersoByCategory(persosDb.OrderBy(p => p.Force).ToList(), classement.maxPersonnages);
+                    break ;
+
+            }
+
+            return Ok(classement);
+        }
+        private List<PersonnageDto> GetPersoByMonstresVaincus(List<Personnage> persosDb, List<MonsterHunted> monstresVaincu, int maxPersos)
+        {
+            return persosDb.Select(p =>
+            {
+                int nbVaincu = monstresVaincu.Count(m => m.IdPerso == p.Id);
+
+                var dto = new PersonnageDto(p);
+                dto.nbMonstresVaincus = nbVaincu;
+                return dto;
+            })
+            .OrderByDescending(p => p.nbMonstresVaincus)
+            .Take(maxPersos)
+            .ToList();
+
+        }
+        private  List<PersonnageDto> GetPersoByCategory(List<Personnage> persosDb,int maxPersos)
+        {
+            List<PersonnageDto> persos = new List<PersonnageDto>();
+     
+
+            for (int i = 0; i < Math.Min(maxPersos, persosDb.Count); i++)
+            {
+                persos.Add(new PersonnageDto(persosDb[i]));
+            }
+            return persos;
+
         }
 
         /// <summary>
